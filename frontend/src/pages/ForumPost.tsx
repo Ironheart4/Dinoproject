@@ -123,7 +123,7 @@ export default function ForumPost() {
     });
   };
 
-  const canDeletePost = post && user && (user.id === post.user.id || user.role === "admin");
+  const canDeletePost = post && user && (Number(user.id) === post.user.id || user.role === "admin");
   const isAdmin = user?.role === "admin";
 
   if (loading) {
@@ -281,7 +281,7 @@ export default function ForumPost() {
                             {formatDate(reply.createdAt)}
                           </span>
                         </div>
-                        {user && (user.id === reply.user.id || user.role === "admin") && (
+                        {user && (Number(user.id) === reply.user.id || user.role === "admin") && (
                           <button
                             onClick={() => handleDeleteReply(reply.id)}
                             className="text-gray-400 hover:text-red-500 transition-colors"
