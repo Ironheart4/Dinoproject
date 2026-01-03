@@ -30,7 +30,7 @@ export default function Support() {
   const [isPremium, setIsPremium] = useState(false)
 
   // PayPal Payment Link - Direct link to PayPal hosted page
-  const PAYPAL_DONATION_LINK = 'https://www.paypal.com/ncp/payment/YDVK9Z6XNVBVY'
+  const PAYPAL_DONATION_LINK = 'https://www.paypal.com/ncp/payment/EVW4TFDP3B9RU'
 
   useEffect(() => {
     // Check for success return from PayPal

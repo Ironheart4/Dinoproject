@@ -163,7 +163,7 @@ export default function AboutUs() {
           though some ads may still appear to help sustain the project.
         </p>
         <a 
-          href="https://www.paypal.com/ncp/payment/YDVK9Z6XNVBVY" 
+          href="https://www.paypal.com/ncp/payment/EVW4TFDP3B9RU" 
           target="_blank" 
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-6 py-3 bg-white text-green-700 rounded-lg hover:bg-gray-100 transition font-bold shadow-lg"
