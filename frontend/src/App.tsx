@@ -1,0 +1,51 @@
+import React from 'react'
+import { Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+import Encyclopedia from './pages/Encyclopedia'
+import DinoDetail from './pages/DinoDetail'
+import Login from './pages/Login'
+import AboutUs from './pages/AboutUs'
+import MasterLayout from './components/MasterLayout'
+import { AuthProvider } from './lib/auth'
+import { ThemeProvider } from './lib/theme'
+import PrivateRoute from './components/PrivateRoute'
+import Quiz from './pages/Quiz'
+import Support from './pages/Support'
+import Dashboard from './pages/Dashboard'
+import Timeline from './pages/Timeline'
+import Forum from './pages/Forum'
+import ForumCategory from './pages/ForumCategory'
+import ForumPost from './pages/ForumPost'
+import Privacy from './pages/Privacy'
+import CookieConsent from './components/CookieConsent'
+import DinoAssistant from './components/DinoAssistant'
+
+export default function App() {
+  return (
+    <ThemeProvider>
+    <AuthProvider>
+      <MasterLayout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/encyclopedia" element={<Encyclopedia />} />
+          <Route path="/dino/:id" element={<DinoDetail />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/quiz" element={<Quiz />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/support/success" element={<Support />} />
+          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/timeline" element={<Timeline />} />
+          <Route path="/forum" element={<Forum />} />
+          <Route path="/forum/category/:slug" element={<ForumCategory />} />
+          <Route path="/forum/post/:id" element={<ForumPost />} />
+          <Route path="/privacy" element={<Privacy />} />
+        </Routes>
+      </MasterLayout>
+      <CookieConsent />
+      <DinoAssistant />
+    </AuthProvider>
+    </ThemeProvider>
+  )
+}
+

@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+frontend/node_modules
+admin/node_modules
+
+# Environment variables (IMPORTANT - keep secrets out of git)
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist
+frontend/dist
+admin/dist
+build
+
+# Prisma
+/generated/prisma
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+
+# Uploads (use cloud storage in production)
+uploads/*
+!uploads/.gitkeep
+
+# Test coverage
+coverage
+
+# Admin panel - PRIVATE (keep in separate private repo for security)
+admin/
+
+# Backup files
+*.backup
+*.bak

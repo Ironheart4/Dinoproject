@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Users (Profile data only - Auth handled by Supabase auth.users)
+model User {
+  id        String   @id @db.Uuid // References auth.users(id)
+  name      String?  @db.VarChar(100)
+  role      String   @default("user") @db.VarChar(20) // user | admin
+  createdAt DateTime @default(now()) @map("created_at")
+
+  scores       Score[]
+  favorites    Favorite[]
+  subscription Subscription?
+  forumPosts   ForumPost[]
+  forumReplies ForumReply[]
+
+  @@map("users")
+}
+
+// Dinosaurs
+model Dinosaur {
+  id           Int      @id @default(autoincrement())
+  name         String?  @db.VarChar(100)
+  species      String   @unique @db.VarChar(100)
+  period       String?  @db.VarChar(50)
+  diet         String?  @db.VarChar(50)
+  habitat      String?  @db.VarChar(50) // land, air, water
+  lengthMeters Decimal? @map("length_meters") @db.Decimal(6, 2)
+  weightKg     Int?     @map("weight_kg")
+  description  String?
+  modelUrl     String   @map("model_url") @db.VarChar(500)
+  roarSound    String?  @map("roar_sound") @db.VarChar(500)
+  imageUrl     String?  @map("image_url") @db.VarChar(500)
+  imageUrl1    String?  @map("image_url1") @db.VarChar(500)
+  imageUrl2    String?  @map("image_url2") @db.VarChar(500)
+  imageUrl3    String?  @map("image_url3") @db.VarChar(500)
+  imageUrl4    String?  @map("image_url4") @db.VarChar(500)
+  imageUrl5    String?  @map("image_url5") @db.VarChar(500)
+  videoUrl     String?  @map("video_url") @db.VarChar(500)
+  taxonomy     String?
+  type         String?  @db.VarChar(100)
+  livedIn      String?  @map("lived_in") @db.VarChar(200)
+  namedBy      String?  @map("named_by") @db.VarChar(200)
+  isPremium    Boolean  @default(false) @map("is_premium") // restrict full 3D access
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  favorites Favorite[]
+
+  @@map("dinosaurs")
+}
+
+// Quizzes
+model Quiz {
+  id        Int        @id @default(autoincrement())
+  title     String     @db.VarChar(200)
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  questions Question[]
+  scores    Score[]
+
+  @@map("quizzes")
+}
+
+// Questions
+model Question {
+  id            Int    @id @default(autoincrement())
+  quizId        Int    @map("quiz_id")
+  questionText  String @map("question_text")
+  optionA       String @map("option_a")
+  optionB       String @map("option_b")
+  optionC       String @map("option_c")
+  optionD       String @map("option_d")
+  correctAnswer String @map("correct_answer") @db.Char(1)
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@map("questions")
+}
+
+// Scores (Quiz results)
+model Score {
+  id          Int      @id @default(autoincrement())
+  userId      String   @map("user_id") @db.Uuid
+  quizId      Int      @map("quiz_id")
+  score       Int
+  completedAt DateTime @default(now()) @map("completed_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@map("scores")
+}
+
+// Favorites (Free users limited to 5 by app logic)
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id") @db.Uuid
+  dinoId    Int      @map("dino_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dinosaur Dinosaur @relation(fields: [dinoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dinoId])
+  @@map("favorites")
+}
+
+// Subscriptions (PayPal - determines premium access)
+model Subscription {
+  id                   Int       @id @default(autoincrement())
+  userId               String    @unique @map("user_id") @db.Uuid
+  plan                 String    @default("free") @db.VarChar(20) // free | premium | donor
+  status               String    @default("active") @db.VarChar(20) // active | cancelled | expired
+  startDate            DateTime  @default(now()) @map("start_date")
+  endDate              DateTime? @map("end_date")
+  paypalSubscriptionId String?   @map("paypal_subscription_id") @db.VarChar(200)
+  createdAt            DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+// Forum Categories
+model ForumCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(100)
+  description String?
+  icon        String?  @db.VarChar(50)
+  color       String?  @default("#4CAF50") @db.VarChar(20)
+  postCount   Int      @default(0) @map("post_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  posts ForumPost[]
+
+  @@map("forum_categories")
+}
+
+// Forum Posts
+model ForumPost {
+  id         Int       @id @default(autoincrement())
+  categoryId Int       @map("category_id")
+  userId     String    @map("user_id") @db.Uuid
+  title      String    @db.VarChar(200)
+  content    String
+  isPinned   Boolean   @default(false) @map("is_pinned")
+  isLocked   Boolean   @default(false) @map("is_locked")
+  viewCount  Int       @default(0) @map("view_count")
+  replyCount Int       @default(0) @map("reply_count")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  category ForumCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replies  ForumReply[]
+
+  @@map("forum_posts")
+}
+
+// Forum Replies
+model ForumReply {
+  id         Int      @id @default(autoincrement())
+  postId     Int      @map("post_id")
+  userId     String   @map("user_id") @db.Uuid
+  content    String
+  isSolution Boolean  @default(false) @map("is_solution")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("forum_replies")
+}

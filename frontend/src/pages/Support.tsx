@@ -1,0 +1,287 @@
+import { useState, useEffect } from 'react'
+import { useAuth } from '../lib/auth'
+import { Link, useSearchParams } from 'react-router-dom'
+import { 
+  Check, Heart, Star, Crown, Sparkles, ExternalLink, Gift, Shield, Zap, Users
+} from 'lucide-react'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
+
+// PayPal Logo Component
+const PayPalLogo = ({ className = "h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 101 32" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#253B80" d="M12.237 2.8h-8.8c-.58 0-1.08.4-1.17.98L0 20.63c-.07.4.24.76.66.76h4.2c.58 0 1.08-.4 1.17-.98l.6-3.8c.09-.58.59-.98 1.17-.98h2.7c5.61 0 8.84-2.72 9.69-8.11.38-2.36.02-4.22-1.08-5.52-1.21-1.43-3.36-2.2-6.24-2.2z"/>
+    <path fill="#179BD7" d="M12.237 2.8h-8.8c-.58 0-1.08.4-1.17.98L0 20.63c-.07.4.24.76.66.76h4.2c.41 0 .75-.33.81-.73l.67-4.05c.09-.58.59-.98 1.17-.98h2.7c5.61 0 8.84-2.72 9.69-8.11.38-2.36.02-4.22-1.08-5.52-1.21-1.43-3.36-2.2-6.24-2.2z"/>
+    <path fill="#253B80" d="M35.998 10.48h-4.23c-.36 0-.69.23-.8.57l-.17.99-.27-.39c-.83-1.21-2.68-1.61-4.53-1.61-4.24 0-7.86 3.21-8.57 7.71-.37 2.24.16 4.39 1.44 5.89 1.18 1.38 2.87 1.96 4.88 1.96 3.45 0 5.37-2.22 5.37-2.22l-.17 1.08c-.07.4.23.76.65.76h3.81c.58 0 1.07-.4 1.16-.98l2.29-14.53c.07-.4-.24-.76-.66-.76z"/>
+    <path fill="#179BD7" d="M37.883 10.48h-4.23c-.36 0-.69.23-.8.57l-.17.99-.27-.39c-.83-1.21-2.68-1.61-4.53-1.61-4.24 0-7.86 3.21-8.57 7.71-.37 2.24.16 4.39 1.44 5.89 1.18 1.38 2.87 1.96 4.88 1.96 3.45 0 5.37-2.22 5.37-2.22l-.17 1.08c-.07.4.23.76.65.76h3.81c.58 0 1.07-.4 1.16-.98l2.29-14.53c.07-.4-.24-.76-.66-.76z"/>
+  </svg>
+)
+
+interface FeatureItem {
+  icon: React.ReactNode
+  text: string
+  highlight?: boolean
+}
+
+export default function Support() {
+  useDocumentTitle('Support DinoProject', ' — DinoProject')
+  const { user, token } = useAuth()
+  const [searchParams] = useSearchParams()
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [isPremium, setIsPremium] = useState(false)
+
+  // PayPal Payment Link - Direct link to PayPal hosted page
+  const PAYPAL_DONATION_LINK = 'https://www.paypal.com/ncp/payment/YDVK9Z6XNVBVY'
+
+  useEffect(() => {
+    // Check for success return from PayPal
+    if (searchParams.get('success') === 'true') {
+      setSuccessMessage('🎉 Thank you for your support! Your Premium access is now active.')
+    }
+  }, [searchParams])
+
+  useEffect(() => {
+    // Check if user has premium
+    if (token) {
+      fetch('http://localhost:5000/api/subscription', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.plan === 'premium' || data.plan === 'donor') {
+            setIsPremium(data.status === 'active')
+          }
+        })
+        .catch(() => {})
+    }
+  }, [token])
+
+  const handleDonate = () => {
+    // Open PayPal Payment Link in new tab
+    window.open(PAYPAL_DONATION_LINK, '_blank')
+  }
+
+  const premiumFeatures: FeatureItem[] = [
+    { icon: <Sparkles className="text-yellow-400" size={20} />, text: 'Full 3D Model Access', highlight: true },
+    { icon: <Crown className="text-purple-400" size={20} />, text: 'Unlimited Favorites' },
+    { icon: <Zap className="text-blue-400" size={20} />, text: 'AI Dino Assistant' },
+    { icon: <Gift className="text-pink-400" size={20} />, text: 'Download Resources' },
+    { icon: <Shield className="text-green-400" size={20} />, text: 'Priority Support' },
+    { icon: <Star className="text-orange-400" size={20} />, text: 'Early Access to New Features' },
+  ]
+
+  const freeFeatures = [
+    'Browse all dinosaur images',
+    'Unlimited quizzes',
+    'Timeline explorer',
+    'Video content',
+    'Save up to 5 favorites',
+    'Community access',
+  ]
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 py-12">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Success Banner */}
+        {successMessage && (
+          <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white text-center shadow-lg animate-pulse">
+            <p className="font-semibold text-lg">{successMessage}</p>
+          </div>
+        )}
+
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-pink-500/20 text-pink-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <Heart size={16} /> Support Our Mission
+          </div>
+          <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-4">
+            Support <span className="text-primary">DinoProject</span>
+          </h1>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            Help us bring dinosaurs to life! Your one-time donation unlocks premium features forever.
+          </p>
+        </div>
+
+        {/* Already Premium Banner */}
+        {isPremium && (
+          <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-center shadow-xl">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <Crown size={28} />
+              <span className="text-2xl font-bold">You're a Premium Supporter!</span>
+            </div>
+            <p className="text-white/90">Thank you for supporting DinoProject. You have access to all premium features!</p>
+          </div>
+        )}
+
+        {/* Main Donation Card */}
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl border border-gray-700 overflow-hidden shadow-2xl mb-12">
+          {/* Top Banner */}
+          <div className="bg-gradient-to-r from-primary to-green-500 px-6 py-4 text-center">
+            <span className="text-white font-bold text-lg">🦕 One-Time Donation — Permanent Premium Access</span>
+          </div>
+
+          <div className="p-8 md:p-10">
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Left - Donation Details */}
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                  <Gift className="text-primary" /> Make a Donation
+                </h2>
+                <p className="text-gray-300 mb-6">
+                  Support DinoProject with a one-time donation of <strong className="text-primary">$5 or more</strong>. 
+                  Your contribution helps us maintain and improve the platform.
+                </p>
+
+                {/* Amount Display */}
+                <div className="bg-gray-700/50 rounded-xl p-6 mb-6 text-center">
+                  <div className="text-sm text-gray-400 mb-1">Minimum Donation</div>
+                  <div className="text-5xl font-bold text-white mb-1">
+                    $5<span className="text-2xl text-gray-400">+</span>
+                  </div>
+                  <div className="text-sm text-gray-400">One-time payment</div>
+                </div>
+
+                {/* Donate Button */}
+                {!isPremium ? (
+                  <button
+                    onClick={handleDonate}
+                    className="w-full py-4 px-6 rounded-xl bg-[#0070BA] hover:bg-[#005C9A] text-white font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <PayPalLogo className="h-6" />
+                    Donate with PayPal
+                    <ExternalLink size={18} />
+                  </button>
+                ) : (
+                  <div className="w-full py-4 px-6 rounded-xl bg-green-600 text-white font-bold text-lg flex items-center justify-center gap-3">
+                    <Check size={24} />
+                    Already a Supporter!
+                  </div>
+                )}
+
+                <p className="text-xs text-gray-500 mt-4 text-center">
+                  You'll be redirected to PayPal's secure payment page. After payment, email us at{' '}
+                  <a href="mailto:dinoprojectoriginal@gmail.com" className="text-primary hover:underline">
+                    dinoprojectoriginal@gmail.com
+                  </a>{' '}
+                  with your PayPal transaction ID to activate your premium access.
+                </p>
+              </div>
+
+              {/* Right - What You Get */}
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                  <Sparkles className="text-yellow-400" /> What You Get
+                </h2>
+                <p className="text-gray-300 mb-6">
+                  Unlock all premium features <strong className="text-green-400">permanently</strong> with a single donation:
+                </p>
+
+                <ul className="space-y-4">
+                  {premiumFeatures.map((feature, i) => (
+                    <li 
+                      key={i} 
+                      className={`flex items-center gap-3 p-3 rounded-lg ${
+                        feature.highlight 
+                          ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30' 
+                          : 'bg-gray-700/30'
+                      }`}
+                    >
+                      {feature.icon}
+                      <span className="text-white font-medium">{feature.text}</span>
+                      {feature.highlight && (
+                        <span className="ml-auto text-xs bg-yellow-500 text-black px-2 py-0.5 rounded-full font-bold">
+                          POPULAR
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Free Plan Section */}
+        <div className="bg-gray-800/50 rounded-2xl border border-gray-700 p-8 mb-12">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <Users className="text-gray-400" /> Free Plan Features
+          </h2>
+          <p className="text-gray-400 mb-4">
+            Not ready to donate? No problem! You can still enjoy these features for free:
+          </p>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {freeFeatures.map((feature, i) => (
+              <div key={i} className="flex items-center gap-2 text-gray-300">
+                <Check size={16} className="text-gray-500" />
+                {feature}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="bg-gray-800/50 rounded-2xl border border-gray-700 p-8">
+          <h2 className="text-xl font-bold text-white mb-6">Frequently Asked Questions</h2>
+          
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-semibold text-white mb-2">How do I get premium access after donating?</h3>
+              <p className="text-gray-400">
+                After making your donation on PayPal, send an email to{' '}
+                <a href="mailto:dinoprojectoriginal@gmail.com" className="text-primary hover:underline">
+                  dinoprojectoriginal@gmail.com
+                </a>{' '}
+                with your PayPal transaction ID and the email you used on DinoProject. We'll activate your premium access within 24 hours.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold text-white mb-2">Is this a subscription or one-time payment?</h3>
+              <p className="text-gray-400">
+                This is a <strong className="text-green-400">one-time donation</strong>. There are no recurring charges, no subscriptions, 
+                and no automatic billing. You pay once and get permanent premium access.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold text-white mb-2">What's the minimum donation amount?</h3>
+              <p className="text-gray-400">
+                The minimum donation is <strong className="text-primary">$5 USD</strong>. You can donate more if you'd like to 
+                provide extra support for the project!
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-white mb-2">What payment methods are accepted?</h3>
+              <p className="text-gray-400">
+                We accept payments through PayPal, which supports credit cards, debit cards, and PayPal balance.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact */}
+        <div className="text-center mt-12 text-gray-400">
+          <p>
+            Questions? Contact us at{' '}
+            <a href="mailto:dinoprojectoriginal@gmail.com" className="text-primary hover:underline">
+              dinoprojectoriginal@gmail.com
+            </a>
+          </p>
+        </div>
+
+        {/* Not logged in prompt */}
+        {!user && (
+          <div className="mt-8 text-center">
+            <p className="text-gray-400 mb-4">
+              Already donated?{' '}
+              <Link to="/login" className="text-primary hover:underline">
+                Log in
+              </Link>{' '}
+              to check your premium status.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

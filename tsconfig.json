@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    // Core settings for Node.js + CommonJS
+    "module": "commonjs",
+    "target": "es2020",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "verbatimModuleSyntax": false,
+
+    // Project structure
+    "outDir": "./dist",
+    "rootDir": "./",
+    "sourceMap": true,
+
+    // Strict type checking (good for us!)
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    // Performance & compatibility
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "moduleResolution": "node",
+
+    // Node.js types
+    "types": ["node"],
+    "lib": ["es2020"],
+
+    // No JSX for backend (we're doing that in React later)
+    "jsx": "preserve"
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist", "frontend", "admin"]
+}

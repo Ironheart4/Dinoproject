@@ -1,0 +1,58 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark theme - single theme */
+:root {
+  --bg-primary: #111827;
+  --bg-secondary: #1F2937;
+  --text-primary: #F9FAFB;
+  --text-secondary: #9CA3AF;
+}
+
+/* Global input styling */
+input, textarea, select {
+  background-color: #374151;
+  color: #F9FAFB;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #6B7280;
+}
+
+/* Sound wave animation for audio player */
+@keyframes soundwave {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 16px;
+  }
+}
+
+.animate-soundwave {
+  animation: soundwave 0.4s ease-in-out infinite;
+}
+
+.animate-soundwave:nth-child(1) { animation-delay: 0s; }
+.animate-soundwave:nth-child(2) { animation-delay: 0.1s; }
+.animate-soundwave:nth-child(3) { animation-delay: 0.2s; }
+.animate-soundwave:nth-child(4) { animation-delay: 0.1s; }
+.animate-soundwave:nth-child(5) { animation-delay: 0s; }
+
+/* Cookie consent slide-up animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out forwards;
+}
