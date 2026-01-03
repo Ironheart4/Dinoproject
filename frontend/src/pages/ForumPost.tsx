@@ -149,22 +149,22 @@ export default function ForumPost() {
 
   return (
     <MasterLayout>
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Breadcrumb */}
         <Link
           to={`/forum/category/${post.category.slug}`}
-          className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 mb-6"
+          className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 mb-4 sm:mb-6 text-sm sm:text-base"
         >
           <ArrowLeft className="w-4 h-4" /> Back to {post.category.name}
         </Link>
 
         {/* Post */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden mb-4 sm:mb-6">
           {/* Post Header */}
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-start justify-between gap-4">
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
               <div>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
                   {post.isPinned && (
                     <span className="flex items-center gap-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded">
                       <Pin className="w-3 h-3" /> Pinned
@@ -176,7 +176,7 @@ export default function ForumPost() {
                     </span>
                   )}
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                   {post.title}
                 </h1>
               </div>
@@ -216,26 +216,26 @@ export default function ForumPost() {
 
           {/* Post Content */}
           <div className="flex">
-            {/* Author Sidebar */}
-            <div className="w-32 p-4 bg-gray-50 dark:bg-gray-900/50 border-r border-gray-200 dark:border-gray-700 text-center hidden md:block">
-              <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white text-xl font-bold">
+            {/* Author Sidebar - hidden on mobile */}
+            <div className="w-24 sm:w-32 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900/50 border-r border-gray-200 dark:border-gray-700 text-center hidden md:block">
+              <div className="w-12 sm:w-16 h-12 sm:h-16 mx-auto mb-2 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white text-lg sm:text-xl font-bold">
                 {post.user.name.charAt(0).toUpperCase()}
               </div>
-              <p className="font-semibold text-gray-900 dark:text-white text-sm">{post.user.name}</p>
+              <p className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm">{post.user.name}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{post.user.role}</p>
-              <p className="text-xs text-gray-400 mt-2">
+              <p className="text-xs text-gray-400 mt-2 hidden sm:block">
                 Member since {formatMemberSince(post.user.createdAt)}
               </p>
             </div>
 
             {/* Content */}
-            <div className="flex-1 p-6">
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4 md:hidden">
+            <div className="flex-1 p-4 sm:p-6">
+              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3 sm:mb-4 md:hidden">
                 <User className="w-4 h-4" />
                 <span>{post.user.name}</span>
               </div>
-              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{post.content}</p>
-              <div className="flex items-center gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{post.content}</p>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                 <span className="flex items-center gap-1">
                   <Clock className="w-4 h-4" /> {formatDate(post.createdAt)}
                 </span>
@@ -246,30 +246,30 @@ export default function ForumPost() {
         </div>
 
         {/* Replies */}
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="mb-4 sm:mb-6">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
             Replies ({post.replies.length})
           </h2>
           
           {post.replies.length === 0 ? (
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 text-center text-gray-500 dark:text-gray-400">
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 sm:p-6 text-center text-sm sm:text-base text-gray-500 dark:text-gray-400">
               No replies yet. Be the first to respond!
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {post.replies.map((reply) => (
                 <div
                   key={reply.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+                  className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 sm:p-4"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold flex-shrink-0">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold flex-shrink-0 text-sm sm:text-base">
                       {reply.user.name.charAt(0).toUpperCase()}
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-gray-900 dark:text-white">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
                             {reply.user.name}
                           </span>
                           {reply.user.role === "admin" && (
@@ -291,7 +291,7 @@ export default function ForumPost() {
                           </button>
                         )}
                       </div>
-                      <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                      <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                         {reply.content}
                       </p>
                     </div>
@@ -304,19 +304,19 @@ export default function ForumPost() {
 
         {/* Reply Form */}
         {!post.isLocked && user ? (
-          <form onSubmit={handleReply} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+          <form onSubmit={handleReply} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 sm:p-4">
             <textarea
               placeholder="Write your reply..."
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               rows={3}
-              className="w-full px-4 py-2 mb-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 outline-none resize-none"
+              className="w-full px-3 sm:px-4 py-2 mb-2 sm:mb-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 outline-none resize-none text-sm sm:text-base"
               required
             />
             <button
               type="submit"
               disabled={sending}
-              className="flex items-center gap-2 px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50 transition-colors"
+              className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50 transition-colors w-full sm:w-auto text-sm sm:text-base"
             >
               <Send className="w-4 h-4" /> {sending ? "Sending..." : "Reply"}
             </button>

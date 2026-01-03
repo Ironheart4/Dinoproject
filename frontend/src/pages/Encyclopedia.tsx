@@ -98,12 +98,12 @@ export default function Encyclopedia() {
 
   return (
     <div>
-      <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-2"><Dna className="text-green-400" /> Dinosaur Encyclopedia</h2>
-      <p className="text-gray-400 mb-6">Explore our comprehensive database of prehistoric creatures.</p>
+      <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 flex items-center gap-2"><Dna className="text-green-400" /> Dinosaur Encyclopedia</h2>
+      <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base">Explore our comprehensive database of prehistoric creatures.</p>
       
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="flex-1 relative" ref={searchRef}>
+      <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="relative" ref={searchRef}>
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10" />
           <input
             type="text"
@@ -133,26 +133,28 @@ export default function Encyclopedia() {
             </div>
           )}
         </div>
-        <select
-          value={dietFilter}
-          onChange={(e) => setDietFilter(e.target.value)}
-          className="border border-gray-600 rounded-lg p-3 bg-gray-700 text-white"
-        >
-          <option value="">All Diets</option>
-          <option value="herbivorous">Herbivorous</option>
-          <option value="carnivorous">Carnivorous</option>
-          <option value="omnivorous">Omnivorous</option>
-        </select>
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="border border-gray-600 rounded-lg p-3 bg-gray-700 text-white"
-        >
-          <option value="">All Types</option>
-          {uniqueTypes.map(type => (
-            <option key={type} value={type}>{type}</option>
-          ))}
-        </select>
+        <div className="grid grid-cols-2 gap-3 sm:flex sm:gap-4">
+          <select
+            value={dietFilter}
+            onChange={(e) => setDietFilter(e.target.value)}
+            className="border border-gray-600 rounded-lg p-3 bg-gray-700 text-white text-sm sm:text-base"
+          >
+            <option value="">All Diets</option>
+            <option value="herbivorous">Herbivorous</option>
+            <option value="carnivorous">Carnivorous</option>
+            <option value="omnivorous">Omnivorous</option>
+          </select>
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="border border-gray-600 rounded-lg p-3 bg-gray-700 text-white text-sm sm:text-base"
+          >
+            <option value="">All Types</option>
+            {uniqueTypes.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="text-sm text-gray-400 mb-4">
@@ -161,7 +163,7 @@ export default function Encyclopedia() {
       
       {loading && <p className="text-gray-400">Loading dinosaurs...</p>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredDinos.map(d => {
           const imageUrl = d.imageUrl1 || d.imageUrl
           const hasImage = imageUrl && imageUrl !== 'DEV_PENDING'
@@ -170,7 +172,7 @@ export default function Encyclopedia() {
             <Link key={d.id} to={`/dino/${d.id}`}>
               <div className="bg-gray-800 border border-gray-700 rounded-lg hover:border-green-500 transition h-full overflow-hidden flex flex-col">
                 {/* Image */}
-                <div className="h-48 bg-gray-900 flex items-center justify-center overflow-hidden relative">
+                <div className="h-40 sm:h-48 bg-gray-900 flex items-center justify-center overflow-hidden relative">
                   {hasImage ? (
                     <img
                       src={imageUrl}

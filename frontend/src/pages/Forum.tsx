@@ -117,12 +117,12 @@ export default function Forum() {
   return (
     <div className="max-w-6xl mx-auto">
       {/* Header */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="mb-6 sm:mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
             🦖 Dino Community Forum
           </h1>
-          <p className="text-gray-400">
+          <p className="text-sm sm:text-base text-gray-400">
             Connect with fellow dinosaur enthusiasts, ask questions, and share discoveries!
           </p>
         </div>
@@ -130,14 +130,14 @@ export default function Forum() {
         {user ? (
           <button
             onClick={() => setShowNewPost(true)}
-            className="px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg flex items-center gap-2 transition"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition w-full sm:w-auto"
           >
             <Plus size={20} /> New Post
           </button>
         ) : (
           <Link
             to="/login"
-            className="px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg flex items-center gap-2 transition"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition w-full sm:w-auto"
           >
             Login to Post
           </Link>
@@ -146,8 +146,8 @@ export default function Forum() {
 
       {/* New Post Modal */}
       {showNewPost && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl max-w-2xl w-full p-6 border border-gray-700">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-gray-800 rounded-xl max-w-2xl w-full p-4 sm:p-6 border border-gray-700 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white">Create New Post</h2>
               <button onClick={() => setShowNewPost(false)} className="text-gray-400 hover:text-white">
@@ -226,10 +226,10 @@ export default function Forum() {
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Categories */}
-        <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <div className="lg:col-span-2 space-y-3 sm:space-y-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">
             Categories
           </h2>
           
@@ -245,27 +245,27 @@ export default function Forum() {
               <Link
                 key={cat.id}
                 to={`/forum/category/${cat.slug}`}
-                className="block bg-gray-800 rounded-lg p-5 hover:bg-gray-750 hover:border-green-500/50 transition border border-gray-700"
+                className="block bg-gray-800 rounded-lg p-3 sm:p-5 hover:bg-gray-750 hover:border-green-500/50 transition border border-gray-700"
               >
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-green-900/30 text-green-400 rounded-lg">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2 sm:p-3 bg-green-900/30 text-green-400 rounded-lg">
                     {getCategoryIcon(cat.slug)}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white text-sm sm:text-base truncate">
                       {cat.name}
                     </h3>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-xs sm:text-sm text-gray-400 line-clamp-1">
                       {cat.description}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <span className="text-2xl font-bold text-green-400">
+                  <div className="text-right shrink-0">
+                    <span className="text-xl sm:text-2xl font-bold text-green-400">
                       {cat._count.posts}
                     </span>
                     <p className="text-xs text-gray-400">posts</p>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                  <ChevronRight className="w-4 sm:w-5 h-4 sm:h-5 text-gray-400 hidden sm:block" />
                 </div>
               </Link>
             ))
@@ -274,8 +274,8 @@ export default function Forum() {
 
         {/* Recent Activity Sidebar */}
         <div>
-          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <Clock className="w-5 h-5" /> Recent Activity
+          <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
+            <Clock className="w-4 sm:w-5 h-4 sm:h-5" /> Recent Activity
           </h2>
           
           <div className="bg-gray-800 rounded-lg border border-gray-700 divide-y divide-gray-700">
@@ -309,15 +309,15 @@ export default function Forum() {
           </div>
 
           {/* Community Stats */}
-          <div className="mt-6 bg-gradient-to-br from-green-600 to-emerald-700 rounded-lg p-5 text-white">
-            <h3 className="font-semibold mb-3">📊 Community Stats</h3>
-            <div className="grid grid-cols-2 gap-4 text-center">
+          <div className="mt-4 sm:mt-6 bg-gradient-to-br from-green-600 to-emerald-700 rounded-lg p-4 sm:p-5 text-white">
+            <h3 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">📊 Community Stats</h3>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
               <div>
-                <p className="text-2xl font-bold">{categories.reduce((a, c) => a + c._count.posts, 0)}</p>
+                <p className="text-xl sm:text-2xl font-bold">{categories.reduce((a, c) => a + c._count.posts, 0)}</p>
                 <p className="text-xs text-green-100">Total Posts</p>
               </div>
               <div>
-                <p className="text-2xl font-bold">{categories.length}</p>
+                <p className="text-xl sm:text-2xl font-bold">{categories.length}</p>
                 <p className="text-xs text-green-100">Categories</p>
               </div>
             </div>
@@ -325,11 +325,11 @@ export default function Forum() {
 
           {/* Call to Action */}
           {!user && (
-            <div className="mt-6 bg-gray-800 rounded-lg p-5 border border-gray-700 text-center">
-              <p className="text-gray-300 mb-3">Join the conversation!</p>
+            <div className="mt-4 sm:mt-6 bg-gray-800 rounded-lg p-4 sm:p-5 border border-gray-700 text-center">
+              <p className="text-gray-300 mb-2 sm:mb-3 text-sm sm:text-base">Join the conversation!</p>
               <Link
                 to="/login"
-                className="inline-block px-6 py-2 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg transition"
+                className="inline-block px-4 sm:px-6 py-2 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg transition text-sm sm:text-base"
               >
                 Login to Participate
               </Link>

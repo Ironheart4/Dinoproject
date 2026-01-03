@@ -135,10 +135,10 @@ export default function DinoDetail() {
       {dino && (
         <div className="space-y-8">
           {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+          <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-white">{dino.name}</h1>
-              <p className="text-xl text-gray-400 italic">{dino.species}</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">{dino.name}</h1>
+              <p className="text-lg sm:text-xl text-gray-400 italic">{dino.species}</p>
             </div>
             <div className="flex gap-2 items-center flex-wrap">
               {/* Like Button - Only for logged-in users */}
@@ -187,15 +187,17 @@ export default function DinoDetail() {
           )}
 
           {/* 3D Viewer */}
-          <div className="bg-gray-800 rounded-lg p-4">
-            <h2 className="text-xl font-semibold text-white mb-4">3D Model</h2>
+          <div className="bg-gray-800 rounded-lg p-3 sm:p-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">3D Model</h2>
             {canView3DModel ? (
-              <DinoViewer url={dino.modelUrl} height={450} />
+              <div className="h-[300px] sm:h-[400px] lg:h-[450px]">
+                <DinoViewer url={dino.modelUrl} height="100%" />
+              </div>
             ) : (
-              <div className="h-[450px] flex flex-col items-center justify-center bg-gray-900 rounded-lg border-2 border-dashed border-gray-600">
-                <Lock size={64} className="text-gray-500 mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">3D Model Locked</h3>
-                <p className="text-gray-400 text-center max-w-md mb-4">
+              <div className="h-[300px] sm:h-[400px] lg:h-[450px] flex flex-col items-center justify-center bg-gray-900 rounded-lg border-2 border-dashed border-gray-600 p-4">
+                <Lock size={48} className="text-gray-500 mb-3 sm:mb-4" />
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 text-center">3D Model Locked</h3>
+                <p className="text-gray-400 text-center max-w-md mb-4 text-sm sm:text-base px-4">
                   {user 
                     ? 'Add this dinosaur to your favorites to unlock the 3D viewer, or upgrade for full access to all 3D models!'
                     : 'Log in and add to favorites to view this 3D model, or upgrade for unlimited access!'
@@ -235,7 +237,7 @@ export default function DinoDetail() {
           <DinoSound src={dino.roarSound} label={`${dino.name} roar sound`} />
 
           {/* Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <div className="bg-gray-800 rounded-lg p-4">
               <h3 className="text-sm text-gray-400 mb-1 flex items-center gap-1"><Calendar size={14} /> Period</h3>
               <p className="text-white font-medium">{dino.period || 'Unknown'}</p>
@@ -272,9 +274,9 @@ export default function DinoDetail() {
 
           {/* Description */}
           {dino.description && (
-            <div className="bg-gray-800 rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2"><BookOpen size={20} /> About {dino.name}</h2>
-              <p className="text-gray-300 leading-relaxed">{dino.description}</p>
+            <div className="bg-gray-800 rounded-lg p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 flex items-center gap-2"><BookOpen size={20} /> About {dino.name}</h2>
+              <p className="text-gray-300 leading-relaxed text-sm sm:text-base">{dino.description}</p>
             </div>
           )}
 

@@ -143,23 +143,23 @@ export default function Quiz() {
   // SETUP STAGE
   if (stage === 'setup') {
     return (
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold text-white mb-4 flex items-center justify-center gap-3"><Dna className="text-green-400" /> Dino Knowledge Quiz</h2>
-          <p className="text-gray-400 text-lg">Test your prehistoric knowledge!</p>
+      <div className="max-w-2xl mx-auto px-2 sm:px-0">
+        <div className="text-center mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3 sm:mb-4 flex items-center justify-center gap-2 sm:gap-3"><Dna className="text-green-400" /> Dino Knowledge Quiz</h2>
+          <p className="text-gray-400 text-base sm:text-lg">Test your prehistoric knowledge!</p>
         </div>
 
-        <div className="bg-gray-800 rounded-lg p-8 text-center">
-          <Brain size={96} className="mx-auto text-green-400 mb-6" />
+        <div className="bg-gray-800 rounded-lg p-4 sm:p-8 text-center">
+          <Brain size={64} className="mx-auto text-green-400 mb-4 sm:mb-6 sm:w-24 sm:h-24" />
           
-          <h3 className="text-xl font-semibold text-white mb-6">How many questions would you like?</h3>
+          <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">How many questions would you like?</h3>
           
-          <div className="flex justify-center gap-3 flex-wrap mb-8">
+          <div className="flex justify-center gap-2 sm:gap-3 flex-wrap mb-6 sm:mb-8">
             {[5, 7, 10, 15, 20].map((count) => (
               <button
                 key={count}
                 onClick={() => setQuestionCount(count)}
-                className={`px-6 py-3 rounded-lg font-semibold transition ${
+                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition text-sm sm:text-base ${
                   questionCount === count
                     ? 'bg-green-600 text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -218,7 +218,7 @@ export default function Quiz() {
         </div>
 
         {/* Question Card */}
-        <div className="bg-gray-800 rounded-lg p-8">
+        <div className="bg-gray-800 rounded-lg p-4 sm:p-8">
           {/* Difficulty Badge */}
           <div className="flex justify-between items-start mb-4">
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -250,10 +250,10 @@ export default function Quiz() {
           )}
 
           {/* Question Text */}
-          <h3 className="text-2xl font-semibold text-white mb-6">{q.questionText}</h3>
+          <h3 className="text-lg sm:text-2xl font-semibold text-white mb-4 sm:mb-6">{q.questionText}</h3>
 
           {/* Options */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             {(['A', 'B', 'C', 'D'] as const).map((opt) => (
               <button
                 key={opt}

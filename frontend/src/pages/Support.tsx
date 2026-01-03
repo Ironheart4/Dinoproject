@@ -79,8 +79,8 @@ export default function Support() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 py-12">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 py-8 sm:py-12">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4">
         {/* Success Banner */}
         {successMessage && (
           <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white text-center shadow-lg animate-pulse">
@@ -89,55 +89,55 @@ export default function Support() {
         )}
 
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-pink-500/20 text-pink-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-2 bg-pink-500/20 text-pink-400 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium mb-4">
             <Heart size={16} /> Support Our Mission
           </div>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-white mb-3 sm:mb-4">
             Support <span className="text-primary">DinoProject</span>
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl text-gray-300 max-w-2xl mx-auto px-2">
             Help us bring dinosaurs to life! Your one-time donation unlocks premium features forever.
           </p>
         </div>
 
         {/* Already Premium Banner */}
         {isPremium && (
-          <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-center shadow-xl">
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <Crown size={28} />
-              <span className="text-2xl font-bold">You're a Premium Supporter!</span>
+          <div className="mb-6 sm:mb-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-center shadow-xl">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-2">
+              <Crown size={24} className="sm:w-7 sm:h-7" />
+              <span className="text-xl sm:text-2xl font-bold">You're a Premium Supporter!</span>
             </div>
-            <p className="text-white/90">Thank you for supporting DinoProject. You have access to all premium features!</p>
+            <p className="text-white/90 text-sm sm:text-base">Thank you for supporting DinoProject. You have access to all premium features!</p>
           </div>
         )}
 
         {/* Main Donation Card */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl border border-gray-700 overflow-hidden shadow-2xl mb-12">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl sm:rounded-3xl border border-gray-700 overflow-hidden shadow-2xl mb-8 sm:mb-12">
           {/* Top Banner */}
-          <div className="bg-gradient-to-r from-primary to-green-500 px-6 py-4 text-center">
-            <span className="text-white font-bold text-lg">🦕 One-Time Donation — Permanent Premium Access</span>
+          <div className="bg-gradient-to-r from-primary to-green-500 px-4 sm:px-6 py-3 sm:py-4 text-center">
+            <span className="text-white font-bold text-sm sm:text-lg">🦕 One-Time Donation — Permanent Premium Access</span>
           </div>
 
-          <div className="p-8 md:p-10">
-            <div className="grid md:grid-cols-2 gap-8">
+          <div className="p-4 sm:p-8 md:p-10">
+            <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
               {/* Left - Donation Details */}
               <div>
-                <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
                   <Gift className="text-primary" /> Make a Donation
                 </h2>
-                <p className="text-gray-300 mb-6">
+                <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6">
                   Support DinoProject with a one-time donation of <strong className="text-primary">$5 or more</strong>. 
                   Your contribution helps us maintain and improve the platform.
                 </p>
 
                 {/* Amount Display */}
-                <div className="bg-gray-700/50 rounded-xl p-6 mb-6 text-center">
-                  <div className="text-sm text-gray-400 mb-1">Minimum Donation</div>
-                  <div className="text-5xl font-bold text-white mb-1">
-                    $5<span className="text-2xl text-gray-400">+</span>
+                <div className="bg-gray-700/50 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 text-center">
+                  <div className="text-xs sm:text-sm text-gray-400 mb-1">Minimum Donation</div>
+                  <div className="text-4xl sm:text-5xl font-bold text-white mb-1">
+                    $5<span className="text-xl sm:text-2xl text-gray-400">+</span>
                   </div>
-                  <div className="text-sm text-gray-400">One-time payment</div>
+                  <div className="text-xs sm:text-sm text-gray-400">One-time payment</div>
                 </div>
 
                 {/* Donate Button */}
@@ -168,14 +168,14 @@ export default function Support() {
 
               {/* Right - What You Get */}
               <div>
-                <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
                   <Sparkles className="text-yellow-400" /> What You Get
                 </h2>
-                <p className="text-gray-300 mb-6">
+                <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6">
                   Unlock all premium features <strong className="text-green-400">permanently</strong> with a single donation:
                 </p>
 
-                <ul className="space-y-4">
+                <ul className="space-y-3 sm:space-y-4">
                   {premiumFeatures.map((feature, i) => (
                     <li 
                       key={i} 
@@ -201,17 +201,17 @@ export default function Support() {
         </div>
 
         {/* Free Plan Section */}
-        <div className="bg-gray-800/50 rounded-2xl border border-gray-700 p-8 mb-12">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        <div className="bg-gray-800/50 rounded-xl sm:rounded-2xl border border-gray-700 p-4 sm:p-8 mb-8 sm:mb-12">
+          <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
             <Users className="text-gray-400" /> Free Plan Features
           </h2>
-          <p className="text-gray-400 mb-4">
+          <p className="text-sm sm:text-base text-gray-400 mb-3 sm:mb-4">
             Not ready to donate? No problem! You can still enjoy these features for free:
           </p>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
             {freeFeatures.map((feature, i) => (
-              <div key={i} className="flex items-center gap-2 text-gray-300">
-                <Check size={16} className="text-gray-500" />
+              <div key={i} className="flex items-center gap-2 text-sm sm:text-base text-gray-300">
+                <Check size={16} className="text-gray-500 shrink-0" />
                 {feature}
               </div>
             ))}
@@ -219,13 +219,13 @@ export default function Support() {
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-gray-800/50 rounded-2xl border border-gray-700 p-8">
-          <h2 className="text-xl font-bold text-white mb-6">Frequently Asked Questions</h2>
+        <div className="bg-gray-800/50 rounded-xl sm:rounded-2xl border border-gray-700 p-4 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Frequently Asked Questions</h2>
           
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
-              <h3 className="font-semibold text-white mb-2">How do I get premium access after donating?</h3>
-              <p className="text-gray-400">
+              <h3 className="font-semibold text-white mb-1 sm:mb-2 text-sm sm:text-base">How do I get premium access after donating?</h3>
+              <p className="text-gray-400 text-sm sm:text-base">
                 After making your donation on PayPal, send an email to{' '}
                 <a href="mailto:dinoprojectoriginal@gmail.com" className="text-primary hover:underline">
                   dinoprojectoriginal@gmail.com
@@ -235,24 +235,24 @@ export default function Support() {
             </div>
             
             <div>
-              <h3 className="font-semibold text-white mb-2">Is this a subscription or one-time payment?</h3>
-              <p className="text-gray-400">
+              <h3 className="font-semibold text-white mb-1 sm:mb-2 text-sm sm:text-base">Is this a subscription or one-time payment?</h3>
+              <p className="text-gray-400 text-sm sm:text-base">
                 This is a <strong className="text-green-400">one-time donation</strong>. There are no recurring charges, no subscriptions, 
                 and no automatic billing. You pay once and get permanent premium access.
               </p>
             </div>
             
             <div>
-              <h3 className="font-semibold text-white mb-2">What's the minimum donation amount?</h3>
-              <p className="text-gray-400">
+              <h3 className="font-semibold text-white mb-1 sm:mb-2 text-sm sm:text-base">What's the minimum donation amount?</h3>
+              <p className="text-gray-400 text-sm sm:text-base">
                 The minimum donation is <strong className="text-primary">$5 USD</strong>. You can donate more if you'd like to 
                 provide extra support for the project!
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-white mb-2">What payment methods are accepted?</h3>
-              <p className="text-gray-400">
+              <h3 className="font-semibold text-white mb-1 sm:mb-2 text-sm sm:text-base">What payment methods are accepted?</h3>
+              <p className="text-gray-400 text-sm sm:text-base">
                 We accept payments through PayPal, which supports credit cards, debit cards, and PayPal balance.
               </p>
             </div>
@@ -260,7 +260,7 @@ export default function Support() {
         </div>
 
         {/* Contact */}
-        <div className="text-center mt-12 text-gray-400">
+        <div className="text-center mt-8 sm:mt-12 text-gray-400 text-sm sm:text-base">
           <p>
             Questions? Contact us at{' '}
             <a href="mailto:dinoprojectoriginal@gmail.com" className="text-primary hover:underline">
@@ -271,8 +271,8 @@ export default function Support() {
 
         {/* Not logged in prompt */}
         {!user && (
-          <div className="mt-8 text-center">
-            <p className="text-gray-400 mb-4">
+          <div className="mt-6 sm:mt-8 text-center">
+            <p className="text-gray-400 mb-3 sm:mb-4 text-sm sm:text-base">
               Already donated?{' '}
               <Link to="/login" className="text-primary hover:underline">
                 Log in

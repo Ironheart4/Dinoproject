@@ -48,12 +48,12 @@ export default function Login() {
   }
 
   return (
-    <div className="max-w-md mx-auto">
-      <div className="bg-gray-800 rounded-2xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold mb-6 text-white text-center flex items-center justify-center gap-2">
-          {mode === 'login' ? <><Dna className="text-green-400" /> Welcome Back!</> : <><UserPlus className="text-green-400" /> Create Account</>}
+    <div className="max-w-md mx-auto px-3 sm:px-4">
+      <div className="bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 md:p-8">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-white text-center flex items-center justify-center gap-2">
+          {mode === 'login' ? <><Dna className="text-green-400 w-5 h-5 sm:w-6 sm:h-6" /> Welcome Back!</> : <><UserPlus className="text-green-400 w-5 h-5 sm:w-6 sm:h-6" /> Create Account</>}
         </h2>
-        <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={submit} className="space-y-3 sm:space-y-4">
           {mode === 'register' && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Name</label>

@@ -250,23 +250,23 @@ export default function Dashboard() {
   const isPremium = stats.subscription.plan === 'premium' || isAdmin
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-900/50 to-blue-900/50 rounded-xl p-6 border border-gray-700">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+      <div className="bg-gradient-to-r from-green-900/50 to-blue-900/50 rounded-xl p-4 sm:p-6 border border-gray-700">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             {/* Profile Avatar - User Initial */}
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-green-600 border-4 border-primary flex items-center justify-center">
-              <span className="text-3xl font-bold text-white">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-green-600 border-4 border-primary flex items-center justify-center">
+              <span className="text-xl sm:text-3xl font-bold text-white">
                 {stats.user.name.charAt(0).toUpperCase()}
               </span>
             </div>
 
             <div>
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className="text-lg sm:text-2xl font-bold text-white">
                 Welcome back, {stats.user.name}!
               </h1>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-400 text-xs sm:text-sm">
                 Member since {formatDate(stats.user.createdAt)}
               </p>
             </div>
@@ -287,12 +287,12 @@ export default function Dashboard() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 border-b border-gray-700 pb-2">
+      <div className="flex gap-1 sm:gap-2 border-b border-gray-700 pb-2 overflow-x-auto">
         {(['overview', 'activity', 'profile'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-t-lg font-medium transition ${
+            className={`px-3 sm:px-4 py-2 rounded-t-lg font-medium transition whitespace-nowrap text-sm sm:text-base ${
               activeTab === tab
                 ? 'bg-primary text-white'
                 : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
@@ -309,26 +309,26 @@ export default function Dashboard() {
       {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Quick Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-              <Heart className="w-8 h-8 text-red-500 mb-2" />
-              <div className="text-3xl font-bold text-white">{stats.stats.favoritesCount}</div>
-              <div className="text-sm text-gray-400">Favorites</div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="bg-gray-800 rounded-xl p-3 sm:p-5 border border-gray-700">
+              <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 mb-1 sm:mb-2" />
+              <div className="text-xl sm:text-3xl font-bold text-white">{stats.stats.favoritesCount}</div>
+              <div className="text-xs sm:text-sm text-gray-400">Favorites</div>
             </div>
-            <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-              <Target className="w-8 h-8 text-blue-500 mb-2" />
-              <div className="text-3xl font-bold text-white">{stats.stats.quizzesCompleted}</div>
-              <div className="text-sm text-gray-400">Quizzes Completed</div>
+            <div className="bg-gray-800 rounded-xl p-3 sm:p-5 border border-gray-700">
+              <Target className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 mb-1 sm:mb-2" />
+              <div className="text-xl sm:text-3xl font-bold text-white">{stats.stats.quizzesCompleted}</div>
+              <div className="text-xs sm:text-sm text-gray-400">Quizzes</div>
             </div>
-            <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-              <Trophy className="w-8 h-8 text-yellow-500 mb-2" />
-              <div className="text-3xl font-bold text-white">{stats.stats.highestScore}%</div>
-              <div className="text-sm text-gray-400">Highest Score</div>
+            <div className="bg-gray-800 rounded-xl p-3 sm:p-5 border border-gray-700">
+              <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 mb-1 sm:mb-2" />
+              <div className="text-xl sm:text-3xl font-bold text-white">{stats.stats.highestScore}%</div>
+              <div className="text-xs sm:text-sm text-gray-400">Best Score</div>
             </div>
-            <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-              <Flame className="w-8 h-8 text-orange-500 mb-2" />
-              <div className="text-3xl font-bold text-white">{stats.stats.activityStreak}</div>
-              <div className="text-sm text-gray-400">Days Active</div>
+            <div className="bg-gray-800 rounded-xl p-3 sm:p-5 border border-gray-700">
+              <Flame className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 mb-1 sm:mb-2" />
+              <div className="text-xl sm:text-3xl font-bold text-white">{stats.stats.activityStreak}</div>
+              <div className="text-xs sm:text-sm text-gray-400">Days Active</div>
             </div>
           </div>
 

@@ -385,24 +385,24 @@ export default function Timeline() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-4xl font-bold font-display text-primary flex items-center gap-3">
+          <h1 className="text-2xl sm:text-4xl font-bold font-display text-primary flex items-center gap-2 sm:gap-3">
             <Calendar className="text-green-400" /> Timeline Explorer
           </h1>
-          <p className="text-gray-400 mt-2">
+          <p className="text-gray-400 mt-1 sm:mt-2 text-sm sm:text-base">
             Explore {dinosaurs.length} dinosaurs across time and space
           </p>
         </div>
         
         {/* Current Time */}
-        <div className="flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-xl border border-gray-700">
-          <Clock className="text-green-400" size={20} />
+        <div className="flex items-center gap-2 bg-gray-800 px-3 sm:px-4 py-2 rounded-xl border border-gray-700 w-fit">
+          <Clock className="text-green-400" size={18} />
           <div className="text-right">
             <div className="text-xs text-gray-400">Your Time</div>
-            <div className="text-lg font-mono text-white">
+            <div className="text-base sm:text-lg font-mono text-white">
               {currentTime.toLocaleTimeString()}
             </div>
           </div>
@@ -410,11 +410,11 @@ export default function Timeline() {
       </div>
 
       {/* Period Filter */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <span className="text-gray-400 text-sm">Filter:</span>
+      <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
+        <span className="text-gray-400 text-xs sm:text-sm">Filter:</span>
         <button
           onClick={() => setSelectedPeriod(null)}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
             !selectedPeriod ? 'bg-green-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
           }`}
         >
@@ -424,7 +424,7 @@ export default function Timeline() {
           <button
             key={period.name}
             onClick={() => setSelectedPeriod(selectedPeriod === period.name ? null : period.name)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-1 sm:gap-2 ${
               selectedPeriod === period.name 
                 ? `${period.bgClass} text-white` 
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -440,10 +440,10 @@ export default function Timeline() {
       </div>
 
       {/* Horizontal Timeline */}
-      <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-        <h2 className="text-lg font-bold text-white mb-4">🦕 Geological Timeline</h2>
+      <div className="bg-gray-800 rounded-xl p-3 sm:p-4 border border-gray-700">
+        <h2 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">🦕 Geological Timeline</h2>
         <div className="overflow-x-auto pb-4" style={{ scrollbarWidth: 'thin' }}>
-          <div className="flex gap-8 min-w-max">
+          <div className="flex gap-4 sm:gap-8 min-w-max">
             {TIME_PERIODS.map((period) => (
               <div key={period.name} className="flex-shrink-0">
                 {/* Period Header */}
@@ -456,7 +456,7 @@ export default function Timeline() {
                 </div>
                 
                 {/* Dinosaur Icons */}
-                <div className="flex gap-2 flex-wrap max-w-[300px]">
+                <div className="flex gap-2 flex-wrap max-w-[250px] sm:max-w-[300px]">
                   {groupedByPeriod[period.name]?.slice(0, 20).map((dino) => (
                     <div
                       key={dino.id}
@@ -473,7 +473,7 @@ export default function Timeline() {
                     >
                       {/* Circular Icon */}
                       <div 
-                        className="w-12 h-12 rounded-full overflow-hidden border-2 bg-gray-700"
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 bg-gray-700"
                         style={{ borderColor: period.color }}
                       >
                         <img
@@ -540,11 +540,11 @@ export default function Timeline() {
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             🌍 Discovery Locations
           </h2>
-          <div className="text-sm text-gray-400">
+          <div className="text-xs sm:text-sm text-gray-400">
             {mappableDinos.length} dinosaurs mapped
           </div>
         </div>
-        <div ref={mapRef} style={{ height: '500px', width: '100%' }} />
+        <div ref={mapRef} className="h-[300px] sm:h-[400px] lg:h-[500px] w-full" />
         
         {/* Popup */}
         <div 
