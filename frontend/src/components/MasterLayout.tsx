@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { 
   LayoutDashboard, Heart, Home, BookOpen, Target, Info, LogIn, 
-  Mail, Twitter, Instagram, Youtube, MessageCircle, Calendar 
+  Mail, Twitter, Instagram, Youtube, MessageCircle, Calendar, Github 
 } from 'lucide-react'
 
 const LOGO = 'https://i.postimg.cc/gcMbkWV0/Dino-Project-Logo.png'
@@ -104,6 +104,7 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
                 <Mail size={14} /> dinoprojectoriginal@gmail.com
               </a>
               <div className="flex gap-3 pt-2">
+                <a href="https://github.com/Ironheart4" target="_blank" rel="noopener noreferrer" className="hover:scale-110 hover:text-primary transition" title="GitHub"><Github size={20} /></a>
                 <a href="https://twitter.com/DinoProjectApp" target="_blank" rel="noopener noreferrer" className="hover:scale-110 hover:text-primary transition" title="Twitter"><Twitter size={20} /></a>
                 <a href="https://instagram.com/dinoproject" target="_blank" rel="noopener noreferrer" className="hover:scale-110 hover:text-primary transition" title="Instagram"><Instagram size={20} /></a>
                 <a href="https://youtube.com/@DinoProject" target="_blank" rel="noopener noreferrer" className="hover:scale-110 hover:text-primary transition" title="YouTube"><Youtube size={20} /></a>
@@ -115,11 +116,13 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
         {/* Bottom bar */}
         <div className="border-t border-gray-700 py-4">
           <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
-            <p>© {new Date().getFullYear()} DinoProject. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} DinoProject. Built by Ayomide Mathins.</p>
             <div className="flex items-center gap-4 mt-2 md:mt-0">
               <Link to="/privacy" className="hover:text-primary transition">Privacy Policy</Link>
               <span>•</span>
-              <span>Made with ❤️ for dinosaur enthusiasts worldwide</span>
+              <a href="https://github.com/Ironheart4" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition flex items-center gap-1"><Github size={12} /> GitHub</a>
+              <span>•</span>
+              <span>Made with ❤️ for dinosaur enthusiasts</span>
             </div>
           </div>
         </div>
