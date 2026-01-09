@@ -5,11 +5,11 @@ import express from "express";
 const app = express();
 const PORT = 5000;
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.json({ message: "Test server works!" });
 });
 
-app.get("/health", (req, res) => {
+app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
