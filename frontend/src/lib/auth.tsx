@@ -1,6 +1,11 @@
+// auth.tsx — Authentication context using Supabase and backend user records
+// Responsibilities:
+// - Keeps Supabase session in sync with local app state
+// - Fetches user profile from backend (/api/auth/me) to read roles and subscription status
+// - Update VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment for production
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from './supabase'
-import type { User, Session } from '@supabase/supabase-js'
+import type { User, Session } from '@supabase/supabase-js' 
 
 type UserData = {
   id: string

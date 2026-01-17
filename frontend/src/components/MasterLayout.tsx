@@ -1,3 +1,8 @@
+// MasterLayout.tsx — Global layout (header, footer, mobile nav)
+// Notes:
+// - Update `navLinks` array to add/remove top-level navigation items
+// - Uses `useAuth()` to display user-specific links (Dashboard, Logout)
+// - Footer contains quick links and contact info; adjust for branding or legal text
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
@@ -5,7 +10,7 @@ import {
   LayoutDashboard, Heart, Home, BookOpen, Target, Info, LogIn, 
   Mail, Twitter, Instagram, Youtube, MessageCircle, Calendar, Github,
   Menu, X
-} from 'lucide-react'
+} from 'lucide-react' 
 
 const LOGO = 'https://i.postimg.cc/gcMbkWV0/Dino-Project-Logo.png'
 

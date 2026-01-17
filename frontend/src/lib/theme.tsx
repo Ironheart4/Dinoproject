@@ -1,6 +1,10 @@
+// theme.tsx — Theme provider to persist user theme preference
+// Notes:
+// - Stores theme in localStorage under `dino-theme` and toggles `light-mode` class on <html>
+// - Useful for testing visual differences and accessibility checks
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
-type Theme = 'dark' | 'light'
+type Theme = 'dark' | 'light' 
 
 type ThemeContextType = {
   theme: Theme

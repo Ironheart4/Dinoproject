@@ -1,3 +1,7 @@
+// PrivateRoute.tsx — Guard component for routes that require authentication
+// Behavior:
+// - Shows a loader while auth state is resolving
+// - Redirects to /login when there is no authenticated user/session
 import React from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'

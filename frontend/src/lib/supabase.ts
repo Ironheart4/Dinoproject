@@ -1,3 +1,7 @@
+// supabase.ts — Supabase client wrapper used across the frontend
+// Notes:
+// - Configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel for production
+// - Never expose Supabase service_role keys on the frontend; only use anon publishable keys here
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://mrhcjbprjtirrxwtudbl.supabase.co";
