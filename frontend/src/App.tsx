@@ -1,3 +1,9 @@
+// App.tsx — Application routes and global providers
+// Responsibilities:
+// - Sets up ThemeProvider and AuthProvider for the app
+// - Contains the top-level `Routes` mapping pages to paths
+// - Use `PrivateRoute` wrapper for any route that requires authentication
+// Note: Add any new page routes here and ensure route paths match frontend links and API expectations
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'

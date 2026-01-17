@@ -1,3 +1,8 @@
+// DinoAssistant.tsx — Floating AI chat widget (DinoBot)
+// Notes & integration:
+// - Uses `/api/ai/chat` and `/api/subscription` on the backend to send messages and check premium status
+// - In development this file points to `http://localhost:5000`; update to `import.meta.env.VITE_API_URL` in production
+// - Feature is gated by premium/subscription; unauthenticated users are prompted to log in
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, User, Loader2, Minimize2, Crown, RefreshCw } from "lucide-react";
 import { useAuth } from "../lib/auth";

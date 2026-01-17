@@ -1,3 +1,8 @@
+// DinoViewer.tsx — Three.js GLTF/GLB model viewer used on DinoDetail pages
+// Notes:
+// - Supports DRACO-compressed GLTF files (DRACOLoader)
+// - Props: url (model URL), background, autoRotate, height
+// - Handles network/CORS errors and shows friendly messages on failure
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
