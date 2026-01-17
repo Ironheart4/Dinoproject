@@ -90,7 +90,16 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+    // Allow if origin is in the explicit list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    // Allow Vercel preview/production URLs
+    if (origin.includes('vercel.app') || origin.includes('dinoproject')) {
+      return callback(null, true);
+    }
+    // Allow in development mode
+    if (process.env.NODE_ENV === 'development') {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));
