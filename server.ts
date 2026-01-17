@@ -1631,6 +1631,8 @@ app.get("/api/paypal/client-id", (_req, res) => {
 
 // ==================== AI DINO ASSISTANT (Hugging Face) ====================
 
+// Hugging Face config: set HUGGINGFACE_API_KEY to enable the AI DinoBot.
+// If the key is missing or the model is overloaded, the AI endpoint will gracefully fallback to `getLocalDinoResponse`.
 const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 const HF_MODEL_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base";
 
@@ -1851,6 +1853,8 @@ function formatDinoResponse(aiResponse: string, originalQuestion: string): strin
 }
 
 // Local fallback responses for dinosaur FAQs
+// Local fallback for AI — uses the database to build short, helpful FAQ-style replies
+// This runs when the external model is unavailable or returns empty/short responses
 async function getLocalDinoResponse(message: string): Promise<string> {
   const msg = message.toLowerCase();
   

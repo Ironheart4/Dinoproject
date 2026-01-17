@@ -69,6 +69,8 @@ const REGION_COORDINATES: Record<string, [number, number]> = {
   'antarctica': [0, -75],
 }
 
+// Map inference helper: tries to map free-text `livedIn` values to approximate [lng, lat].
+// Returns null for unknown locations. The `seed` adds small offsets to prevent marker overlap.
 function getCoordinates(livedIn: string | null, seed: number = 0): [number, number] | null {
   if (!livedIn) return null
   const lower = livedIn.toLowerCase()

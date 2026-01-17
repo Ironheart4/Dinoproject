@@ -4,6 +4,7 @@
 // - In production, set `VITE_API_URL` in Vercel (or your host) and replace BASE accordingly
 //   e.g., const BASE = import.meta.env.VITE_API_URL || 'https://your-render-url.onrender.com'
 // - All requests include a JSON content type and optional Bearer token when present
+// BASE URL for API calls: replace with `import.meta.env.VITE_API_URL` in production
 const BASE = 'http://localhost:5000'
 
 function getHeaders(token?: string) {

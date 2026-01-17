@@ -107,6 +107,7 @@ export default function DinoViewer({
     console.log("Loading 3D model from:", url);
     
     // First, fetch the file to ensure it's accessible
+    // If this fails often check the model host for proper CORS headers (Access-Control-Allow-Origin)
     fetch(url, { mode: 'cors' })
       .then(response => {
         if (!response.ok) {
