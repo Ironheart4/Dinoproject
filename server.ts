@@ -21,6 +21,10 @@ import { createClient } from "@supabase/supabase-js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import dns from "dns";
+
+// Force IPv4 DNS resolution to avoid IPv6 ENETUNREACH errors on networks without IPv6 support
+dns.setDefaultResultOrder("ipv4first");
 
 const app = express();
 const PORT = process.env.PORT || 5000;

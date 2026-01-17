@@ -3,6 +3,15 @@
 import React from 'react'
 import { User, Heart, BookOpen, Brain, Bot, Map, Clock, Image, Video, Cuboid as Cube3d, Github, Mail, Coffee, ExternalLink } from 'lucide-react'
 
+// PayPal Logo SVG Component (Flaticon: Freepik)
+const PayPalIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#1565C0" d="M18.7,13.767l0.005,0.002C18.809,13.326,19.187,13,19.66,13h13.472c4.459,0,8.049,3.63,8.049,8.129c0,5.894-4.82,10.672-10.752,10.672h-4.571c-0.467,0-0.878,0.318-0.99,0.774L23.169,42.5c-0.085,0.341-0.388,0.583-0.74,0.583l-6.014,0c-0.385,0-0.669-0.345-0.589-0.723L18.7,13.767z"/>
+    <path fill="#039BE5" d="M33.132,21.129C33.132,28.316,27.36,34.1,20.19,34.1h-4.464c-0.467,0-0.878,0.318-0.99,0.774L12.591,45.5c-0.085,0.341-0.388,0.583-0.74,0.583h-5.586c-0.385,0-0.669-0.346-0.59-0.723l3.293-15.01l0.005,0.002C9.077,29.908,9.455,29.582,9.928,29.582h5.404c7.87,0,14.253-6.392,14.253-14.287c0-2.66-0.733-5.149-2.009-7.286C31.713,10.595,33.132,15.628,33.132,21.129z"/>
+    <path fill="#283593" d="M19.66,5h13.472c5.159,0,9.339,4.213,9.339,9.416c0,6.769-5.53,12.257-12.342,12.257h-4.571c-0.467,0-0.878,0.318-0.99,0.774L22.169,37.5c-0.085,0.341-0.388,0.583-0.74,0.583H14.92c-0.385,0-0.669-0.345-0.589-0.723L18.669,5.767L18.674,5.77C18.778,5.327,19.156,5,19.66,5z"/>
+  </svg>
+)
+
 export default function AboutUs() {
   return (
     <div className="max-w-4xl mx-auto">
@@ -170,7 +179,7 @@ export default function AboutUs() {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white text-green-700 rounded-lg hover:bg-gray-100 transition font-bold shadow-lg text-sm sm:text-base"
         >
-          <Coffee size={20} /> Support via PayPal <ExternalLink size={16} />
+          <PayPalIcon className="w-5 h-5" /> Support the Creator <ExternalLink size={16} />
         </a>
       </section>
 
