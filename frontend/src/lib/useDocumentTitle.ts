@@ -1,3 +1,5 @@
+// useDocumentTitle.ts — Small hook to set document.title with a consistent suffix
+// Usage: useDocumentTitle('Page Title') will set document.title to 'Page Title | DinoProject'
 import { useEffect } from "react";
 
 export function useDocumentTitle(title: string, suffix: string = " | DinoProject") {

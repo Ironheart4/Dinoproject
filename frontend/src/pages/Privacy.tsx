@@ -1,3 +1,5 @@
+// Privacy.tsx — Privacy policy and data handling details
+// Notes: Update policy text to reflect actual data collection, cookies, and third-party services
 import { Link } from "react-router-dom";
 import { ArrowLeft, Shield, Cookie, Database, Mail, Lock } from "lucide-react";
 import MasterLayout from "../components/MasterLayout";

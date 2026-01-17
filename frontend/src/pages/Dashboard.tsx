@@ -1,3 +1,7 @@
+// Dashboard.tsx — User dashboard showing statistics, charts, and activity
+// Notes:
+// - Protected route: ensure `PrivateRoute` wraps this page in routing
+// - Fetches `/api/dashboard/*` endpoints and renders charts and export features
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'

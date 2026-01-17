@@ -1,3 +1,5 @@
+// AboutUs.tsx — About page with project details, credits, and contributor links
+// Notes: Keep this page updated with contributors, project status, and links to the repo and support channels
 import React from 'react'
 import { User, Heart, BookOpen, Brain, Bot, Map, Clock, Image, Video, Cuboid as Cube3d, Github, Mail, Coffee, ExternalLink } from 'lucide-react'
 

@@ -1,8 +1,12 @@
+// Timeline.tsx — Timeline explorer with geographic mapping
+// Notes:
+// - Uses OpenLayers to render dinosaur locations inferred from `livedIn` text
+// - Groups dinosaurs by time period and allows searching, hovering, and navigation to details
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
-import { Clock, Calendar, Loader2, Search, X, MapPin } from 'lucide-react'
+import { Clock, Calendar, Loader2, Search, X, MapPin } from 'lucide-react' 
 
 // OpenLayers imports
 import Map from 'ol/Map'

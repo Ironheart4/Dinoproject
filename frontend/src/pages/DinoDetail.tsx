@@ -1,11 +1,15 @@
 
+// DinoDetail.tsx — Dinosaur detail page
+// Responsibilities:
+// - Displays dinosaur metadata, images, video, 3D model (gated by premium or favorites), and roar audio
+// - Manages favorites and checks subscription status to control gated content
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { fetchDino } from '../lib/api'
 import DinoViewer from '../components/DinoViewer'
 import DinoSound from '../components/DinoSound'
 import { useAuth } from '../lib/auth'
-import { useDocumentTitle } from '../lib/useDocumentTitle'
+import { useDocumentTitle } from '../lib/useDocumentTitle' 
 import {
   Heart, Lock, Star, Calendar, Globe, Ruler, Scale, Home as HomeIcon,
   PenTool, Microscope, BookOpen, Image, Video, Loader2, AlertTriangle

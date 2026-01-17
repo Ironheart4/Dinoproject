@@ -1,3 +1,7 @@
+// Login.tsx — Authentication page for signing in and registering
+// Notes:
+// - Uses Supabase via `useAuth()` for sign-in/register flows
+// - On successful login, redirects to home and session is managed globally by AuthProvider
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'

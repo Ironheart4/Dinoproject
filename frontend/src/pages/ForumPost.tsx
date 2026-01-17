@@ -1,3 +1,7 @@
+// ForumPost.tsx — View a single forum post and its replies
+// Notes:
+// - Read-only for public users; posting replies requires auth
+// - Provides controls for authors/admins to edit, delete, pin, or lock threads
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Send, Trash2, Pin, Lock, Clock, User } from "lucide-react";

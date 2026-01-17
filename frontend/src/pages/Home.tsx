@@ -1,3 +1,8 @@
+// Home.tsx — Public landing page with featured dinosaurs and CTAs
+// Responsibilities:
+// - Fetches featured dinosaurs (first 6) for the homepage carousel
+// - Promotes premium features and links to key app sections (Encyclopedia, Quiz, Support)
+// - Uses `useDocumentTitle` to set the browser title
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'

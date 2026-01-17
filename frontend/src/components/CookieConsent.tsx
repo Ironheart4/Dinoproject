@@ -1,3 +1,7 @@
+// CookieConsent.tsx — Simple cookie consent banner (client-side only)
+// Notes:
+// - Stores user preference in localStorage under `cookie-consent`
+// - Minimal compliance UI; update content to match actual cookie usage
 import { useState, useEffect } from "react";
 import { Cookie, X } from "lucide-react";
 import { Link } from "react-router-dom";

@@ -1,3 +1,7 @@
+// ForumCategory.tsx — List posts for a specific forum category (by slug)
+// Notes:
+// - Fetches posts by category and supports creating new posts (auth required)
+// - Uses `MasterLayout` for consistent header/footer and `api` helper for network calls
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, MessageSquare, Eye, Pin, Lock, Clock } from "lucide-react";

@@ -1,10 +1,14 @@
+// Support.tsx — Donation & Premium support page
+// Notes:
+// - Provides PayPal donation link and explains premium benefits
+// - Shows user's subscription status and success banners after donation
 import { useState, useEffect } from 'react'
 import { useAuth } from '../lib/auth'
 import { Link, useSearchParams } from 'react-router-dom'
 import { 
   Check, Heart, Star, Crown, Sparkles, ExternalLink, Gift, Shield, Zap, Users
 } from 'lucide-react'
-import { useDocumentTitle } from '../lib/useDocumentTitle'
+import { useDocumentTitle } from '../lib/useDocumentTitle' 
 
 // PayPal Logo Component
 const PayPalLogo = ({ className = "h-5" }: { className?: string }) => (

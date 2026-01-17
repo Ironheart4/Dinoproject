@@ -1,3 +1,7 @@
+// Forum.tsx — Community forum listing (categories and recent posts)
+// Notes:
+// - Public browsing of categories and posts; posting requires authentication
+// - Uses `api` helper to fetch forum endpoints and handles simple client-side posting
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MessageSquare, Users, Clock, ChevronRight, TrendingUp, Plus, Send, X } from "lucide-react";

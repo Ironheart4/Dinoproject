@@ -1,3 +1,7 @@
+// Encyclopedia.tsx — Dinosaur catalog and search UI
+// Notes:
+// - Loads the full dinosaur list and supports client-side filtering, suggestions, and quick navigation to detail pages
+// - Use this page to browse species details and access the 3D viewer (if available)
 import React, { useEffect, useState, useRef } from 'react'
 import { fetchDinos } from '../lib/api'
 import { Link, useNavigate } from 'react-router-dom'
