@@ -1,7 +1,7 @@
 // Privacy.tsx — Privacy policy and data handling details
 // Notes: Update policy text to reflect actual data collection, cookies, and third-party services
 import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Cookie, Database, Mail, Lock } from "lucide-react";
+import { ArrowLeft, Shield, Cookie, Database, Mail, Lock, Heart, Server, CreditCard } from "lucide-react";
 import MasterLayout from "../components/MasterLayout";
 
 export default function Privacy() {
@@ -18,7 +18,7 @@ export default function Privacy() {
         <div className="bg-gray-800 rounded-xl p-4 sm:p-6 md:p-8 border border-gray-700">
           <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
             <Shield className="w-6 sm:w-8 h-6 sm:h-8 text-green-500" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Privacy Policy</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Privacy Policy & Terms</h1>
           </div>
           
           <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8">
@@ -38,6 +38,54 @@ export default function Privacy() {
               </p>
             </section>
 
+            {/* Third-Party Services & Data Security */}
+            <section className="bg-green-900/20 border border-green-700/50 rounded-lg p-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
+                <Server className="w-4 sm:w-5 h-4 sm:h-5 text-green-500" /> Third-Party Services & Data Security
+              </h2>
+              <p className="mb-3">
+                <strong className="text-green-400">Your data is in safe hands.</strong> DinoProject is an independent, 
+                solo project and we do not directly store or manage your sensitive data ourselves. Instead, we rely on 
+                trusted, industry-leading third-party services:
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-2 sm:ml-4 mb-3">
+                <li><strong>Supabase:</strong> Handles user authentication, database storage, and security. Supabase is SOC 2 Type II compliant and uses enterprise-grade encryption.</li>
+                <li><strong>PayPal:</strong> Processes all donations and payments. We never see or store your payment card details.</li>
+                <li><strong>Vercel:</strong> Hosts our frontend with global CDN and SSL encryption.</li>
+                <li><strong>Render:</strong> Hosts our backend API with automatic SSL and secure infrastructure.</li>
+                <li><strong>Hugging Face:</strong> Powers our AI Dino Assistant. Conversations are processed but not stored long-term.</li>
+              </ul>
+              <p className="text-green-300 text-sm">
+                ✓ We do not have direct access to your passwords (hashed by Supabase)<br/>
+                ✓ We do not store payment card numbers<br/>
+                ✓ All data transmission is encrypted via HTTPS/SSL
+              </p>
+            </section>
+
+            {/* Donations & Use of Funds */}
+            <section className="bg-amber-900/20 border border-amber-700/50 rounded-lg p-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
+                <Heart className="w-4 sm:w-5 h-4 sm:h-5 text-pink-500" /> Donations & Use of Funds
+              </h2>
+              <p className="mb-3">
+                DinoProject is a passion project run by a single developer. <strong className="text-amber-300">All donations 
+                are voluntary</strong> and are used to improve and maintain the platform.
+              </p>
+              <p className="mb-3">Donations help cover:</p>
+              <ul className="list-disc list-inside space-y-1 ml-2 sm:ml-4 mb-3">
+                <li><strong>Hosting costs:</strong> Vercel, Render, and database services</li>
+                <li><strong>Third-party services:</strong> AI API costs (Hugging Face), premium Supabase features</li>
+                <li><strong>Development tools:</strong> Software licenses and resources</li>
+                <li><strong>3D models & content:</strong> Purchasing or licensing dinosaur assets</li>
+                <li><strong>Future improvements:</strong> New features, better servers, more dinosaurs!</li>
+              </ul>
+              <p className="text-amber-300 text-sm">
+                <CreditCard className="inline w-4 h-4 mr-1" />
+                Donations are processed securely via PayPal. We never see your card details.
+                Donations are non-refundable unless required by law.
+              </p>
+            </section>
+
             {/* Information We Collect */}
             <section>
               <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
@@ -50,7 +98,7 @@ export default function Privacy() {
                 <li><strong>Quiz Results:</strong> Your scores and progress on dinosaur quizzes</li>
                 <li><strong>Favorites:</strong> Dinosaurs you save to your favorites list</li>
                 <li><strong>Forum Posts:</strong> Content you post in our community forum</li>
-                <li><strong>Payment Information:</strong> Processed securely through third-party payment providers</li>
+                <li><strong>Donation Records:</strong> Transaction IDs for premium activation (no card details)</li>
               </ul>
             </section>
 
@@ -76,7 +124,7 @@ export default function Privacy() {
               <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3">How We Use Your Information</h2>
               <ul className="list-disc list-inside space-y-1 sm:space-y-2 ml-2 sm:ml-4">
                 <li>Provide, maintain, and improve our services</li>
-                <li>Process your subscriptions and payments</li>
+                <li>Process your subscriptions and donations</li>
                 <li>Send you updates about your account and our services</li>
                 <li>Respond to your comments and questions</li>
                 <li>Monitor and analyze usage trends</li>
@@ -89,7 +137,7 @@ export default function Privacy() {
               <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3">Information Sharing</h2>
               <p className="mb-2 sm:mb-3">We do not sell your personal information. We may share data with:</p>
               <ul className="list-disc list-inside space-y-1 sm:space-y-2 ml-2 sm:ml-4">
-                <li><strong>Service Providers:</strong> Companies that help us operate (hosting, payment processing)</li>
+                <li><strong>Service Providers:</strong> Companies that help us operate (Supabase, Vercel, Render, PayPal)</li>
                 <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
                 <li><strong>Business Transfers:</strong> In connection with any merger or acquisition</li>
               </ul>
@@ -112,8 +160,9 @@ export default function Privacy() {
             <section>
               <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3">Data Security</h2>
               <p>
-                We implement appropriate security measures to protect your personal information. However, 
-                no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.
+                We implement appropriate security measures to protect your personal information through our 
+                trusted third-party providers. All data is encrypted in transit (SSL/TLS) and at rest. 
+                However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.
               </p>
             </section>
 
@@ -127,13 +176,24 @@ export default function Privacy() {
               </p>
             </section>
 
+            {/* Disclaimer */}
+            <section className="bg-gray-700/50 rounded-lg p-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3">Disclaimer</h2>
+              <p className="text-gray-400">
+                DinoProject is an independent educational project and is not affiliated with any museum, 
+                scientific institution, or entertainment company. All dinosaur information is sourced from 
+                public educational resources and may not reflect the latest scientific discoveries. 
+                The service is provided "as is" without warranties of any kind.
+              </p>
+            </section>
+
             {/* Contact */}
             <section>
               <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3 flex items-center gap-2">
                 <Mail className="w-4 sm:w-5 h-4 sm:h-5 text-green-500" /> Contact Us
               </h2>
               <p>
-                If you have questions about this Privacy Policy or your data, please contact us at:{" "}
+                If you have questions about this Privacy Policy, your data, or donations, please contact us at:{" "}
                 <a href="mailto:dinoprojectoriginal@gmail.com" className="text-green-400 hover:underline">
                   dinoprojectoriginal@gmail.com
                 </a>
