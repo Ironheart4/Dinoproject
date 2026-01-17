@@ -1,3 +1,6 @@
+// scripts/seed.ts — seeds the database with sample dinosaurs and a quiz
+// Purpose: populate the database for local development or for quick testing on a fresh DB
+// Note: Users are managed by Supabase Auth. To create users use Supabase Dashboard or the Auth endpoints
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";

@@ -1,3 +1,13 @@
+// server.ts — DinoProject backend HTTP server
+// Purpose: Provides the REST API for DinoProject and integrates:
+//  - Supabase Auth (JWT verification)
+//  - PostgreSQL via Prisma (PrismaPg adapter + pg Pool)
+//  - File uploads (multer) and static uploads serving
+//  - Security (helmet, CORS), logging (morgan), and rate limiting
+// Quick tips:
+//  - Set SUPABASE_URL and SUPABASE_ANON_KEY in environment variables
+//  - Set DATABASE_URL to your Postgres connection string (e.g., Supabase)
+//  - Configure ALLOWED_ORIGINS to include your frontend domain(s) (Vercel URL)
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -16,22 +26,28 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Supabase client setup
+// - SUPABASE_URL: your Supabase project URL (from Supabase dashboard)
+// - SUPABASE_ANON_KEY: public anon key used for client-side auth; do NOT publish service_role keys
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Prisma 7 adapter setup
+// - DATABASE_URL must point to your Postgres server (e.g., Supabase connection string)
+// - Uses a pg.Pool and PrismaPg adapter to avoid connection storms in serverless environments
 const connectionString = process.env.DATABASE_URL!;
 const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 // Handle pool errors
+// If you see this logged repeatedly, it often indicates the DB is unreachable or credentials are invalid
 pool.on('error', (err) => {
   console.error('Unexpected pool error:', err);
 });
 
-// Handle uncaught exceptions
+// Handle uncaught exceptions and unhandled promise rejections
+// These handlers ensure unexpected runtime errors are logged for post-mortem debugging
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
 });
@@ -41,6 +57,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // Rate limiting - prevent brute force attacks
+// Configure using env vars: RATE_LIMIT_WINDOW_MS and RATE_LIMIT_MAX_REQUESTS
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"), // 15 minutes
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "100"), // limit each IP to 100 requests per windowMs
@@ -50,6 +67,7 @@ const limiter = rateLimit({
 });
 
 // Stricter rate limit for auth endpoints
+// This keeps login/register attempts low to reduce credential stuffing and brute force
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // limit each IP to 10 login/register attempts per windowMs
@@ -57,6 +75,7 @@ const authLimiter = rateLimit({
 });
 
 // CORS configuration - restrict origins in production
+// Set ALLOWED_ORIGINS to a comma-separated list of allowed frontend domains (e.g., https://dinoproject.vercel.app)
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
   'http://localhost:5173',
   'http://localhost:5174',
@@ -78,6 +97,7 @@ app.use(cors({
 }));
 
 // Security headers
+// Content Security Policy is deliberately permissive for fonts, images, and Supabase connections
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -92,16 +112,20 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false, // Allow loading 3D models
 }));
 
+// HTTP request logging (dev vs production) and request body parsing
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: "10mb" }));
 app.use(limiter); // Apply rate limiting to all routes
 
 // Serve uploaded files statically
+// Uploaded files (e.g., profile pictures) are saved in the /uploads folder and served from /uploads
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 app.use("/uploads", express.static(uploadsDir));
 
 // Multer configuration for profile picture uploads
+// - Saves files to /uploads with a unique filename
+// - Limits file size to 5MB and only accepts common image types
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadsDir),
   filename: (_req, file, cb) => {
@@ -122,6 +146,11 @@ const upload = multer({
 });
 
 // Auth middleware: verify Supabase JWT from Authorization header
+// Steps:
+// 1. Read Bearer token from Authorization header
+// 2. Verify token with Supabase; if invalid, reject request
+// 3. Ensure the user exists in the local 'users' table (create if missing)
+// 4. Attach `req.user` with id, name, role and email for downstream handlers
 async function authMiddleware(req: any, res: any, next: any) {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ error: "No token provided" });
@@ -162,12 +191,14 @@ async function authMiddleware(req: any, res: any, next: any) {
 }
 
 // Admin middleware: check if user is admin
+// Expects `req.user` to be populated by `authMiddleware` and contains `role`
 function adminMiddleware(req: any, res: any, next: any) {
   if (req.user?.role !== "admin") return res.status(403).json({ error: "Admin only" });
   next();
 }
 
 // Health check: verifies Prisma can reach the database
+// Used by hosting services (Render, health probes) to confirm the backend is healthy
 app.get("/health", async (_req, res) => {
   try {
     // simple lightweight check
@@ -1887,6 +1918,8 @@ async function getLocalDinoResponse(message: string): Promise<string> {
   return "🦕 Great question! I'm DinoBot, your dinosaur expert. I can tell you about:\n• Specific dinosaurs (T-Rex, Velociraptor, etc.)\n• Dinosaur diets and sizes\n• Time periods and extinction\n• Fossils and discoveries\n\nWhat would you like to know?";
 }
 
+// Start the HTTP server
+// Note: In production the service will bind to the port in process.env.PORT (Render/containers)
 const server = app.listen(PORT, () => {
   console.log(`\n🚀 Server running at http://localhost:${PORT}`);
   console.log(`📡 GET  → http://localhost:${PORT}/api/dinosaurs`);
