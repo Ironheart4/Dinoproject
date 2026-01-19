@@ -3,6 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// scripts/seed.ts — seeds the database with sample dinosaurs and a quiz
+// Purpose: populate the database for local development or for quick testing on a fresh DB
+// Note: Users are managed by Supabase Auth. To create users use Supabase Dashboard or the Auth endpoints
 const client_1 = require("@prisma/client");
 const adapter_pg_1 = require("@prisma/adapter-pg");
 const pg_1 = __importDefault(require("pg"));

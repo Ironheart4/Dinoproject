@@ -3,6 +3,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// server.ts — DinoProject backend HTTP server
+// Purpose: Provides the REST API for DinoProject and integrates:
+//  - Supabase Auth (JWT verification)
+//  - PostgreSQL via Prisma (PrismaPg adapter + pg Pool)
+//  - File uploads (multer) and static uploads serving
+//  - Security (helmet, CORS), logging (morgan), and rate limiting
+// Quick tips:
+//  - Set SUPABASE_URL and SUPABASE_ANON_KEY in environment variables
+//  - Set DATABASE_URL to your Postgres connection string (e.g., Supabase)
+//  - Configure ALLOWED_ORIGINS to include your frontend domain(s) (Vercel URL)
 require("dotenv/config");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
@@ -16,22 +26,31 @@ const supabase_js_1 = require("@supabase/supabase-js");
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
+const dns_1 = __importDefault(require("dns"));
+// Force IPv4 DNS resolution to avoid IPv6 ENETUNREACH errors on networks without IPv6 support
+dns_1.default.setDefaultResultOrder("ipv4first");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 // Supabase client setup
+// - SUPABASE_URL: your Supabase project URL (from Supabase dashboard)
+// - SUPABASE_ANON_KEY: public anon key used for client-side auth; do NOT publish service_role keys
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 const supabase = (0, supabase_js_1.createClient)(supabaseUrl, supabaseAnonKey);
 // Prisma 7 adapter setup
+// - DATABASE_URL must point to your Postgres server (e.g., Supabase connection string)
+// - Uses a pg.Pool and PrismaPg adapter to avoid connection storms in serverless environments
 const connectionString = process.env.DATABASE_URL;
 const pool = new pg_1.Pool({ connectionString });
 const adapter = new adapter_pg_1.PrismaPg(pool);
 const prisma = new client_1.PrismaClient({ adapter });
 // Handle pool errors
+// If you see this logged repeatedly, it often indicates the DB is unreachable or credentials are invalid
 pool.on('error', (err) => {
     console.error('Unexpected pool error:', err);
 });
-// Handle uncaught exceptions
+// Handle uncaught exceptions and unhandled promise rejections
+// These handlers ensure unexpected runtime errors are logged for post-mortem debugging
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
 });
@@ -39,6 +58,7 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 // Rate limiting - prevent brute force attacks
+// Configure using env vars: RATE_LIMIT_WINDOW_MS and RATE_LIMIT_MAX_REQUESTS
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"), // 15 minutes
     max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "100"), // limit each IP to 100 requests per windowMs
@@ -47,22 +67,70 @@ const limiter = (0, express_rate_limit_1.default)({
     legacyHeaders: false,
 });
 // Stricter rate limit for auth endpoints
+// This keeps login/register attempts low to reduce credential stuffing and brute force
 const authLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 10, // limit each IP to 10 login/register attempts per windowMs
     message: { error: "Too many authentication attempts, please try again later." },
 });
-app.use((0, cors_1.default)());
-app.use((0, helmet_1.default)());
-app.use((0, morgan_1.default)("dev")); // Request logging
+// CORS configuration - restrict origins in production
+// Set ALLOWED_ORIGINS to a comma-separated list of allowed frontend domains (e.g., https://dinoproject.vercel.app)
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000',
+];
+app.use((0, cors_1.default)({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, etc.)
+        if (!origin)
+            return callback(null, true);
+        // Allow if origin is in the explicit list
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        // Allow Vercel preview/production URLs
+        if (origin.includes('vercel.app') || origin.includes('dinoproject')) {
+            return callback(null, true);
+        }
+        // Allow in development mode
+        if (process.env.NODE_ENV === 'development') {
+            return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+// Security headers
+// Content Security Policy is deliberately permissive for fonts, images, and Supabase connections
+app.use((0, helmet_1.default)({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "https:", "blob:"],
+            scriptSrc: ["'self'"],
+            connectSrc: ["'self'", "https://*.supabase.co"],
+        },
+    },
+    crossOriginEmbedderPolicy: false, // Allow loading 3D models
+}));
+// HTTP request logging (dev vs production) and request body parsing
+app.use((0, morgan_1.default)(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express_1.default.json({ limit: "10mb" }));
 app.use(limiter); // Apply rate limiting to all routes
 // Serve uploaded files statically
+// Uploaded files (e.g., profile pictures) are saved in the /uploads folder and served from /uploads
 const uploadsDir = path_1.default.join(__dirname, "uploads");
 if (!fs_1.default.existsSync(uploadsDir))
     fs_1.default.mkdirSync(uploadsDir, { recursive: true });
 app.use("/uploads", express_1.default.static(uploadsDir));
 // Multer configuration for profile picture uploads
+// - Saves files to /uploads with a unique filename
+// - Limits file size to 5MB and only accepts common image types
 const storage = multer_1.default.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadsDir),
     filename: (_req, file, cb) => {
@@ -84,6 +152,11 @@ const upload = (0, multer_1.default)({
     },
 });
 // Auth middleware: verify Supabase JWT from Authorization header
+// Steps:
+// 1. Read Bearer token from Authorization header
+// 2. Verify token with Supabase; if invalid, reject request
+// 3. Ensure the user exists in the local 'users' table (create if missing)
+// 4. Attach `req.user` with id, name, role and email for downstream handlers
 async function authMiddleware(req, res, next) {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token)
@@ -120,12 +193,14 @@ async function authMiddleware(req, res, next) {
     }
 }
 // Admin middleware: check if user is admin
+// Expects `req.user` to be populated by `authMiddleware` and contains `role`
 function adminMiddleware(req, res, next) {
     if (req.user?.role !== "admin")
         return res.status(403).json({ error: "Admin only" });
     next();
 }
 // Health check: verifies Prisma can reach the database
+// Used by hosting services (Render, health probes) to confirm the backend is healthy
 app.get("/health", async (_req, res) => {
     try {
         // simple lightweight check
@@ -705,6 +780,153 @@ app.get("/api/analytics", authMiddleware, adminMiddleware, async (_req, res) => 
     catch (error) {
         console.error("Fetch analytics error:", error);
         res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+});
+// ==================== FORUM ENDPOINTS ====================
+// Get all forum categories
+app.get("/api/forum/categories", async (_req, res) => {
+    try {
+        const categories = await prisma.forumCategory.findMany({
+            include: {
+                _count: { select: { posts: true } }
+            },
+            orderBy: { name: "asc" }
+        });
+        res.json(categories);
+    }
+    catch (error) {
+        console.error("Fetch categories error:", error);
+        res.status(500).json({ error: "Failed to fetch categories" });
+    }
+});
+// Get recent forum posts
+app.get("/api/forum/posts/recent", async (_req, res) => {
+    try {
+        const posts = await prisma.forumPost.findMany({
+            take: 10,
+            orderBy: { createdAt: "desc" },
+            include: {
+                user: { select: { id: true, name: true, role: true } },
+                category: { select: { id: true, name: true, slug: true } },
+                _count: { select: { replies: true } }
+            }
+        });
+        res.json(posts);
+    }
+    catch (error) {
+        console.error("Fetch recent posts error:", error);
+        res.status(500).json({ error: "Failed to fetch recent posts" });
+    }
+});
+// Get posts by category
+app.get("/api/forum/category/:slug", async (req, res) => {
+    try {
+        const category = await prisma.forumCategory.findUnique({
+            where: { slug: req.params.slug },
+            include: {
+                posts: {
+                    orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
+                    include: {
+                        user: { select: { id: true, name: true, role: true } },
+                        _count: { select: { replies: true } }
+                    }
+                }
+            }
+        });
+        if (!category)
+            return res.status(404).json({ error: "Category not found" });
+        res.json(category);
+    }
+    catch (error) {
+        console.error("Fetch category posts error:", error);
+        res.status(500).json({ error: "Failed to fetch category" });
+    }
+});
+// Get single post with replies
+app.get("/api/forum/post/:id", async (req, res) => {
+    try {
+        const postId = parseInt(req.params.id);
+        // Increment view count
+        await prisma.forumPost.update({
+            where: { id: postId },
+            data: { viewCount: { increment: 1 } }
+        });
+        const post = await prisma.forumPost.findUnique({
+            where: { id: postId },
+            include: {
+                user: { select: { id: true, name: true, role: true } },
+                category: { select: { id: true, name: true, slug: true } },
+                replies: {
+                    orderBy: { createdAt: "asc" },
+                    include: {
+                        user: { select: { id: true, name: true, role: true } }
+                    }
+                }
+            }
+        });
+        if (!post)
+            return res.status(404).json({ error: "Post not found" });
+        res.json(post);
+    }
+    catch (error) {
+        console.error("Fetch post error:", error);
+        res.status(500).json({ error: "Failed to fetch post" });
+    }
+});
+// Create a new post (requires auth)
+app.post("/api/forum/posts", authMiddleware, async (req, res) => {
+    try {
+        const { categoryId, title, content } = req.body;
+        if (!categoryId || !title || !content) {
+            return res.status(400).json({ error: "categoryId, title, and content are required" });
+        }
+        const post = await prisma.forumPost.create({
+            data: {
+                categoryId: parseInt(categoryId),
+                userId: req.user.id,
+                title,
+                content
+            },
+            include: {
+                user: { select: { id: true, name: true, role: true } },
+                category: { select: { id: true, name: true, slug: true } }
+            }
+        });
+        res.status(201).json(post);
+    }
+    catch (error) {
+        console.error("Create post error:", error);
+        res.status(500).json({ error: "Failed to create post" });
+    }
+});
+// Create a reply (requires auth)
+app.post("/api/forum/posts/:id/replies", authMiddleware, async (req, res) => {
+    try {
+        const postId = parseInt(req.params.id);
+        const { content } = req.body;
+        if (!content) {
+            return res.status(400).json({ error: "Content is required" });
+        }
+        const reply = await prisma.forumReply.create({
+            data: {
+                postId,
+                userId: req.user.id,
+                content
+            },
+            include: {
+                user: { select: { id: true, name: true, role: true } }
+            }
+        });
+        // Update reply count
+        await prisma.forumPost.update({
+            where: { id: postId },
+            data: { replyCount: { increment: 1 } }
+        });
+        res.status(201).json(reply);
+    }
+    catch (error) {
+        console.error("Create reply error:", error);
+        res.status(500).json({ error: "Failed to create reply" });
     }
 });
 // SUBSCRIPTIONS ENDPOINTS
@@ -1302,6 +1524,8 @@ app.get("/api/paypal/client-id", (_req, res) => {
     res.json({ clientId: PAYPAL_CLIENT_ID });
 });
 // ==================== AI DINO ASSISTANT (Hugging Face) ====================
+// Hugging Face config: set HUGGINGFACE_API_KEY to enable the AI DinoBot.
+// If the key is missing or the model is overloaded, the AI endpoint will gracefully fallback to `getLocalDinoResponse`.
 const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 const HF_MODEL_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base";
 // Simple in-memory cache for repeated questions (lightweight)
@@ -1333,25 +1557,30 @@ app.post("/api/ai/chat", authMiddleware, async (req, res) => {
     try {
         const { message } = req.body;
         const userId = req.user?.id;
+        const userRole = req.user?.role;
         if (!message) {
             return res.status(400).json({ error: "Message is required" });
         }
         if (!userId) {
             return res.status(401).json({ error: "Authentication required" });
         }
-        // Check if user is Premium or Donor
-        const subscription = await prisma.subscription.findFirst({
-            where: {
-                userId,
-                status: "active",
-                plan: { in: ["premium", "donor"] },
-            },
-        });
-        if (!subscription) {
-            return res.status(403).json({
-                error: "Premium required",
-                message: "AI Assistant is available for Premium and Donor members only. Upgrade to access DinoBot!"
+        // Admins always have access
+        const isAdmin = userRole === "admin";
+        // Check if user is Premium or Donor (skip for admins)
+        if (!isAdmin) {
+            const subscription = await prisma.subscription.findFirst({
+                where: {
+                    userId,
+                    status: "active",
+                    plan: { in: ["premium", "donor"] },
+                },
             });
+            if (!subscription) {
+                return res.status(403).json({
+                    error: "Premium required",
+                    message: "AI Assistant is available for Premium and Donor members only. Upgrade to access DinoBot!"
+                });
+            }
         }
         // Check cache first
         const cacheKey = normalizeQuestion(message);
@@ -1486,6 +1715,8 @@ function formatDinoResponse(aiResponse, originalQuestion) {
     return response;
 }
 // Local fallback responses for dinosaur FAQs
+// Local fallback for AI — uses the database to build short, helpful FAQ-style replies
+// This runs when the external model is unavailable or returns empty/short responses
 async function getLocalDinoResponse(message) {
     const msg = message.toLowerCase();
     // Try to find relevant dinosaur from database
@@ -1535,6 +1766,8 @@ async function getLocalDinoResponse(message) {
     // Default response
     return "🦕 Great question! I'm DinoBot, your dinosaur expert. I can tell you about:\n• Specific dinosaurs (T-Rex, Velociraptor, etc.)\n• Dinosaur diets and sizes\n• Time periods and extinction\n• Fossils and discoveries\n\nWhat would you like to know?";
 }
+// Start the HTTP server
+// Note: In production the service will bind to the port in process.env.PORT (Render/containers)
 const server = app.listen(PORT, () => {
     console.log(`\n🚀 Server running at http://localhost:${PORT}`);
     console.log(`📡 GET  → http://localhost:${PORT}/api/dinosaurs`);
