@@ -25,6 +25,7 @@ import { createClient } from "@supabase/supabase-js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { lookup } from "dns/promises";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,11 +37,23 @@ const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Prisma 7 adapter setup
+// Prisma 7 adapter setup with IPv4 forced DNS lookup
 // - DATABASE_URL must point to your Postgres server (e.g., Supabase connection string)
 // - Uses a pg.Pool and PrismaPg adapter to avoid connection storms in serverless environments
+// - Custom lookup function forces IPv4 resolution to avoid ENETUNREACH on IPv6-only networks
 const connectionString = process.env.DATABASE_URL!;
-const pool = new Pool({ connectionString });
+const pool = new Pool({ 
+  connectionString,
+  // Force IPv4 DNS resolution for database connections
+  lookup: async (hostname, options, callback) => {
+    try {
+      const result = await lookup(hostname, { family: 4 });
+      callback(null, result.address, 4);
+    } catch (err: any) {
+      callback(err, '', 4);
+    }
+  }
+});
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
