@@ -55,8 +55,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(session.access_token)
       
       // Fetch user data from our backend
+      const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
       try {
-        const res = await fetch('http://localhost:5000/api/auth/me', {
+        const res = await fetch(`${API}/api/auth/me`, {
           headers: { 'Authorization': `Bearer ${session.access_token}` }
         })
         if (res.ok) {
@@ -144,8 +145,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Create user in our database via backend
+      const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
       try {
-        await fetch('http://localhost:5000/api/auth/register', {
+        await fetch(`${API}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password }),

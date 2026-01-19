@@ -1,11 +1,10 @@
 // api.ts — Simple network helper for communicating with the backend API
 // Notes:
 // - In development this uses http://localhost:5000
-// - In production, set `VITE_API_URL` in Vercel (or your host) and replace BASE accordingly
-//   e.g., const BASE = import.meta.env.VITE_API_URL || 'https://your-render-url.onrender.com'
+// - In production, set `VITE_API_URL` in Vercel to your Render URL
 // - All requests include a JSON content type and optional Bearer token when present
-// BASE URL for API calls: replace with `import.meta.env.VITE_API_URL` in production
-const BASE = 'http://localhost:5000'
+// BASE URL for API calls - uses environment variable in production
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 function getHeaders(token?: string) {
   return {

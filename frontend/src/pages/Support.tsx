@@ -45,7 +45,8 @@ export default function Support() {
   useEffect(() => {
     // Check if user has premium
     if (token) {
-      fetch('http://localhost:5000/api/subscription', {
+      const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+      fetch(`${API}/api/subscription`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => res.json())

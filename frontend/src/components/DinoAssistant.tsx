@@ -39,9 +39,9 @@ export default function DinoAssistant() {
       return;
     }
     
+    const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     if (user && token) {
-      // NOTE: Replace hardcoded URL with `import.meta.env.VITE_API_URL` in production to point to Render/production API
-      fetch("http://localhost:5000/api/subscription", {
+      fetch(`${API}/api/subscription`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
@@ -97,8 +97,8 @@ export default function DinoAssistant() {
     setModelLoading(false);
 
     try {
-      // NOTE: Use `import.meta.env.VITE_API_URL` in production (Vercel) instead of hardcoded localhost
-      const response = await fetch("http://localhost:5000/api/ai/chat", {
+      const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${API}/api/ai/chat`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
