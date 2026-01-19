@@ -1,6 +1,7 @@
 // server.ts — DinoProject backend HTTP server
 // CRITICAL: DNS fix must be FIRST before any imports to prevent IPv6 issues
 import dns from "dns";
+import { promisify } from "util";
 dns.setDefaultResultOrder("ipv4first");
 
 // Purpose: Provides the REST API for DinoProject and integrates:
@@ -36,20 +37,46 @@ const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Prisma 7 adapter setup
-// - DATABASE_URL must point to your Postgres server (e.g., Supabase connection string)
-// - Uses a pg.Pool and PrismaPg adapter to avoid connection storms in serverless environments
-// - dns.setDefaultResultOrder("ipv4first") at top of file forces IPv4 for all DNS lookups
-const connectionString = process.env.DATABASE_URL!;
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+// Helper to resolve hostname to IPv4 address
+const lookup4 = promisify(dns.lookup);
+async function resolveToIPv4(connectionString: string): Promise<string> {
+  try {
+    const url = new URL(connectionString);
+    const hostname = url.hostname;
+    // Resolve to IPv4 only
+    const result = await lookup4(hostname, { family: 4 });
+    const ipv4Address = typeof result === 'string' ? result : result.address;
+    // Replace hostname with IPv4 address in connection string
+    url.hostname = ipv4Address;
+    console.log(`Resolved ${hostname} to IPv4: ${ipv4Address}`);
+    return url.toString();
+  } catch (err) {
+    console.error('Failed to resolve hostname to IPv4, using original:', err);
+    return connectionString;
+  }
+}
 
-// Handle pool errors
-// If you see this logged repeatedly, it often indicates the DB is unreachable or credentials are invalid
-pool.on('error', (err) => {
-  console.error('Unexpected pool error:', err);
-});
+// Prisma and Pool will be initialized after IPv4 resolution
+let pool: Pool;
+let adapter: PrismaPg;
+let prisma: PrismaClient;
+
+// Initialize database connection with IPv4 resolution
+async function initDatabase() {
+  const originalConnectionString = process.env.DATABASE_URL!;
+  const connectionString = await resolveToIPv4(originalConnectionString);
+  
+  pool = new Pool({ connectionString });
+  adapter = new PrismaPg(pool);
+  prisma = new PrismaClient({ adapter });
+  
+  // Handle pool errors
+  pool.on('error', (err) => {
+    console.error('Unexpected pool error:', err);
+  });
+  
+  console.log('Database connection initialized');
+}
 
 // Handle uncaught exceptions and unhandled promise rejections
 // These handlers ensure unexpected runtime errors are logged for post-mortem debugging
@@ -1940,24 +1967,35 @@ async function getLocalDinoResponse(message: string): Promise<string> {
   return "🦕 Great question! I'm DinoBot, your dinosaur expert. I can tell you about:\n• Specific dinosaurs (T-Rex, Velociraptor, etc.)\n• Dinosaur diets and sizes\n• Time periods and extinction\n• Fossils and discoveries\n\nWhat would you like to know?";
 }
 
-// Start the HTTP server
+// Start the HTTP server after initializing database
 // Note: In production the service will bind to the port in process.env.PORT (Render/containers)
-const server = app.listen(PORT, () => {
-  console.log(`\n🚀 Server running at http://localhost:${PORT}`);
-  console.log(`📡 GET  → http://localhost:${PORT}/api/dinosaurs`);
-  console.log(`🦖 POST → http://localhost:${PORT}/api/dinosaurs\n`);
-});
+async function startServer() {
+  try {
+    await initDatabase();
+    
+    const server = app.listen(PORT, () => {
+      console.log(`\n🚀 Server running at http://localhost:${PORT}`);
+      console.log(`📡 GET  → http://localhost:${PORT}/api/dinosaurs`);
+      console.log(`🦖 POST → http://localhost:${PORT}/api/dinosaurs\n`);
+    });
 
-// Keep server alive
-server.on('close', () => {
-  console.log('Server closed');
-});
+    // Keep server alive
+    server.on('close', () => {
+      console.log('Server closed');
+    });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
-});
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received, shutting down gracefully');
+      server.close(() => {
+        pool.end();
+        process.exit(0);
+      });
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+}
+
+startServer();
