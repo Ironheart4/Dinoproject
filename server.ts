@@ -1,4 +1,8 @@
 // server.ts — DinoProject backend HTTP server
+// CRITICAL: DNS fix must be FIRST before any imports to prevent IPv6 issues
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
+
 // Purpose: Provides the REST API for DinoProject and integrates:
 //  - Supabase Auth (JWT verification)
 //  - PostgreSQL via Prisma (PrismaPg adapter + pg Pool)
@@ -21,10 +25,6 @@ import { createClient } from "@supabase/supabase-js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import dns from "dns";
-
-// Force IPv4 DNS resolution to avoid IPv6 ENETUNREACH errors on networks without IPv6 support
-dns.setDefaultResultOrder("ipv4first");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -210,15 +210,19 @@ function adminMiddleware(req: any, res: any, next: any) {
   next();
 }
 
-// Health check: verifies Prisma can reach the database
-// Used by hosting services (Render, health probes) to confirm the backend is healthy
+// Health check: simple endpoint for hosting services
+// Returns OK immediately - database connectivity is checked separately
 app.get("/health", async (_req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+// Database health check (separate endpoint for debugging)
+app.get("/health/db", async (_req, res) => {
   try {
-    // simple lightweight check
     await prisma.$queryRaw`SELECT 1`;
-    res.json({ status: "ok" });
+    res.json({ status: "ok", database: "connected" });
   } catch (err) {
-    console.error("Health check failed:", err);
+    console.error("Database health check failed:", err);
     res.status(503).json({ status: "error", detail: String(err) });
   }
 });
