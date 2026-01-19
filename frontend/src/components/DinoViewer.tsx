@@ -15,7 +15,7 @@ type Props = {
   className?: string;
   background?: string;
   autoRotate?: boolean;
-  height?: number;
+  height?: number | string; // allow percentage strings like '100%'
 };
 
 export default function DinoViewer({
@@ -51,7 +51,8 @@ export default function DinoViewer({
 
     // Ensure container has dimensions
     const width = container.clientWidth || 600;
-    const h = height || 400;
+    // If height is a number use it; if it's a string like '100%' use the container height
+    const h = typeof height === 'number' ? height : (container.clientHeight || 400);
 
     // Scene setup
     const scene = new THREE.Scene();
@@ -217,7 +218,7 @@ export default function DinoViewer({
       <div
         ref={mountRef}
         className="rounded-lg overflow-hidden bg-gray-900"
-        style={{ width: "100%", height }}
+        style={{ width: "100%", height: typeof height === 'number' ? `${height}px` : height }}
       />
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 rounded-lg">
