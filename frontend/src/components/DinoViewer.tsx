@@ -16,18 +16,14 @@ type Props = {
   background?: string;
   autoRotate?: boolean;
   height?: number | string; // allow percentage strings like '100%'
-  cameraY?: number; // vertical camera position
-  targetY?: number; // vertical target position for OrbitControls
 };
 
 export default function DinoViewer({
   url,
   className = "",
-  background = "#000000",
+  background = "#0b1220",
   autoRotate = true,
   height = 400,
-  cameraY = 1.5,
-  targetY = 0.8,
 }: Props) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -56,23 +52,18 @@ export default function DinoViewer({
     // Ensure container has dimensions
     const width = container.clientWidth || 600;
     // If height is a number use it; if it's a string like '100%' use the container height
-    let h = typeof height === 'number' ? height : (container.clientHeight || 400);
+    const h = typeof height === 'number' ? height : (container.clientHeight || 400);
 
     // Scene setup
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(background);
 
     const camera = new THREE.PerspectiveCamera(45, width / h, 0.1, 1000);
-    camera.position.set(0, cameraY, 4);
+    camera.position.set(0, 1.5, 4);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, h);
-    // Use device pixel ratio but clamp to avoid huge GPU cost on very high DPI
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.domElement.style.maxWidth = '100%';
-    renderer.domElement.style.width = '100%';
-    renderer.domElement.style.height = '100%';
-    renderer.domElement.style.display = 'block';
+    renderer.setPixelRatio(1); // Use 1 for better performance
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     rendererRef.current = renderer;
     container.appendChild(renderer.domElement);
@@ -96,7 +87,7 @@ export default function DinoViewer({
 
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, targetY, 0);
+    controls.target.set(0, 0.8, 0);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.autoRotate = autoRotate;
@@ -181,28 +172,15 @@ export default function DinoViewer({
     const handleResize = () => {
       if (!container) return;
       const w = container.clientWidth;
-      const newH = typeof height === 'number' ? height : (container.clientHeight || 400);
-      h = newH;
-      // Ensure renderer DOM element fills parent
-      renderer.domElement.style.width = `${w}px`;
-      renderer.domElement.style.height = `${newH}px`;
-      camera.aspect = w / newH;
+      camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      renderer.setSize(w, newH);
+      renderer.setSize(w, h);
     };
     window.addEventListener("resize", handleResize);
-
-    // Also observe container size changes in case parent layout changes (better for responsive)
-    const resizeObserver = new ResizeObserver(() => handleResize());
-    resizeObserver.observe(container);
-
-    // Initial resize to ensure filling parent
-    handleResize();
 
     // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize);
-      try { resizeObserver.disconnect(); } catch (e) {}
       cancelAnimationFrame(animationId);
       controls.dispose();
       renderer.dispose();
@@ -239,11 +217,11 @@ export default function DinoViewer({
     <div className={`${className} relative`}>
       <div
         ref={mountRef}
-        className="rounded-lg overflow-hidden bg-black"
+        className="rounded-lg overflow-hidden bg-gray-900"
         style={{ width: "100%", height: typeof height === 'number' ? `${height}px` : height }}
       />
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-lg">
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 rounded-lg">
           <div className="text-center">
             <Loader2 size={40} className="animate-spin text-green-400 mx-auto mb-2" />
             <p className="text-gray-400 text-sm">Loading 3D model...</p>
@@ -262,7 +240,7 @@ export default function DinoViewer({
         </div>
       )}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-lg">
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 rounded-lg">
           <div className="text-center text-red-400">
             <AlertTriangle size={40} className="mx-auto mb-2" />
             <p className="text-sm">{error}</p>
