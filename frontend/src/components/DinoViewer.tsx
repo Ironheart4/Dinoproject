@@ -59,12 +59,12 @@ export default function DinoViewer({
     scene.background = new THREE.Color(background);
 
     const camera = new THREE.PerspectiveCamera(45, width / h, 0.1, 1000);
-    // Move camera slightly closer so the model appears larger within the same canvas
-    camera.position.set(0, 1.5, 3.2);
+    camera.position.set(0, 1.5, 4);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, h);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(1); // Use 1 for better performance
+    // Ensure canvas fills parent element and scales responsively
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
     renderer.domElement.style.display = 'block';
@@ -96,19 +96,6 @@ export default function DinoViewer({
     controls.dampingFactor = 0.05;
     controls.autoRotate = autoRotate;
     controls.autoRotateSpeed = 1.5;
-
-    // Simple resize handling (window resize); keeps canvas responsive without ResizeObserver
-    const handleResize = () => {
-      if (!container) return;
-      const w = container.clientWidth;
-      const newH = typeof height === 'number' ? height : (container.clientHeight || 400);
-      camera.aspect = w / newH;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, newH);
-    };
-    window.addEventListener("resize", handleResize);
-    // initial size
-    handleResize();
 
     let mixer: THREE.AnimationMixer | null = null;
     const clock = new THREE.Clock();
@@ -144,14 +131,13 @@ export default function DinoViewer({
         box.getSize(size);
         const maxDim = Math.max(size.x, size.y, size.z);
         const scale = 2 / (maxDim || 1);
-        // Slightly increase the scale so the model appears larger in the same canvas
-        root.scale.setScalar(scale * 1.12);
+        root.scale.setScalar(scale);
 
         box.setFromObject(root);
         const center = new THREE.Vector3();
         box.getCenter(center);
         root.position.sub(center);
-        root.position.y -= box.min.y * scale * 1.12;
+        root.position.y -= box.min.y * scale;
 
         scene.add(root);
 
@@ -186,6 +172,15 @@ export default function DinoViewer({
     };
     animate();
 
+    // Resize handler
+    const handleResize = () => {
+      if (!container) return;
+      const w = container.clientWidth;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
+    window.addEventListener("resize", handleResize);
 
     // Cleanup
     return () => {
