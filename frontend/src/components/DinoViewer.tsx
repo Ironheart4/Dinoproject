@@ -59,7 +59,8 @@ export default function DinoViewer({
     scene.background = new THREE.Color(background);
 
     const camera = new THREE.PerspectiveCamera(45, width / h, 0.1, 1000);
-    camera.position.set(0, 1.5, 4);
+    // Move camera slightly closer so the model appears larger within the same canvas
+    camera.position.set(0, 1.5, 3.2);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, h);
@@ -143,13 +144,14 @@ export default function DinoViewer({
         box.getSize(size);
         const maxDim = Math.max(size.x, size.y, size.z);
         const scale = 2 / (maxDim || 1);
-        root.scale.setScalar(scale);
+        // Slightly increase the scale so the model appears larger in the same canvas
+        root.scale.setScalar(scale * 1.12);
 
         box.setFromObject(root);
         const center = new THREE.Vector3();
         box.getCenter(center);
         root.position.sub(center);
-        root.position.y -= box.min.y * scale;
+        root.position.y -= box.min.y * scale * 1.12;
 
         scene.add(root);
 
