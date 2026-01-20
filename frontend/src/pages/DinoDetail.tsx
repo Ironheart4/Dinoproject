@@ -194,13 +194,13 @@ export default function DinoDetail() {
           <div className="bg-gray-800 rounded-lg p-2 sm:p-3">
             <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">3D Model</h2>
             {canView3DModel ? (
-              <div className="w-full min-h-[420px] sm:min-h-[560px] lg:min-h-[700px] flex items-center justify-center overflow-hidden">
-                <div className="w-full h-full rounded-lg">
-                  <DinoViewer url={dino.modelUrl} height="100%" background="#000000" cameraY={2.2} targetY={0.5} />
+              <div className="w-full min-h-[520px] sm:min-h-[700px] lg:min-h-[900px] flex items-center justify-center overflow-hidden">
+                <div className="w-full h-full rounded-lg pt-2">
+                  <DinoViewer url={dino.modelUrl} height="100%" background="#000000" cameraY={2.8} targetY={0.9} />
                 </div>
               </div>
             ) : (
-              <div className="w-full min-h-[420px] sm:min-h-[560px] lg:min-h-[700px] flex flex-col items-center justify-center bg-gray-900 rounded-lg border-2 border-dashed border-gray-600 p-3">
+              <div className="w-full min-h-[520px] sm:min-h-[700px] lg:min-h-[900px] flex flex-col items-center justify-center bg-gray-900 rounded-lg border-2 border-dashed border-gray-600 p-3">
                 <Lock size={48} className="text-gray-500 mb-3 sm:mb-4" />
                 <h3 className="text-lg sm:text-xl font-bold text-white mb-2 text-center">3D Model Locked</h3>
                 <p className="text-gray-400 text-center max-w-md mb-4 text-sm sm:text-base px-4">

@@ -26,8 +26,9 @@ export default function DinoViewer({
   background = "#000000",
   autoRotate = true,
   height = 400,
-  cameraY = 1.5,
-  targetY = 0.8,
+  // Raised cameraY and slightly higher targetY to push the model lower in the frame
+  cameraY = 2.8,
+  targetY = 0.9,
 }: Props) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
