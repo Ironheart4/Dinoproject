@@ -16,6 +16,8 @@ type Props = {
   background?: string;
   autoRotate?: boolean;
   height?: number | string; // allow percentage strings like '100%'
+  cameraY?: number; // vertical camera position
+  targetY?: number; // vertical target position for OrbitControls
 };
 
 export default function DinoViewer({
@@ -24,6 +26,8 @@ export default function DinoViewer({
   background = "#000000",
   autoRotate = true,
   height = 400,
+  cameraY = 1.5,
+  targetY = 0.8,
 }: Props) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -59,7 +63,7 @@ export default function DinoViewer({
     scene.background = new THREE.Color(background);
 
     const camera = new THREE.PerspectiveCamera(45, width / h, 0.1, 1000);
-    camera.position.set(0, 1.5, 4);
+    camera.position.set(0, cameraY, 4);
 
     const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, h);
@@ -87,7 +91,7 @@ export default function DinoViewer({
 
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 0.8, 0);
+    controls.target.set(0, targetY, 0);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.autoRotate = autoRotate;
