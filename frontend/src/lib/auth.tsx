@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (session?.access_token && session?.user) {
       setToken(session.access_token)
       
-      // Fetch user data from our backend
+      // If Supabase session exists, try to load extended profile from backend (roles, subscription)
       const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
       try {
         const res = await fetch(`${API}/api/auth/me`, {

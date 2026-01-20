@@ -53,6 +53,8 @@ export default function DinoSound({ src, className = "", label = "Dinosaur Roar"
     // Try loading with src directly - crossOrigin can cause issues
     audio.src = src;
     audioRef.current = audio;
+    // Note: Some hosts require proper CORS headers for audio. If loading fails consider
+    // hosting via a CORS-enabled CDN or a server-side proxy to avoid `NetworkError` issues.
     
     // Log for debugging
     console.log('Loading audio from:', src);

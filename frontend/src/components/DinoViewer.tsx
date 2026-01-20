@@ -138,7 +138,9 @@ export default function DinoViewer({
         box.setFromObject(root);
         const center = new THREE.Vector3();
         box.getCenter(center);
+        // Center geometry on the origin so orbit controls rotate around model center
         root.position.sub(center);
+        // Align the model's lowest point to y=0 so it sits on the virtual ground plane
         root.position.y -= box.min.y * scale;
 
         scene.add(root);

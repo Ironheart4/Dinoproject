@@ -56,6 +56,9 @@ async function resolveToIPv4(connectionString: string): Promise<string> {
     return url.toString();
   } catch (err) {
     console.error('Failed to resolve hostname to IPv4, using original:', err);
+    // If DNS to IPv4 fails we fall back to the original connection string.
+    // This is safe because some hosts or poolers will handle resolution; the fallback
+    // helps avoid startup crashes while still preferring IPv4 when available.
     return connectionString;
   }
 }

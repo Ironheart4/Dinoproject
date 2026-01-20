@@ -6,6 +6,7 @@
 // BASE URL for API calls - uses environment variable in production
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
+// Build request headers. When a token is provided include a Bearer Authorization header.
 function getHeaders(token?: string) {
   return {
     'Content-Type': 'application/json',
