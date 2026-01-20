@@ -70,7 +70,9 @@ export default function DinoViewer({
     // Use device pixel ratio but clamp to avoid huge GPU cost on very high DPI
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.domElement.style.maxWidth = '100%';
-    renderer.domElement.style.height = 'auto';
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.display = 'block';
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     rendererRef.current = renderer;
     container.appendChild(renderer.domElement);
@@ -181,6 +183,9 @@ export default function DinoViewer({
       const w = container.clientWidth;
       const newH = typeof height === 'number' ? height : (container.clientHeight || 400);
       h = newH;
+      // Ensure renderer DOM element fills parent
+      renderer.domElement.style.width = `${w}px`;
+      renderer.domElement.style.height = `${newH}px`;
       camera.aspect = w / newH;
       camera.updateProjectionMatrix();
       renderer.setSize(w, newH);
@@ -190,6 +195,9 @@ export default function DinoViewer({
     // Also observe container size changes in case parent layout changes (better for responsive)
     const resizeObserver = new ResizeObserver(() => handleResize());
     resizeObserver.observe(container);
+
+    // Initial resize to ensure filling parent
+    handleResize();
 
     // Cleanup
     return () => {
