@@ -16,14 +16,18 @@ type Props = {
   background?: string;
   autoRotate?: boolean;
   height?: number | string; // allow percentage strings like '100%'
+  cameraY?: number; // vertical camera position
+  targetY?: number; // vertical target position for OrbitControls
 };
 
 export default function DinoViewer({
   url,
   className = "",
-  background = "#0b1220",
+  background = "#000000",
   autoRotate = true,
   height = 400,
+  cameraY = 1.5,
+  targetY = 0.8,
 }: Props) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -59,11 +63,14 @@ export default function DinoViewer({
     scene.background = new THREE.Color(background);
 
     const camera = new THREE.PerspectiveCamera(45, width / h, 0.1, 1000);
-    camera.position.set(0, 1.5, 4);
+    camera.position.set(0, cameraY, 4);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, h);
-    renderer.setPixelRatio(1); // Use 1 for better performance
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.display = 'block';
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     rendererRef.current = renderer;
     container.appendChild(renderer.domElement);
@@ -87,11 +94,25 @@ export default function DinoViewer({
 
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 0.8, 0);
+    controls.target.set(0, targetY, 0);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.autoRotate = autoRotate;
-    controls.autoRotateSpeed = 1.5;
+    controls.autoRotateSpeed = 1.5; // call a resize to ensure correct sizing
+
+    // Resize handling
+    const handleResize = () => {
+      if (!container) return;
+      const w = container.clientWidth;
+      const newH = typeof height === 'number' ? height : (container.clientHeight || 400);
+      camera.aspect = w / newH;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, newH);
+    };
+    window.addEventListener("resize", handleResize);
+    const resizeObserver = new ResizeObserver(() => handleResize());
+    resizeObserver.observe(container);
+    handleResize();
 
     let mixer: THREE.AnimationMixer | null = null;
     const clock = new THREE.Clock();
@@ -168,19 +189,11 @@ export default function DinoViewer({
     };
     animate();
 
-    // Resize handler
-    const handleResize = () => {
-      if (!container) return;
-      const w = container.clientWidth;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-    window.addEventListener("resize", handleResize);
 
     // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize);
+      try { resizeObserver.disconnect(); } catch (e) {}
       cancelAnimationFrame(animationId);
       controls.dispose();
       renderer.dispose();
@@ -200,7 +213,7 @@ export default function DinoViewer({
         }
       });
     };
-  }, [url, background, autoRotate, height]);
+  }, [url, background, autoRotate, height, cameraY, targetY]);
 
   if (!url || url === "DEV_PENDING") {
     return (
@@ -217,7 +230,7 @@ export default function DinoViewer({
     <div className={`${className} relative`}>
       <div
         ref={mountRef}
-        className="rounded-lg overflow-hidden bg-gray-900"
+        className="rounded-lg overflow-hidden bg-black"
         style={{ width: "100%", height: typeof height === 'number' ? `${height}px` : height }}
       />
       {loading && (
