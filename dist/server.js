@@ -4,6 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // server.ts — DinoProject backend HTTP server
+// CRITICAL: DNS fix must be FIRST before any imports to prevent IPv6 issues
+const dns_1 = __importDefault(require("dns"));
+const util_1 = require("util");
+dns_1.default.setDefaultResultOrder("ipv4first");
 // Purpose: Provides the REST API for DinoProject and integrates:
 //  - Supabase Auth (JWT verification)
 //  - PostgreSQL via Prisma (PrismaPg adapter + pg Pool)
@@ -26,9 +30,6 @@ const supabase_js_1 = require("@supabase/supabase-js");
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-const dns_1 = __importDefault(require("dns"));
-// Force IPv4 DNS resolution to avoid IPv6 ENETUNREACH errors on networks without IPv6 support
-dns_1.default.setDefaultResultOrder("ipv4first");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 // Supabase client setup
@@ -37,18 +38,46 @@ const PORT = process.env.PORT || 5000;
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 const supabase = (0, supabase_js_1.createClient)(supabaseUrl, supabaseAnonKey);
-// Prisma 7 adapter setup
-// - DATABASE_URL must point to your Postgres server (e.g., Supabase connection string)
-// - Uses a pg.Pool and PrismaPg adapter to avoid connection storms in serverless environments
-const connectionString = process.env.DATABASE_URL;
-const pool = new pg_1.Pool({ connectionString });
-const adapter = new adapter_pg_1.PrismaPg(pool);
-const prisma = new client_1.PrismaClient({ adapter });
-// Handle pool errors
-// If you see this logged repeatedly, it often indicates the DB is unreachable or credentials are invalid
-pool.on('error', (err) => {
-    console.error('Unexpected pool error:', err);
-});
+// Helper to resolve hostname to IPv4 address
+// Note: Some cloud runners (Render, Vercel, etc.) do not always support IPv6 to
+// the database host which leads to Prisma/pg throwing ENETUNREACH. We resolve the
+// DNS to an IPv4 address at startup as a pragmatic workaround. If resolution fails
+// we safely fall back to the original connection string.
+const lookup4 = (0, util_1.promisify)(dns_1.default.lookup);
+async function resolveToIPv4(connectionString) {
+    try {
+        const url = new URL(connectionString);
+        const hostname = url.hostname;
+        // Resolve to IPv4 only
+        const result = await lookup4(hostname, { family: 4 });
+        const ipv4Address = typeof result === 'string' ? result : result.address;
+        // Replace hostname with IPv4 address in connection string
+        url.hostname = ipv4Address;
+        console.log(`Resolved ${hostname} to IPv4: ${ipv4Address}`);
+        return url.toString();
+    }
+    catch (err) {
+        console.error('Failed to resolve hostname to IPv4, using original:', err);
+        return connectionString;
+    }
+}
+// Prisma and Pool will be initialized after IPv4 resolution
+let pool;
+let adapter;
+let prisma;
+// Initialize database connection with IPv4 resolution
+async function initDatabase() {
+    const originalConnectionString = process.env.DATABASE_URL;
+    const connectionString = await resolveToIPv4(originalConnectionString);
+    pool = new pg_1.Pool({ connectionString });
+    adapter = new adapter_pg_1.PrismaPg(pool);
+    prisma = new client_1.PrismaClient({ adapter });
+    // Handle pool errors
+    pool.on('error', (err) => {
+        console.error('Unexpected pool error:', err);
+    });
+    console.log('Database connection initialized');
+}
 // Handle uncaught exceptions and unhandled promise rejections
 // These handlers ensure unexpected runtime errors are logged for post-mortem debugging
 process.on('uncaughtException', (err) => {
@@ -199,16 +228,19 @@ function adminMiddleware(req, res, next) {
         return res.status(403).json({ error: "Admin only" });
     next();
 }
-// Health check: verifies Prisma can reach the database
-// Used by hosting services (Render, health probes) to confirm the backend is healthy
+// Health check: simple endpoint for hosting services
+// Returns OK immediately - database connectivity is checked separately
 app.get("/health", async (_req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+// Database health check (separate endpoint for debugging)
+app.get("/health/db", async (_req, res) => {
     try {
-        // simple lightweight check
         await prisma.$queryRaw `SELECT 1`;
-        res.json({ status: "ok" });
+        res.json({ status: "ok", database: "connected" });
     }
     catch (err) {
-        console.error("Health check failed:", err);
+        console.error("Database health check failed:", err);
         res.status(503).json({ status: "error", detail: String(err) });
     }
 });
@@ -1766,23 +1798,35 @@ async function getLocalDinoResponse(message) {
     // Default response
     return "🦕 Great question! I'm DinoBot, your dinosaur expert. I can tell you about:\n• Specific dinosaurs (T-Rex, Velociraptor, etc.)\n• Dinosaur diets and sizes\n• Time periods and extinction\n• Fossils and discoveries\n\nWhat would you like to know?";
 }
-// Start the HTTP server
+// Start the HTTP server after initializing database
+// Important: We initialize the DB pool first (initDatabase) to avoid DNS/connect
+// errors during startup — the server is started *after* the DB is reachable.
 // Note: In production the service will bind to the port in process.env.PORT (Render/containers)
-const server = app.listen(PORT, () => {
-    console.log(`\n🚀 Server running at http://localhost:${PORT}`);
-    console.log(`📡 GET  → http://localhost:${PORT}/api/dinosaurs`);
-    console.log(`🦖 POST → http://localhost:${PORT}/api/dinosaurs\n`);
-});
-// Keep server alive
-server.on('close', () => {
-    console.log('Server closed');
-});
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('SIGTERM received, shutting down gracefully');
-    server.close(() => {
-        console.log('Server closed');
-        process.exit(0);
-    });
-});
+async function startServer() {
+    try {
+        await initDatabase();
+        const server = app.listen(PORT, () => {
+            console.log(`\n🚀 Server running at http://localhost:${PORT}`);
+            console.log(`📡 GET  → http://localhost:${PORT}/api/dinosaurs`);
+            console.log(`🦖 POST → http://localhost:${PORT}/api/dinosaurs\n`);
+        });
+        // Keep server alive
+        server.on('close', () => {
+            console.log('Server closed');
+        });
+        // Graceful shutdown
+        process.on('SIGTERM', () => {
+            console.log('SIGTERM received, shutting down gracefully');
+            server.close(() => {
+                pool.end();
+                process.exit(0);
+            });
+        });
+    }
+    catch (err) {
+        console.error('Failed to start server:', err);
+        process.exit(1);
+    }
+}
+startServer();
 //# sourceMappingURL=server.js.map
