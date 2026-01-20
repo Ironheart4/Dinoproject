@@ -56,12 +56,14 @@ export default function DinoViewer({
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(background);
+    scene.background = new THREE.Color(background); // default background is black for contrast
 
     const camera = new THREE.PerspectiveCamera(45, width / h, 0.1, 1000);
     camera.position.set(0, 1.5, 4);
 
     const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
+    // The canvas is styled to fill its parent and a simple window resize handler updates
+    // the renderer size. This avoids more complex observers and keeps behavior stable.
     renderer.setSize(width, h);
     renderer.setPixelRatio(1); // Use 1 for better performance
     // Ensure canvas fills parent element and scales responsively

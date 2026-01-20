@@ -1,3 +1,6 @@
+// prisma/schema.prisma — Database schema for DinoProject
+// Purpose: Defines the database models used by the backend (users, dinosaurs, quizzes, etc.)
+// Note: Authentication users are managed in Supabase auth.users; `User.id` maps to that UUID
 generator client {
   provider = "prisma-client-js"
 }

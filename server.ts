@@ -38,6 +38,10 @@ const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Helper to resolve hostname to IPv4 address
+// Note: Some cloud runners (Render, Vercel, etc.) do not always support IPv6 to
+// the database host which leads to Prisma/pg throwing ENETUNREACH. We resolve the
+// DNS to an IPv4 address at startup as a pragmatic workaround. If resolution fails
+// we safely fall back to the original connection string.
 const lookup4 = promisify(dns.lookup);
 async function resolveToIPv4(connectionString: string): Promise<string> {
   try {
@@ -1968,6 +1972,8 @@ async function getLocalDinoResponse(message: string): Promise<string> {
 }
 
 // Start the HTTP server after initializing database
+// Important: We initialize the DB pool first (initDatabase) to avoid DNS/connect
+// errors during startup — the server is started *after* the DB is reachable.
 // Note: In production the service will bind to the port in process.env.PORT (Render/containers)
 async function startServer() {
   try {
