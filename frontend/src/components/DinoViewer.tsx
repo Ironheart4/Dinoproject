@@ -21,7 +21,7 @@ type Props = {
 export default function DinoViewer({
   url,
   className = "",
-  background = "#0b1220",
+  background = "#000000",
   autoRotate = true,
   height = 400,
 }: Props) {
@@ -217,11 +217,11 @@ export default function DinoViewer({
     <div className={`${className} relative`}>
       <div
         ref={mountRef}
-        className="rounded-lg overflow-hidden bg-gray-900"
+        className="rounded-lg overflow-hidden bg-black"
         style={{ width: "100%", height: typeof height === 'number' ? `${height}px` : height }}
       />
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 rounded-lg">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-lg">
           <div className="text-center">
             <Loader2 size={40} className="animate-spin text-green-400 mx-auto mb-2" />
             <p className="text-gray-400 text-sm">Loading 3D model...</p>
@@ -240,7 +240,7 @@ export default function DinoViewer({
         </div>
       )}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 rounded-lg">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-lg">
           <div className="text-center text-red-400">
             <AlertTriangle size={40} className="mx-auto mb-2" />
             <p className="text-sm">{error}</p>
