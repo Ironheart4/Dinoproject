@@ -16,8 +16,6 @@ type Props = {
   background?: string;
   autoRotate?: boolean;
   height?: number | string; // allow percentage strings like '100%'
-  cameraY?: number; // vertical camera position
-  targetY?: number; // vertical target position for OrbitControls
 };
 
 export default function DinoViewer({
@@ -26,9 +24,6 @@ export default function DinoViewer({
   background = "#000000",
   autoRotate = true,
   height = 400,
-  // Raised cameraY and slightly higher targetY to push the model lower in the frame
-  cameraY = 2.8,
-  targetY = 0.9,
 }: Props) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -64,7 +59,7 @@ export default function DinoViewer({
     scene.background = new THREE.Color(background);
 
     const camera = new THREE.PerspectiveCamera(45, width / h, 0.1, 1000);
-    camera.position.set(0, cameraY, 4);
+    camera.position.set(0, 1.5, 4);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, h);
@@ -95,13 +90,13 @@ export default function DinoViewer({
 
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, targetY, 0);
+    controls.target.set(0, 0.8, 0);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.autoRotate = autoRotate;
-    controls.autoRotateSpeed = 1.5; // call a resize to ensure correct sizing
+    controls.autoRotateSpeed = 1.5;
 
-    // Resize handling
+    // Simple resize handling (window resize); keeps canvas responsive without ResizeObserver
     const handleResize = () => {
       if (!container) return;
       const w = container.clientWidth;
@@ -111,8 +106,7 @@ export default function DinoViewer({
       renderer.setSize(w, newH);
     };
     window.addEventListener("resize", handleResize);
-    const resizeObserver = new ResizeObserver(() => handleResize());
-    resizeObserver.observe(container);
+    // initial size
     handleResize();
 
     let mixer: THREE.AnimationMixer | null = null;
@@ -194,7 +188,6 @@ export default function DinoViewer({
     // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize);
-      try { resizeObserver.disconnect(); } catch (e) {}
       cancelAnimationFrame(animationId);
       controls.dispose();
       renderer.dispose();
@@ -214,7 +207,7 @@ export default function DinoViewer({
         }
       });
     };
-  }, [url, background, autoRotate, height, cameraY, targetY]);
+  }, [url, background, autoRotate, height]);
 
   if (!url || url === "DEV_PENDING") {
     return (
