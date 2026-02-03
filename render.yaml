@@ -1,3 +1,7 @@
+# render.yaml — Render service configuration for the backend
+# Notes:
+# - This defines the `dinoproject-api` web service used to run the Node/Express backend
+# - Update `ALLOWED_ORIGINS` here when adding new frontend or admin domains
 services:
   - type: web
     name: dinoproject-api
