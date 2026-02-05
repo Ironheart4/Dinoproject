@@ -2,11 +2,12 @@
 // Notes:
 // - Loads the full dinosaur list and supports client-side filtering, suggestions, and quick navigation to detail pages
 // - Use this page to browse species details and access the 3D viewer (if available)
-import React, { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { fetchDinos } from '../lib/api'
 import { Link, useNavigate } from 'react-router-dom'
-import { Dna, Search, Calendar, Globe, Bone, Ruler } from 'lucide-react'
+import { Search, Calendar, Globe, Bone, Ruler } from 'lucide-react'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import { TRexIcon, DinoFootprint } from '../components/DinoIcons'
 
 export default function Encyclopedia() {
   useDocumentTitle('Dinosaur Encyclopedia');
@@ -102,7 +103,7 @@ export default function Encyclopedia() {
 
   return (
     <div>
-      <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 flex items-center gap-2"><Dna className="text-green-400" /> Dinosaur Encyclopedia</h2>
+      <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 flex items-center gap-2"><TRexIcon size={28} className="text-green-400" /> Dinosaur Encyclopedia</h2>
       <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base">Explore our comprehensive database of prehistoric creatures.</p>
       
       {/* Filters */}
@@ -127,7 +128,7 @@ export default function Encyclopedia() {
                   onClick={() => handleSuggestionClick(dino)}
                   className="w-full px-4 py-3 text-left hover:bg-gray-700 transition flex items-center gap-3 border-b border-gray-700 last:border-b-0"
                 >
-                  <Dna size={16} className="text-green-400 flex-shrink-0" />
+                  <DinoFootprint size={16} className="text-green-400 flex-shrink-0" />
                   <div>
                     <div className="text-white font-medium">{dino.name}</div>
                     <div className="text-xs text-gray-400">{dino.species} • {dino.period}</div>
@@ -190,7 +191,7 @@ export default function Encyclopedia() {
                       }}
                     />
                   ) : (
-                    <Dna size={64} className="text-gray-500" />
+                    <TRexIcon size={64} className="text-gray-500" />
                   )}
                 </div>
                 
