@@ -9,7 +9,7 @@ import { Dna, UserPlus, Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react'
 
 export default function Login() {
   const [mode, setMode] = useState<'login' | 'register'>('login')
-  const [form, setForm] = useState({ name: '', email: '', password: '' })
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' })
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
@@ -32,15 +32,27 @@ export default function Login() {
           setError(result.error || 'Invalid email/password')
         }
       } else {
+        // Validate password match for registration
+        if (form.password !== form.confirmPassword) {
+          setError('Passwords do not match')
+          setLoading(false)
+          return
+        }
+        if (form.password.length < 6) {
+          setError('Password must be at least 6 characters')
+          setLoading(false)
+          return
+        }
+        
         const result = await auth.register(form.name, form.email, form.password)
         if (result.success) {
           setSuccess(result.message || 'Registration successful!')
           if (result.message?.includes('verify')) {
             // Email verification required
-            setForm({ name: '', email: '', password: '' })
+            setForm({ name: '', email: '', password: '', confirmPassword: '' })
           } else {
             setMode('login')
-            setForm({ name: '', email: form.email, password: '' })
+            setForm({ name: '', email: form.email, password: '', confirmPassword: '' })
           }
         } else {
           setError(result.error || 'Registration failed')
@@ -96,12 +108,37 @@ export default function Login() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition"
-                title={showPassword ? 'Hide password' : 'Show password'}
+                title={showPassword ? 'Hide passwords' : 'Show passwords'}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
+          {mode === 'register' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label>
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                className={`w-full border rounded-lg p-3 bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-transparent transition ${
+                  form.confirmPassword && form.password !== form.confirmPassword 
+                    ? 'border-red-500' 
+                    : form.confirmPassword && form.password === form.confirmPassword 
+                    ? 'border-green-500' 
+                    : 'border-gray-600'
+                }`}
+                placeholder="Confirm your password"
+                value={form.confirmPassword} 
+                onChange={e => setForm({ ...form, confirmPassword: e.target.value })} 
+                disabled={loading}
+              />
+              {form.confirmPassword && form.password !== form.confirmPassword && (
+                <p className="text-red-400 text-xs mt-1">Passwords do not match</p>
+              )}
+              {form.confirmPassword && form.password === form.confirmPassword && (
+                <p className="text-green-400 text-xs mt-1">Passwords match ✓</p>
+              )}
+            </div>
+          )}
           {error && <div className="text-red-400 text-sm bg-red-900/30 p-3 rounded-lg">{error}</div>}
           {success && (
             <div className="text-green-400 text-sm bg-green-900/30 p-3 rounded-lg flex items-center gap-2">
@@ -126,7 +163,12 @@ export default function Login() {
           {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
           <button 
             className="text-primary hover:text-green-400 font-semibold underline" 
-            onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(null); setSuccess(null) }}
+            onClick={() => { 
+              setMode(mode === 'login' ? 'register' : 'login')
+              setError(null)
+              setSuccess(null)
+              setForm({ name: '', email: form.email, password: '', confirmPassword: '' })
+            }}
             disabled={loading}
           >
             {mode === 'login' ? 'Register' : 'Login'}

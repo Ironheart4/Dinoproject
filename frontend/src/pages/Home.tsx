@@ -3,14 +3,15 @@
 // - Displays immersive hero section with particle background and rotating 3D dinosaur
 // - Fetches featured dinosaurs for the homepage carousel
 // - Promotes premium features and links to key app sections
+// - Journey Through Ages preview, Community forum preview, Achievement showcase
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
-import { BookOpen, Brain, Search, Loader2, ChevronLeft, ChevronRight, Heart, Sparkles, Play } from 'lucide-react'
+import { BookOpen, Brain, Search, Loader2, ChevronLeft, ChevronRight, Heart, Sparkles, Play, Clock, Users, Trophy, MessageSquare, Map, ArrowRight } from 'lucide-react'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import ParticleBackground from '../components/ParticleBackground'
 import HeroDinoViewer from '../components/HeroDinoViewer'
-import { TRexIcon, DinoFootprint } from '../components/DinoIcons'
+import { TRexIcon, DinoFootprint, TriceratopsIcon, BrachioIcon, PteroIcon, RaptorIcon } from '../components/DinoIcons'
 
 interface Dinosaur {
   id: number
@@ -22,17 +23,34 @@ interface Dinosaur {
   modelUrl: string | null
 }
 
+// Time periods for Journey Through Ages
+const TIME_PERIODS = [
+  { name: 'Triassic', years: '252-201 MYA', color: '#E74C3C', desc: 'Dawn of the dinosaurs' },
+  { name: 'Jurassic', years: '201-145 MYA', color: '#3498DB', desc: 'Giants roamed the Earth' },
+  { name: 'Cretaceous', years: '145-66 MYA', color: '#398f61', desc: 'The golden age of dinosaurs' },
+]
+
+// Achievement preview data
+const FEATURED_ACHIEVEMENTS = [
+  { icon: Trophy, title: 'Quiz Master', desc: 'Complete 20 quizzes', color: '#f97316' },
+  { icon: BookOpen, title: 'Expert Explorer', desc: 'View 50 dinosaurs', color: '#3b82f6' },
+  { icon: Map, title: 'World Traveler', desc: 'Explore all continents', color: '#a855f7' },
+]
+
 const FEATURES = [
-  { icon: TRexIcon, title: '3D Models', desc: 'Interactive 3D dinosaur models you can rotate and explore', color: 'text-green-400' },
-  { icon: BookOpen, title: 'Encyclopedia', desc: 'Comprehensive database with 100+ dinosaur species', color: 'text-blue-400' },
-  { icon: Brain, title: 'Quizzes', desc: 'Test your knowledge and track your progress', color: 'text-purple-400' },
+  { icon: TRexIcon, title: '3D Models', desc: 'Interactive 3D dinosaur models you can rotate, zoom, and explore in stunning detail', color: 'text-green-400', link: '/encyclopedia' },
+  { icon: BookOpen, title: 'Encyclopedia', desc: 'Comprehensive database with 100+ species, complete with facts, diets, and habitats', color: 'text-blue-400', link: '/encyclopedia' },
+  { icon: Brain, title: 'Quizzes', desc: 'Challenge yourself with gamified quizzes and compete on the leaderboard', color: 'text-purple-400', link: '/quiz' },
+  { icon: Clock, title: 'Timeline', desc: 'Journey through 180 million years of prehistoric history with our interactive timeline', color: 'text-orange-400', link: '/timeline' },
+  { icon: MessageSquare, title: 'Community', desc: 'Join discussions with fellow dinosaur enthusiasts and share discoveries', color: 'text-pink-400', link: '/forum' },
+  { icon: Map, title: 'Fossil Map', desc: 'Explore where dinosaurs lived with our interactive global fossil map', color: 'text-cyan-400', link: '/timeline' },
 ]
 
 const STATS = [
-  { value: '100+', label: 'Dinosaur Species' },
-  { value: '50+', label: '3D Models' },
-  { value: '500+', label: 'Quiz Questions' },
-  { value: '10K+', label: 'Happy Learners' },
+  { value: '100+', label: 'Dinosaur Species', icon: TRexIcon },
+  { value: '50+', label: '3D Models', icon: BrachioIcon },
+  { value: '500+', label: 'Quiz Questions', icon: Brain },
+  { value: '10K+', label: 'Happy Learners', icon: Users },
 ]
 
 export default function Home() {
@@ -117,12 +135,18 @@ export default function Home() {
 
               {/* Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-8 border-t border-white/10">
-                {STATS.map((stat, i) => (
-                  <div key={i} className="text-center lg:text-left">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
-                    <div className="text-sm text-gray-400">{stat.label}</div>
-                  </div>
-                ))}
+                {STATS.map((stat, i) => {
+                  const StatIcon = stat.icon
+                  return (
+                    <div key={i} className="text-center lg:text-left group cursor-default">
+                      <div className="flex items-center gap-2 justify-center lg:justify-start mb-1">
+                        <StatIcon size={20} className="text-green-400 group-hover:scale-110 transition-transform" />
+                        <span className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</span>
+                      </div>
+                      <div className="text-sm text-gray-400">{stat.label}</div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
@@ -269,27 +293,165 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {FEATURES.map((feature, idx) => {
             const IconComponent = feature.icon
             return (
-              <div 
+              <Link 
                 key={idx} 
-                className="group relative bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-700 hover:border-green-500/50 transition-all duration-300"
+                to={feature.link}
+                className="group relative bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-700 hover:border-green-500/50 transition-all duration-300 hover:-translate-y-2"
               >
                 {/* Icon */}
                 <div className={`w-16 h-16 rounded-2xl bg-gray-700/50 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform ${feature.color}`}>
                   <IconComponent size={32} />
                 </div>
 
-                <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
+                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-green-400 transition-colors">{feature.title}</h3>
                 <p className="text-gray-400">{feature.desc}</p>
+
+                {/* Arrow indicator */}
+                <ArrowRight size={20} className="absolute bottom-6 right-6 text-gray-600 group-hover:text-green-400 group-hover:translate-x-1 transition-all" />
 
                 {/* Decorative gradient */}
                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
+              </Link>
             )
           })}
+        </div>
+      </section>
+
+      {/* Journey Through the Ages */}
+      <section className="relative py-12 sm:py-16">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/20 border border-orange-500/30 rounded-full text-orange-400 text-sm font-medium mb-4">
+            <Clock size={16} />
+            <span>Time Travel</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-white mb-3">
+            Journey Through the Ages
+          </h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Explore 180 million years of dinosaur evolution across three magnificent eras
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {TIME_PERIODS.map((period, idx) => (
+            <Link 
+              key={period.name}
+              to={`/timeline?era=${period.name.toLowerCase()}`}
+              className="group relative overflow-hidden rounded-2xl border border-gray-700 hover:border-opacity-0 transition-all duration-500"
+              style={{ '--era-color': period.color } as React.CSSProperties}
+            >
+              {/* Background gradient */}
+              <div 
+                className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity"
+                style={{ background: `linear-gradient(135deg, ${period.color}40 0%, transparent 70%)` }}
+              />
+              
+              <div className="relative p-8">
+                {/* Era number */}
+                <div 
+                  className="text-7xl font-bold opacity-10 absolute top-4 right-4"
+                  style={{ color: period.color }}
+                >
+                  {idx + 1}
+                </div>
+
+                {/* Era badge */}
+                <div 
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium mb-4"
+                  style={{ backgroundColor: `${period.color}30`, color: period.color }}
+                >
+                  {period.years}
+                </div>
+
+                <h3 className="text-2xl font-bold text-white mb-2 group-hover:translate-x-1 transition-transform">
+                  {period.name}
+                </h3>
+                <p className="text-gray-400 mb-4">{period.desc}</p>
+
+                {/* Animated arrow */}
+                <div className="flex items-center gap-2 text-sm font-medium" style={{ color: period.color }}>
+                  <span>Explore Era</span>
+                  <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
+                </div>
+              </div>
+
+              {/* Bottom glow */}
+              <div 
+                className="absolute bottom-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ background: period.color }}
+              />
+            </Link>
+          ))}
+        </div>
+
+        <div className="text-center mt-8">
+          <Link 
+            to="/timeline"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 font-medium rounded-xl transition border border-orange-500/30"
+          >
+            <Clock size={20} />
+            View Full Timeline
+            <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+
+      {/* Achievement Preview */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700">
+        <div className="absolute inset-0 bg-grid opacity-20" />
+        
+        <div className="relative p-8 sm:p-12">
+          <div className="flex flex-col lg:flex-row items-center gap-8">
+            {/* Left: Text */}
+            <div className="flex-1 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-full text-yellow-400 text-sm font-medium mb-4">
+                <Trophy size={16} />
+                <span>Gamification</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-white mb-4">
+                Unlock Achievements
+              </h2>
+              <p className="text-gray-400 mb-6 max-w-lg">
+                Earn badges, climb the leaderboard, and track your progress as you explore the world of dinosaurs. Every quiz, discovery, and exploration counts!
+              </p>
+              <Link 
+                to="/quiz"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg"
+              >
+                <Trophy size={20} />
+                Start Earning
+              </Link>
+            </div>
+
+            {/* Right: Achievement cards */}
+            <div className="flex gap-4 flex-wrap justify-center">
+              {FEATURED_ACHIEVEMENTS.map((achievement, idx) => {
+                const AchIcon = achievement.icon
+                return (
+                  <div 
+                    key={idx}
+                    className="group w-32 h-40 rounded-2xl border border-gray-700 hover:border-opacity-0 transition-all duration-300 flex flex-col items-center justify-center p-4 hover:-translate-y-2"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${achievement.color}15 0%, transparent 100%)`,
+                    }}
+                  >
+                    <div 
+                      className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"
+                      style={{ backgroundColor: `${achievement.color}30` }}
+                    >
+                      <AchIcon size={24} style={{ color: achievement.color }} />
+                    </div>
+                    <h4 className="text-sm font-bold text-white text-center">{achievement.title}</h4>
+                    <p className="text-xs text-gray-500 text-center mt-1">{achievement.desc}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -306,10 +468,13 @@ export default function Home() {
 
         <div className="relative z-10 px-6 sm:px-12 py-12 sm:py-16 text-center">
           <div className="flex justify-center mb-6">
-            <DinoFootprint size={64} className="text-white/80" />
+            <div className="relative">
+              <DinoFootprint size={64} className="text-white/80" />
+              <Sparkles size={20} className="absolute -top-2 -right-2 text-yellow-300 animate-pulse" />
+            </div>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display text-white mb-4">
-            Ready to Learn More?
+            Ready to Become a Dino Expert?
           </h2>
           <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Take our interactive dinosaur quiz to test your knowledge and compete with other dino enthusiasts!
@@ -317,16 +482,76 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
               to="/quiz" 
-              className="px-8 py-4 bg-white text-green-600 font-bold rounded-xl hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2"
+              className="group px-8 py-4 bg-white text-green-600 font-bold rounded-xl hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2"
             >
               <Brain size={20} />
-              Start Quiz
+              Start Quiz Challenge
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link 
               to="/timeline" 
               className="px-8 py-4 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/30 transition-all border border-white/30 flex items-center justify-center gap-2"
             >
+              <Clock size={20} />
               Explore Timeline
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Community Preview */}
+      <section className="relative py-12 sm:py-16">
+        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+          {/* Left: Community visual */}
+          <div className="flex-1 relative">
+            <div className="relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl border border-gray-700 p-6 overflow-hidden">
+              {/* Mock forum posts */}
+              <div className="space-y-4">
+                {[
+                  { user: 'DinoLover42', topic: 'Best T-Rex facts?', time: '2h ago', replies: 15 },
+                  { user: 'PaleoNerd', topic: 'My fossil collection', time: '5h ago', replies: 23 },
+                  { user: 'JurassicFan', topic: 'Favorite dinosaur?', time: '1d ago', replies: 42 },
+                ].map((post, idx) => (
+                  <div key={idx} className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50 hover:border-green-500/30 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm">
+                      {post.user[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-white truncate">{post.topic}</h4>
+                      <p className="text-sm text-gray-500">by {post.user} · {post.time}</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-gray-400">
+                      <MessageSquare size={16} />
+                      <span className="text-sm">{post.replies}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Decorative overlay */}
+              <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-gray-800/80 to-transparent pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Right: Text */}
+          <div className="flex-1 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink-500/20 border border-pink-500/30 rounded-full text-pink-400 text-sm font-medium mb-4">
+              <Users size={16} />
+              <span>Community</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-white mb-4">
+              Join the Discussion
+            </h2>
+            <p className="text-gray-400 mb-6 max-w-lg mx-auto lg:mx-0">
+              Connect with thousands of dinosaur enthusiasts from around the world. Share discoveries, ask questions, and make friends who share your passion.
+            </p>
+            <Link 
+              to="/forum"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-xl transition border border-gray-700"
+            >
+              <MessageSquare size={20} />
+              Browse Forum
+              <ArrowRight size={16} />
             </Link>
           </div>
         </div>
@@ -334,30 +559,36 @@ export default function Home() {
 
       {/* Info Grid */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-700 hover:border-blue-500/50 transition-all group">
-          <BookOpen size={48} className="mb-4 text-blue-400 group-hover:scale-110 transition-transform" />
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-700 hover:border-blue-500/50 transition-all group hover:-translate-y-1">
+          <div className="flex items-center gap-4 mb-4">
+            <BrachioIcon size={48} className="text-blue-400 group-hover:scale-110 transition-transform" />
+          </div>
           <h3 className="font-bold text-white text-xl mb-2">Learn</h3>
           <p className="text-gray-400">Explore our comprehensive dinosaur encyclopedia with detailed information about every species.</p>
-          <Link to="/encyclopedia" className="inline-flex items-center gap-2 mt-4 text-blue-400 hover:text-blue-300 font-medium">
-            Browse Encyclopedia <ChevronRight size={16} />
+          <Link to="/encyclopedia" className="inline-flex items-center gap-2 mt-4 text-blue-400 hover:text-blue-300 font-medium group/link">
+            Browse Encyclopedia <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
           </Link>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-700 hover:border-purple-500/50 transition-all group">
-          <Brain size={48} className="mb-4 text-purple-400 group-hover:scale-110 transition-transform" />
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-700 hover:border-purple-500/50 transition-all group hover:-translate-y-1">
+          <div className="flex items-center gap-4 mb-4">
+            <RaptorIcon size={48} className="text-purple-400 group-hover:scale-110 transition-transform" />
+          </div>
           <h3 className="font-bold text-white text-xl mb-2">Quiz</h3>
           <p className="text-gray-400">Test your dinosaur knowledge with challenging quizzes and see how you rank among other learners.</p>
-          <Link to="/quiz" className="inline-flex items-center gap-2 mt-4 text-purple-400 hover:text-purple-300 font-medium">
-            Take a Quiz <ChevronRight size={16} />
+          <Link to="/quiz" className="inline-flex items-center gap-2 mt-4 text-purple-400 hover:text-purple-300 font-medium group/link">
+            Take a Quiz <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
           </Link>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-700 hover:border-pink-500/50 transition-all sm:col-span-2 lg:col-span-1 group">
-          <Heart size={48} className="mb-4 text-pink-400 group-hover:scale-110 transition-transform" />
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-700 hover:border-pink-500/50 transition-all sm:col-span-2 lg:col-span-1 group hover:-translate-y-1">
+          <div className="flex items-center gap-4 mb-4">
+            <TriceratopsIcon size={48} className="text-pink-400 group-hover:scale-110 transition-transform" />
+          </div>
           <h3 className="font-bold text-white text-xl mb-2">Support</h3>
           <p className="text-gray-400">Help us grow DinoProject and unlock premium features like HD models and unlimited favorites.</p>
-          <Link to="/support" className="inline-flex items-center gap-2 mt-4 text-pink-400 hover:text-pink-300 font-medium">
-            Become a Supporter <ChevronRight size={16} />
+          <Link to="/support" className="inline-flex items-center gap-2 mt-4 text-pink-400 hover:text-pink-300 font-medium group/link">
+            Become a Supporter <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
           </Link>
         </div>
       </section>

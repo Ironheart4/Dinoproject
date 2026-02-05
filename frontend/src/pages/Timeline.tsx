@@ -607,11 +607,19 @@ export default function Timeline() {
           )}
         </div>
         {searchResult && (
-          <div className="mt-3 p-3 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center gap-3">
-            <MapPin className="text-green-400 flex-shrink-0" size={20} />
-            <span className="text-green-400">
-              Found <strong>{searchResult.name}</strong> in {searchResult.livedIn || 'Unknown location'} - Look for the blinking marker above!
-            </span>
+          <div className="mt-3 p-3 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <MapPin className="text-green-400 flex-shrink-0" size={20} />
+              <span className="text-green-400">
+                Found <strong>{searchResult.name}</strong> in {searchResult.livedIn || 'Unknown location'} - Look for the blinking marker above!
+              </span>
+            </div>
+            <button
+              onClick={() => navigate(`/dino/${searchResult.id}`)}
+              className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition text-sm whitespace-nowrap"
+            >
+              View Details
+            </button>
           </div>
         )}
       </div>

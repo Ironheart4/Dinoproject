@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { 
   LayoutDashboard, Heart, Home, BookOpen, Target, Info, LogIn, 
-  Mail, Twitter, Instagram, Youtube, MessageCircle, Calendar, Github,
+  Mail, Twitter, Instagram, Youtube, MessageCircle, Calendar, Facebook,
   Menu, X
 } from 'lucide-react' 
 
@@ -175,7 +175,7 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
                 <Mail size={14} className="shrink-0" /> dinoprojectoriginal@gmail.com
               </a>
               <div className="flex gap-4 pt-1 sm:pt-2">
-                <a href="https://github.com/Ironheart4" target="_blank" rel="noopener noreferrer" className="hover:scale-110 hover:text-primary transition" title="GitHub"><Github size={20} /></a>
+                <a href="https://facebook.com/DinoProject" target="_blank" rel="noopener noreferrer" className="hover:scale-110 hover:text-primary transition" title="Facebook"><Facebook size={20} /></a>
                 <a href="https://twitter.com/DinoProjectApp" target="_blank" rel="noopener noreferrer" className="hover:scale-110 hover:text-primary transition" title="Twitter"><Twitter size={20} /></a>
                 <a href="https://instagram.com/dinoproject" target="_blank" rel="noopener noreferrer" className="hover:scale-110 hover:text-primary transition" title="Instagram"><Instagram size={20} /></a>
                 <a href="https://youtube.com/@DinoProject" target="_blank" rel="noopener noreferrer" className="hover:scale-110 hover:text-primary transition" title="YouTube"><Youtube size={20} /></a>
@@ -190,8 +190,6 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
             <p className="text-center md:text-left">© {new Date().getFullYear()} DinoProject. Built by Ayomide Mathins.</p>
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
               <Link to="/privacy" className="hover:text-primary transition">Privacy Policy</Link>
-              <span className="hidden sm:inline">•</span>
-              <a href="https://github.com/Ironheart4" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition flex items-center gap-1"><Github size={12} /> GitHub</a>
               <span className="hidden sm:inline">•</span>
               <span className="hidden sm:inline">Made with ❤️ for dinosaur enthusiasts</span>
             </div>
