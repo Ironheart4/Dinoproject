@@ -23,6 +23,7 @@ import Forum from './pages/Forum'
 import ForumCategory from './pages/ForumCategory'
 import ForumPost from './pages/ForumPost'
 import Privacy from './pages/Privacy'
+import Splash from './pages/Splash'
 import CookieConsent from './components/CookieConsent'
 import DinoAssistant from './components/DinoAssistant'
 
@@ -30,24 +31,32 @@ export default function App() {
   return (
     <ThemeProvider>
     <AuthProvider>
-      <MasterLayout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/encyclopedia" element={<Encyclopedia />} />
-          <Route path="/dino/:id" element={<DinoDetail />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/quiz" element={<Quiz />} />
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/support/success" element={<Support />} />
-          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/timeline" element={<Timeline />} />
-          <Route path="/forum" element={<Forum />} />
-          <Route path="/forum/category/:slug" element={<ForumCategory />} />
-          <Route path="/forum/post/:id" element={<ForumPost />} />
-          <Route path="/privacy" element={<Privacy />} />
-        </Routes>
-      </MasterLayout>
+      <Routes>
+        {/* Splash page - full screen without header/footer */}
+        <Route path="/welcome" element={<Splash />} />
+        
+        {/* Main app with layout */}
+        <Route path="/*" element={
+          <MasterLayout>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/encyclopedia" element={<Encyclopedia />} />
+              <Route path="/dino/:id" element={<DinoDetail />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/quiz" element={<Quiz />} />
+              <Route path="/about" element={<AboutUs />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/support/success" element={<Support />} />
+              <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/timeline" element={<Timeline />} />
+              <Route path="/forum" element={<Forum />} />
+              <Route path="/forum/category/:slug" element={<ForumCategory />} />
+              <Route path="/forum/post/:id" element={<ForumPost />} />
+              <Route path="/privacy" element={<Privacy />} />
+            </Routes>
+          </MasterLayout>
+        } />
+      </Routes>
       <CookieConsent />
       <DinoAssistant />
     </AuthProvider>
