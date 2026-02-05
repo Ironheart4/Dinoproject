@@ -2,12 +2,10 @@
 // Notes: Update policy text to reflect actual data collection, cookies, and third-party services
 import { Link } from "react-router-dom";
 import { ArrowLeft, Shield, Cookie, Database, Mail, Lock, Heart, Server, CreditCard } from "lucide-react";
-import MasterLayout from "../components/MasterLayout";
 
 export default function Privacy() {
   return (
-    <MasterLayout>
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+    <div className="max-w-4xl mx-auto">
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-gray-400 hover:text-green-500 mb-4 sm:mb-6 text-sm sm:text-base"
@@ -202,6 +200,5 @@ export default function Privacy() {
           </div>
         </div>
       </div>
-    </MasterLayout>
   );
 }

@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
-import { BookOpen, Brain, Search, Loader2, ChevronLeft, ChevronRight, Heart, Sparkles, Play, Clock, Users, Trophy, MessageSquare, Map, ArrowRight } from 'lucide-react'
+import { BookOpen, Brain, Search, Loader2, ChevronLeft, ChevronRight, Heart, Sparkles, Play, Clock, Users, MessageSquare, Map, ArrowRight, Award, Eye, Globe, PenTool, HelpCircle, Star, Zap } from 'lucide-react'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import ParticleBackground from '../components/ParticleBackground'
 import HeroDinoViewer from '../components/HeroDinoViewer'
@@ -32,9 +32,9 @@ const TIME_PERIODS = [
 
 // Achievement preview data
 const FEATURED_ACHIEVEMENTS = [
-  { icon: Trophy, title: 'Quiz Master', desc: 'Score 80%+ on 10 quizzes', color: '#f97316' },
-  { icon: BookOpen, title: 'Expert Explorer', desc: 'View 50 unique species', color: '#3b82f6' },
-  { icon: Map, title: 'World Traveler', desc: 'Find fossils on 6 continents', color: '#a855f7' },
+  { icon: Award, title: 'Quiz Master', desc: 'Score 80%+ on 10 quizzes', color: '#f97316' },
+  { icon: Eye, title: 'Expert Explorer', desc: 'View 50 unique species', color: '#3b82f6' },
+  { icon: Globe, title: 'World Traveler', desc: 'Find fossils on 6 continents', color: '#a855f7' },
 ]
 
 const FEATURES = [
@@ -49,7 +49,7 @@ const FEATURES = [
 const STATS = [
   { value: '100+', label: 'Dinosaur Species', icon: TRexIcon },
   { value: '50+', label: '3D Models', icon: BrachioIcon },
-  { value: '500+', label: 'Quiz Questions', icon: Brain },
+  { value: '500+', label: 'Quiz Questions', icon: HelpCircle },
   { value: '10K+', label: 'Happy Learners', icon: Users },
 ]
 
@@ -409,7 +409,7 @@ export default function Home() {
             {/* Left: Text */}
             <div className="flex-1 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-full text-yellow-400 text-sm font-medium mb-4">
-                <Trophy size={16} />
+                <Zap size={16} />
                 <span>Gamification</span>
               </div>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-white mb-4">
@@ -422,7 +422,7 @@ export default function Home() {
                 to="/quiz"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg"
               >
-                <Trophy size={20} />
+                <Star size={20} />
                 Start Earning
               </Link>
             </div>
@@ -562,7 +562,7 @@ export default function Home() {
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-700 hover:border-blue-500/50 transition-all group hover:-translate-y-1">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <BookOpen size={28} className="text-blue-400" />
+              <PenTool size={28} className="text-blue-400" />
             </div>
           </div>
           <h3 className="font-bold text-white text-xl mb-2">Learn</h3>

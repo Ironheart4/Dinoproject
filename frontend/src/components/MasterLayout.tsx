@@ -35,9 +35,8 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
       <header className="bg-gray-800/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-700/50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2" onClick={closeMobileMenu}>
-            <img src={LOGO} alt="DinoProject" className="h-8 w-8 sm:h-10 sm:w-10" />
-            <span className="text-lg sm:text-xl font-bold font-display text-primary">DinoProject</span>
+          <Link to="/" className="flex items-center" onClick={closeMobileMenu}>
+            <img src={LOGO} alt="DinoProject" className="h-10 w-10 sm:h-12 sm:w-12" />
           </Link>
 
           {/* Desktop Navigation */}
