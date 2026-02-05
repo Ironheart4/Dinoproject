@@ -248,37 +248,37 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
         <>
           <button
             onClick={handlePrev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition z-10"
+            className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition z-10"
             aria-label="Previous dinosaur"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
           </button>
           <button
             onClick={handleNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition z-10"
+            className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition z-10"
             aria-label="Next dinosaur"
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={20} className="sm:w-6 sm:h-6" />
           </button>
         </>
       )}
 
       {/* Bottom Info Bar with Thumbnails */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 pt-8">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-3 sm:p-4 pt-6 sm:pt-8">
         {/* Dino Info */}
         <Link 
           to={`/dino/${currentDino.id}`}
-          className="block mb-3 group"
+          className="block mb-2 sm:mb-3 group"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-white font-bold text-xl group-hover:text-green-400 transition">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-white font-bold text-base sm:text-xl group-hover:text-green-400 transition truncate">
                 {currentDino.name}
               </h3>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-300">{currentDino.period || 'Unknown period'}</span>
+              <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm flex-wrap">
+                <span className="text-gray-300 truncate">{currentDino.period || 'Unknown period'}</span>
                 {currentDino.diet && (
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${
+                  <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs ${
                     currentDino.diet === 'carnivorous' ? 'bg-red-500/30 text-red-300' :
                     currentDino.diet === 'herbivorous' ? 'bg-green-500/30 text-green-300' :
                     'bg-yellow-500/30 text-yellow-300'
@@ -288,20 +288,20 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
                 )}
               </div>
             </div>
-            <div className="text-green-400 text-sm font-medium group-hover:translate-x-1 transition-transform">
-              View Details →
+            <div className="text-green-400 text-xs sm:text-sm font-medium group-hover:translate-x-1 transition-transform whitespace-nowrap">
+              View →
             </div>
           </div>
         </Link>
 
         {/* Thumbnail Selector */}
         {dinosWithModels.length > 1 && (
-          <div className="flex gap-2 justify-center overflow-x-auto py-2 scrollbar-hide">
+          <div className="flex gap-1.5 sm:gap-2 justify-center overflow-x-auto py-1 sm:py-2 scrollbar-hide">
             {dinosWithModels.map((dino, idx) => (
               <button
                 key={dino.id}
                 onClick={() => setCurrentIndex(idx)}
-                className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
+                className={`flex-shrink-0 w-9 h-9 sm:w-12 sm:h-12 rounded-lg overflow-hidden border-2 transition-all ${
                   idx === currentIndex 
                     ? 'border-green-400 scale-110 shadow-lg shadow-green-400/30' 
                     : 'border-white/20 hover:border-white/50 opacity-70 hover:opacity-100'
@@ -315,7 +315,7 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-700 flex items-center justify-center text-lg">
+                  <div className="w-full h-full bg-gray-700 flex items-center justify-center text-sm sm:text-lg">
                     🦖
                   </div>
                 )}

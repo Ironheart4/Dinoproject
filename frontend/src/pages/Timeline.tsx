@@ -555,8 +555,9 @@ export default function Timeline() {
         {/* Popup */}
         <div 
           ref={popupRef} 
-          className="bg-gray-900 text-white p-3 rounded-lg shadow-xl min-w-[180px] border border-gray-700"
+          className="bg-gray-900 text-white p-3 rounded-lg shadow-xl min-w-[180px] border border-gray-700 cursor-pointer hover:border-green-500 transition-colors"
           style={{ display: 'none' }}
+          onClick={() => popupContent && navigate(`/dino/${popupContent.id}`)}
         >
           {popupContent && (
             <>
@@ -567,7 +568,7 @@ export default function Timeline() {
                 {popupContent.weightKg && <div>Weight: {Number(popupContent.weightKg).toLocaleString()}kg</div>}
                 {popupContent.livedIn && <div>Location: {popupContent.livedIn}</div>}
               </div>
-              <div className="mt-2 pt-2 border-t border-gray-700 text-xs text-gray-500">
+              <div className="mt-2 pt-2 border-t border-gray-700 text-xs text-green-400 hover:text-green-300 flex items-center gap-1">
                 Click to view details →
               </div>
             </>
