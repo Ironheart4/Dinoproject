@@ -49,17 +49,23 @@ export default function DinoViewer({
     setError(null);
     setLoadProgress(0);
 
-    // Ensure container has dimensions
-    const width = container.clientWidth || 600;
-    // If height is a number use it; if it's a string like '100%' use the container height
-    const h = typeof height === 'number' ? height : (container.clientHeight || 400);
+    // Ensure container has dimensions - use container's actual size for responsive behavior
+    const getContainerSize = () => {
+      const w = container.clientWidth || 600;
+      // For percentage heights, use container height; for numbers use that value
+      const h = typeof height === 'number' ? height : (container.clientHeight || 500);
+      return { w, h };
+    };
+    
+    const { w: width, h } = getContainerSize();
 
     // Scene setup
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(background); // default background is black for contrast
 
-    const camera = new THREE.PerspectiveCamera(45, width / h, 0.1, 1000);
-    camera.position.set(0, 1.5, 4);
+    const camera = new THREE.PerspectiveCamera(40, width / h, 0.1, 1000);
+    // Position camera closer and at a better angle for larger display
+    camera.position.set(0, 1.2, 3.5);
 
     const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
     // The canvas is styled to fill its parent and a simple window resize handler updates
@@ -176,19 +182,24 @@ export default function DinoViewer({
     };
     animate();
 
-    // Resize handler
+    // Resize handler - update both dimensions for full responsiveness
     const handleResize = () => {
       if (!container) return;
-      const w = container.clientWidth;
-      camera.aspect = w / h;
+      const { w, h: newH } = getContainerSize();
+      camera.aspect = w / newH;
       camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
+      renderer.setSize(w, newH);
     };
     window.addEventListener("resize", handleResize);
+    
+    // Also observe container size changes for better responsiveness
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(container);
 
     // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize);
+      resizeObserver.disconnect();
       cancelAnimationFrame(animationId);
       controls.dispose();
       renderer.dispose();

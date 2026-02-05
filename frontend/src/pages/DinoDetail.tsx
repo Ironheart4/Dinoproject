@@ -190,15 +190,15 @@ export default function DinoDetail() {
             </div>
           )}
 
-          {/* 3D Viewer */}
-          <div className="bg-gray-800 rounded-lg p-3 sm:p-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">3D Model</h2>
+          {/* 3D Viewer - Large and prominent */}
+          <div className="bg-gray-800 rounded-xl p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">3D Model</h2>
             {canView3DModel ? (
-              <div className="h-[300px] sm:h-[400px] lg:h-[450px]">
+              <div className="h-[350px] sm:h-[450px] md:h-[500px] lg:h-[600px] xl:h-[650px]">
                 <DinoViewer url={dino.modelUrl} height="100%" />
               </div>
             ) : (
-              <div className="h-[300px] sm:h-[400px] lg:h-[450px] flex flex-col items-center justify-center bg-gray-900 rounded-lg border-2 border-dashed border-gray-600 p-4">
+              <div className="h-[350px] sm:h-[450px] md:h-[500px] lg:h-[600px] xl:h-[650px] flex flex-col items-center justify-center bg-gray-900 rounded-lg border-2 border-dashed border-gray-600 p-4">
                 <Lock size={48} className="text-gray-500 mb-3 sm:mb-4" />
                 <h3 className="text-lg sm:text-xl font-bold text-white mb-2 text-center">3D Model Locked</h3>
                 <p className="text-gray-400 text-center max-w-md mb-4 text-sm sm:text-base px-4">
