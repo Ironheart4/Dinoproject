@@ -30,9 +30,9 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
   const closeMobileMenu = () => setMobileMenuOpen(false)
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900 text-gray-100">
+    <div className="min-h-screen flex flex-col bg-gray-900 text-gray-100 bg-pattern">
       {/* Header */}
-      <header className="bg-gray-800 shadow-sm sticky top-0 z-50">
+      <header className="bg-gray-800/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-700/50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2" onClick={closeMobileMenu}>

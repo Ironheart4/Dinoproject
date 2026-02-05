@@ -64,8 +64,8 @@ export default function DinoViewer({
     scene.background = new THREE.Color(background); // default background is black for contrast
 
     const camera = new THREE.PerspectiveCamera(40, width / h, 0.1, 1000);
-    // Position camera closer and at a better angle for larger display
-    camera.position.set(0, 1.2, 3.5);
+    // Initial camera position - will be adjusted after model loads
+    camera.position.set(0, 1, 5);
 
     const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
     // The canvas is styled to fill its parent and a simple window resize handler updates
@@ -99,11 +99,13 @@ export default function DinoViewer({
 
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 0.8, 0);
+    controls.target.set(0, 1, 0); // Initial target - will be updated after model loads
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.autoRotate = autoRotate;
     controls.autoRotateSpeed = 1.5;
+    controls.minDistance = 1;
+    controls.maxDistance = 20;
 
     let mixer: THREE.AnimationMixer | null = null;
     const clock = new THREE.Clock();
@@ -133,23 +135,37 @@ export default function DinoViewer({
         console.log("Model loaded successfully:", gltf);
         const root = gltf.scene || gltf.scenes[0];
 
-        // Auto-scale and center
+        // Auto-scale and center the model properly
         const box = new THREE.Box3().setFromObject(root);
         const size = new THREE.Vector3();
         box.getSize(size);
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 2 / (maxDim || 1);
-        root.scale.setScalar(scale);
-
-        box.setFromObject(root);
         const center = new THREE.Vector3();
         box.getCenter(center);
-        // Center geometry on the origin so orbit controls rotate around model center
-        root.position.sub(center);
-        // Align the model's lowest point to y=0 so it sits on the virtual ground plane
-        root.position.y -= box.min.y * scale;
+        
+        // Calculate scale to fit model nicely in view
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 2.2 / (maxDim || 1);
+        root.scale.setScalar(scale);
+
+        // Recalculate bounding box after scaling
+        box.setFromObject(root);
+        box.getCenter(center);
+        box.getSize(size);
+        
+        // Center the model at origin (0, 0, 0)
+        root.position.x = -center.x;
+        root.position.z = -center.z;
+        // Position model so its bottom sits at y=0
+        root.position.y = -box.min.y;
 
         scene.add(root);
+        
+        // Update camera and controls to look at model center
+        const modelCenter = new THREE.Vector3(0, size.y / 2, 0);
+        controls.target.copy(modelCenter);
+        camera.position.set(0, size.y / 2, Math.max(size.x, size.z) * 2 + 2);
+        camera.lookAt(modelCenter);
+        controls.update();
 
         // Play animations if present
         if (gltf.animations && gltf.animations.length) {

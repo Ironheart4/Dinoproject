@@ -124,15 +124,23 @@ export default function DinoDetail() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <Link to="/encyclopedia" className="text-green-400 hover:text-green-300 mb-4 inline-block">
-        ← Back to Encyclopedia
+      <Link to="/encyclopedia" className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 mb-6 group">
+        <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Encyclopedia
       </Link>
 
-      {error && <div className="p-4 bg-red-900/50 text-red-300 rounded-lg mb-4">{error}</div>}
+      {error && (
+        <div className="p-4 bg-red-900/30 border border-red-500/30 text-red-300 rounded-xl mb-6 flex items-center gap-3">
+          <AlertTriangle size={20} />
+          {error}
+        </div>
+      )}
       
       {loading && (
-        <div className="text-gray-400 flex items-center gap-2">
-          <Loader2 size={20} className="animate-spin" /> Loading dinosaur...
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <Loader2 size={48} className="animate-spin text-green-400 mx-auto mb-4" />
+            <p className="text-gray-400">Loading dinosaur...</p>
+          </div>
         </div>
       )}
 

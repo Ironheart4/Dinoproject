@@ -1,11 +1,11 @@
-// HeroDinoViewer.tsx — Mini 3D viewer for hero section showing random dinosaurs
-// Cycles through available dinosaurs with their 3D models
+// HeroDinoViewer.tsx — Interactive 3D viewer for hero section with dinosaur selector
+// Shows dinosaurs with their 3D models, allows user selection
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { Loader2 } from 'lucide-react'
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 interface Dinosaur {
@@ -13,7 +13,9 @@ interface Dinosaur {
   name: string
   species: string | null
   period: string | null
+  diet: string | null
   modelUrl: string | null
+  imageUrl1: string | null
 }
 
 interface Props {
@@ -29,16 +31,16 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
   // Filter dinosaurs with valid model URLs
   const dinosWithModels = dinosaurs.filter(d => 
     d.modelUrl && d.modelUrl !== 'DEV_PENDING' && d.modelUrl.startsWith('http')
-  )
+  ).slice(0, 8) // Limit to 8 for the selector
 
   const currentDino = dinosWithModels[currentIndex] || null
 
-  // Cycle through dinosaurs every 8 seconds
+  // Auto-cycle every 10 seconds (but user can override)
   useEffect(() => {
     if (dinosWithModels.length <= 1) return
     const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % dinosWithModels.length)
-    }, 8000)
+    }, 10000)
     return () => clearInterval(interval)
   }, [dinosWithModels.length])
 
@@ -59,9 +61,9 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
     const scene = new THREE.Scene()
     scene.background = null // Transparent
 
-    // Camera
+    // Camera - will be adjusted after model loads
     const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 1000)
-    camera.position.set(0, 1, 4)
+    camera.position.set(0, 1, 5)
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({ 
@@ -76,7 +78,7 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
     container.appendChild(renderer.domElement)
 
     // Lighting
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6)
+    const ambient = new THREE.AmbientLight(0xffffff, 0.7)
     scene.add(ambient)
 
     const mainLight = new THREE.DirectionalLight(0xffffff, 1.2)
@@ -97,7 +99,8 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
     controls.enablePan = false
     controls.autoRotate = true
     controls.autoRotateSpeed = 2
-    controls.target.set(0, 0.5, 0)
+    controls.enableDamping = true
+    controls.dampingFactor = 0.05
 
     // DRACO Loader
     const dracoLoader = new DRACOLoader()
@@ -116,21 +119,39 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
       .then((gltf) => {
         const root = gltf.scene || gltf.scenes[0]
 
-        // Auto-scale and center
+        // Calculate bounding box and center model
         const box = new THREE.Box3().setFromObject(root)
         const size = new THREE.Vector3()
         box.getSize(size)
-        const maxDim = Math.max(size.x, size.y, size.z)
-        const scale = 1.8 / (maxDim || 1)
-        root.scale.setScalar(scale)
-
-        box.setFromObject(root)
         const center = new THREE.Vector3()
         box.getCenter(center)
-        root.position.sub(center)
-        root.position.y -= box.min.y * scale
+
+        // Scale model to fit nicely
+        const maxDim = Math.max(size.x, size.y, size.z)
+        const scale = 2 / (maxDim || 1)
+        root.scale.setScalar(scale)
+
+        // Recalculate after scaling
+        box.setFromObject(root)
+        box.getCenter(center)
+        box.getSize(size)
+
+        // Center model at origin
+        root.position.x = -center.x
+        root.position.z = -center.z
+        root.position.y = -box.min.y // Sit on ground
 
         scene.add(root)
+
+        // Update camera and controls to look at model center
+        const modelCenter = new THREE.Vector3(0, size.y / 2, 0)
+        controls.target.copy(modelCenter)
+        
+        // Position camera to see the whole model
+        const distance = Math.max(size.x, size.z) * 1.5 + 2
+        camera.position.set(0, size.y / 2, distance)
+        camera.lookAt(modelCenter)
+        controls.update()
 
         // Play animations
         if (gltf.animations?.length) {
@@ -178,6 +199,14 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
     }
   }, [currentDino?.modelUrl])
 
+  const handlePrev = () => {
+    setCurrentIndex(prev => (prev - 1 + dinosWithModels.length) % dinosWithModels.length)
+  }
+
+  const handleNext = () => {
+    setCurrentIndex(prev => (prev + 1) % dinosWithModels.length)
+  }
+
   if (!currentDino) {
     return (
       <div className="w-full h-full flex items-center justify-center">
@@ -190,13 +219,13 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
   }
 
   return (
-    <div className="relative w-full h-full">
-      {/* 3D Viewer */}
-      <div ref={mountRef} className="w-full h-full" />
+    <div className="relative w-full h-full flex flex-col">
+      {/* 3D Viewer Area */}
+      <div ref={mountRef} className="flex-1 min-h-0" />
 
       {/* Loading overlay */}
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="text-center">
             <Loader2 size={40} className="animate-spin text-green-400 mx-auto mb-2" />
             <p className="text-white/80 text-sm">Loading {currentDino.name}...</p>
@@ -214,40 +243,87 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
         </div>
       )}
 
-      {/* Dino info overlay */}
-      {!loading && !error && (
+      {/* Navigation Arrows */}
+      {dinosWithModels.length > 1 && (
+        <>
+          <button
+            onClick={handlePrev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition z-10"
+            aria-label="Previous dinosaur"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button
+            onClick={handleNext}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition z-10"
+            aria-label="Next dinosaur"
+          >
+            <ChevronRight size={24} />
+          </button>
+        </>
+      )}
+
+      {/* Bottom Info Bar with Thumbnails */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 pt-8">
+        {/* Dino Info */}
         <Link 
           to={`/dino/${currentDino.id}`}
-          className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md rounded-xl p-3 hover:bg-black/70 transition group"
+          className="block mb-3 group"
         >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-white font-bold text-lg group-hover:text-green-400 transition">
+              <h3 className="text-white font-bold text-xl group-hover:text-green-400 transition">
                 {currentDino.name}
               </h3>
-              <p className="text-gray-300 text-sm">{currentDino.period || 'Unknown period'}</p>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-300">{currentDino.period || 'Unknown period'}</span>
+                {currentDino.diet && (
+                  <span className={`px-2 py-0.5 rounded-full text-xs ${
+                    currentDino.diet === 'carnivorous' ? 'bg-red-500/30 text-red-300' :
+                    currentDino.diet === 'herbivorous' ? 'bg-green-500/30 text-green-300' :
+                    'bg-yellow-500/30 text-yellow-300'
+                  }`}>
+                    {currentDino.diet}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="text-green-400 text-sm font-medium">
+            <div className="text-green-400 text-sm font-medium group-hover:translate-x-1 transition-transform">
               View Details →
             </div>
           </div>
         </Link>
-      )}
 
-      {/* Pagination dots */}
-      {dinosWithModels.length > 1 && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2">
-          {dinosWithModels.slice(0, 5).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentIndex(i)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                i === currentIndex ? 'bg-green-400 w-6' : 'bg-white/40 hover:bg-white/60'
-              }`}
-            />
-          ))}
-        </div>
-      )}
+        {/* Thumbnail Selector */}
+        {dinosWithModels.length > 1 && (
+          <div className="flex gap-2 justify-center overflow-x-auto py-2 scrollbar-hide">
+            {dinosWithModels.map((dino, idx) => (
+              <button
+                key={dino.id}
+                onClick={() => setCurrentIndex(idx)}
+                className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
+                  idx === currentIndex 
+                    ? 'border-green-400 scale-110 shadow-lg shadow-green-400/30' 
+                    : 'border-white/20 hover:border-white/50 opacity-70 hover:opacity-100'
+                }`}
+                title={dino.name}
+              >
+                {dino.imageUrl1 && dino.imageUrl1 !== 'DEV_PENDING' ? (
+                  <img 
+                    src={dino.imageUrl1} 
+                    alt={dino.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-700 flex items-center justify-center text-lg">
+                    🦖
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
