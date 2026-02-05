@@ -35,7 +35,7 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
       <header className="bg-gray-800/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-700/50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center" onClick={closeMobileMenu}>
+          <Link to="/home" className="flex items-center" onClick={closeMobileMenu}>
             <img src={LOGO} alt="DinoProject" className="h-10 w-10 sm:h-12 sm:w-12" />
           </Link>
 
@@ -144,7 +144,7 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
           <div>
             <h4 className="font-semibold mb-3 sm:mb-4 text-white text-sm sm:text-base">Explore</h4>
             <ul className="space-y-1.5 sm:space-y-2 text-gray-400 text-xs sm:text-sm">
-              <li><Link to="/" className="hover:text-primary transition flex items-center gap-2"><Home size={14} /> Home</Link></li>
+              <li><Link to="/home" className="hover:text-primary transition flex items-center gap-2"><Home size={14} /> Home</Link></li>
               <li><Link to="/encyclopedia" className="hover:text-primary transition flex items-center gap-2"><BookOpen size={14} /> Encyclopedia</Link></li>
               <li><Link to="/timeline" className="hover:text-primary transition flex items-center gap-2"><Calendar size={14} /> Timeline</Link></li>
               <li><Link to="/quiz" className="hover:text-primary transition flex items-center gap-2"><Target size={14} /> Quizzes</Link></li>
