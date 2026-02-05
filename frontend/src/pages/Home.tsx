@@ -11,7 +11,7 @@ import { BookOpen, Brain, Search, Loader2, ChevronLeft, ChevronRight, Heart, Spa
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import ParticleBackground from '../components/ParticleBackground'
 import HeroDinoViewer from '../components/HeroDinoViewer'
-import { TRexIcon, DinoFootprint, TriceratopsIcon, BrachioIcon, PteroIcon, RaptorIcon } from '../components/DinoIcons'
+import { TRexIcon, DinoFootprint, BrachioIcon } from '../components/DinoIcons'
 
 interface Dinosaur {
   id: number
@@ -25,25 +25,25 @@ interface Dinosaur {
 
 // Time periods for Journey Through Ages
 const TIME_PERIODS = [
-  { name: 'Triassic', years: '252-201 MYA', color: '#E74C3C', desc: 'Dawn of the dinosaurs' },
-  { name: 'Jurassic', years: '201-145 MYA', color: '#3498DB', desc: 'Giants roamed the Earth' },
-  { name: 'Cretaceous', years: '145-66 MYA', color: '#398f61', desc: 'The golden age of dinosaurs' },
+  { name: 'Triassic', years: '252-201 MYA', color: '#E74C3C', desc: 'Explore 15+ species from the first dinosaur era' },
+  { name: 'Jurassic', years: '201-145 MYA', color: '#3498DB', desc: 'Meet 40+ giants including Brachiosaurus' },
+  { name: 'Cretaceous', years: '145-66 MYA', color: '#398f61', desc: 'Discover 50+ species from the final dinosaur age' },
 ]
 
 // Achievement preview data
 const FEATURED_ACHIEVEMENTS = [
-  { icon: Trophy, title: 'Quiz Master', desc: 'Complete 20 quizzes', color: '#f97316' },
-  { icon: BookOpen, title: 'Expert Explorer', desc: 'View 50 dinosaurs', color: '#3b82f6' },
-  { icon: Map, title: 'World Traveler', desc: 'Explore all continents', color: '#a855f7' },
+  { icon: Trophy, title: 'Quiz Master', desc: 'Score 80%+ on 10 quizzes', color: '#f97316' },
+  { icon: BookOpen, title: 'Expert Explorer', desc: 'View 50 unique species', color: '#3b82f6' },
+  { icon: Map, title: 'World Traveler', desc: 'Find fossils on 6 continents', color: '#a855f7' },
 ]
 
 const FEATURES = [
-  { icon: TRexIcon, title: '3D Models', desc: 'Interactive 3D dinosaur models you can rotate, zoom, and explore in stunning detail', color: 'text-green-400', link: '/encyclopedia' },
-  { icon: BookOpen, title: 'Encyclopedia', desc: 'Comprehensive database with 100+ species, complete with facts, diets, and habitats', color: 'text-blue-400', link: '/encyclopedia' },
-  { icon: Brain, title: 'Quizzes', desc: 'Challenge yourself with gamified quizzes and compete on the leaderboard', color: 'text-purple-400', link: '/quiz' },
-  { icon: Clock, title: 'Timeline', desc: 'Journey through 180 million years of prehistoric history with our interactive timeline', color: 'text-orange-400', link: '/timeline' },
-  { icon: MessageSquare, title: 'Community', desc: 'Join discussions with fellow dinosaur enthusiasts and share discoveries', color: 'text-pink-400', link: '/forum' },
-  { icon: Map, title: 'Fossil Map', desc: 'Explore where dinosaurs lived with our interactive global fossil map', color: 'text-cyan-400', link: '/timeline' },
+  { icon: TRexIcon, title: '3D Models', desc: 'Rotate, zoom, and explore 50+ detailed 3D dinosaur models in real-time', color: 'text-green-400', link: '/encyclopedia' },
+  { icon: BookOpen, title: 'Encyclopedia', desc: 'Access facts, images, and stats for 100+ species — updated weekly', color: 'text-blue-400', link: '/encyclopedia' },
+  { icon: Brain, title: 'Quizzes', desc: 'Test yourself with 500+ questions across Easy, Medium, and Hard levels', color: 'text-purple-400', link: '/quiz' },
+  { icon: Clock, title: 'Timeline', desc: 'Travel through 180 million years from Triassic to Cretaceous extinction', color: 'text-orange-400', link: '/timeline' },
+  { icon: MessageSquare, title: 'Community', desc: 'Join 10,000+ members discussing discoveries and sharing insights daily', color: 'text-pink-400', link: '/forum' },
+  { icon: Map, title: 'Fossil Map', desc: 'Pinpoint fossil sites across 6 continents with our interactive world map', color: 'text-cyan-400', link: '/timeline' },
 ]
 
 const STATS = [
@@ -413,10 +413,10 @@ export default function Home() {
                 <span>Gamification</span>
               </div>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-white mb-4">
-                Unlock Achievements
+                Unlock 25+ Achievements
               </h2>
               <p className="text-gray-400 mb-6 max-w-lg">
-                Earn badges, climb the leaderboard, and track your progress as you explore the world of dinosaurs. Every quiz, discovery, and exploration counts!
+                Earn badges for every milestone — complete 10 quizzes, explore 50 species, or discover fossils on all continents. Track your progress and compete on the global leaderboard.
               </p>
               <Link 
                 to="/quiz"
@@ -474,10 +474,10 @@ export default function Home() {
             </div>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display text-white mb-4">
-            Ready to Become a Dino Expert?
+            Ready to Test Your Dino Knowledge?
           </h2>
           <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Take our interactive dinosaur quiz to test your knowledge and compete with other dino enthusiasts!
+            Answer 10 questions in under 5 minutes. Score 80%+ to earn the Quiz Master badge and join our top 100 leaderboard!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
@@ -540,10 +540,10 @@ export default function Home() {
               <span>Community</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-white mb-4">
-              Join the Discussion
+              Join 10,000+ Dino Fans
             </h2>
             <p className="text-gray-400 mb-6 max-w-lg mx-auto lg:mx-0">
-              Connect with thousands of dinosaur enthusiasts from around the world. Share discoveries, ask questions, and make friends who share your passion.
+              Post questions, share discoveries, and get answers within 24 hours. Our active community adds 50+ new discussions weekly across 8 topic categories.
             </p>
             <Link 
               to="/forum"
@@ -561,10 +561,12 @@ export default function Home() {
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-700 hover:border-blue-500/50 transition-all group hover:-translate-y-1">
           <div className="flex items-center gap-4 mb-4">
-            <BrachioIcon size={48} className="text-blue-400 group-hover:scale-110 transition-transform" />
+            <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <BookOpen size={28} className="text-blue-400" />
+            </div>
           </div>
           <h3 className="font-bold text-white text-xl mb-2">Learn</h3>
-          <p className="text-gray-400">Explore our comprehensive dinosaur encyclopedia with detailed information about every species.</p>
+          <p className="text-gray-400">Discover 100+ dinosaur species with detailed facts, images, and 3D models. Master prehistoric knowledge in minutes.</p>
           <Link to="/encyclopedia" className="inline-flex items-center gap-2 mt-4 text-blue-400 hover:text-blue-300 font-medium group/link">
             Browse Encyclopedia <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
           </Link>
@@ -572,10 +574,12 @@ export default function Home() {
 
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-700 hover:border-purple-500/50 transition-all group hover:-translate-y-1">
           <div className="flex items-center gap-4 mb-4">
-            <RaptorIcon size={48} className="text-purple-400 group-hover:scale-110 transition-transform" />
+            <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Brain size={28} className="text-purple-400" />
+            </div>
           </div>
           <h3 className="font-bold text-white text-xl mb-2">Quiz</h3>
-          <p className="text-gray-400">Test your dinosaur knowledge with challenging quizzes and see how you rank among other learners.</p>
+          <p className="text-gray-400">Challenge yourself with 500+ questions across 3 difficulty levels. Track your score and climb the global leaderboard.</p>
           <Link to="/quiz" className="inline-flex items-center gap-2 mt-4 text-purple-400 hover:text-purple-300 font-medium group/link">
             Take a Quiz <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
           </Link>
@@ -583,10 +587,12 @@ export default function Home() {
 
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 border border-gray-700 hover:border-pink-500/50 transition-all sm:col-span-2 lg:col-span-1 group hover:-translate-y-1">
           <div className="flex items-center gap-4 mb-4">
-            <TriceratopsIcon size={48} className="text-pink-400 group-hover:scale-110 transition-transform" />
+            <div className="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Heart size={28} className="text-pink-400" />
+            </div>
           </div>
           <h3 className="font-bold text-white text-xl mb-2">Support</h3>
-          <p className="text-gray-400">Help us grow DinoProject and unlock premium features like HD models and unlimited favorites.</p>
+          <p className="text-gray-400">Unlock HD 3D models, unlimited favorites, and ad-free browsing. Your support helps us add 20+ new species monthly.</p>
           <Link to="/support" className="inline-flex items-center gap-2 mt-4 text-pink-400 hover:text-pink-300 font-medium group/link">
             Become a Supporter <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
           </Link>

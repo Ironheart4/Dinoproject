@@ -341,8 +341,8 @@ export default function Splash() {
 
         {/* Subtitle */}
         <p className="text-base sm:text-lg md:text-xl text-gray-300 text-center max-w-2xl mb-6 sm:mb-8 leading-relaxed">
-          Journey through millions of years with interactive 3D dinosaurs, challenge yourself with quizzes, 
-          explore fossil discoveries on a global map, and join a community of prehistoric enthusiasts.
+          Discover 100+ species with 3D models, test your knowledge with 500+ quiz questions, 
+          explore fossils across 6 continents, and join 10,000+ prehistoric enthusiasts.
         </p>
 
         {/* Feature highlights */}
