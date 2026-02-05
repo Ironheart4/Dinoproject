@@ -256,7 +256,7 @@ export default function Splash() {
   }
 
   const handleSkip = () => {
-    navigate('/')
+    navigate('/home')
   }
 
   return (

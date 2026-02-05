@@ -8,10 +8,11 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
 import { BookOpen, Brain, Search, Loader2, ChevronLeft, ChevronRight, Heart, Sparkles, Play, Clock, Users, MessageSquare, Map, ArrowRight, Award, Eye, Globe, PenTool, HelpCircle, Star, Zap } from 'lucide-react'
+import { GiDinosaurRex, GiBrokenBone, GiDinosaurBones } from 'react-icons/gi'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import ParticleBackground from '../components/ParticleBackground'
 import HeroDinoViewer from '../components/HeroDinoViewer'
-import { TRexIcon, DinoFootprint, BrachioIcon } from '../components/DinoIcons'
+import { DinoFootprint, BrachioIcon } from '../components/DinoIcons'
 
 interface Dinosaur {
   id: number
@@ -38,7 +39,7 @@ const FEATURED_ACHIEVEMENTS = [
 ]
 
 const FEATURES = [
-  { icon: TRexIcon, title: '3D Models', desc: 'Rotate, zoom, and explore 50+ detailed 3D dinosaur models in real-time', color: 'text-green-400', link: '/encyclopedia' },
+  { icon: GiDinosaurBones, title: '3D Models', desc: 'Rotate, zoom, and explore 50+ detailed 3D dinosaur models in real-time', color: 'text-green-400', link: '/encyclopedia' },
   { icon: BookOpen, title: 'Encyclopedia', desc: 'Access facts, images, and stats for 100+ species — updated weekly', color: 'text-blue-400', link: '/encyclopedia' },
   { icon: Brain, title: 'Quizzes', desc: 'Test yourself with 500+ questions across Easy, Medium, and Hard levels', color: 'text-purple-400', link: '/quiz' },
   { icon: Clock, title: 'Timeline', desc: 'Travel through 180 million years from Triassic to Cretaceous extinction', color: 'text-orange-400', link: '/timeline' },
@@ -47,8 +48,8 @@ const FEATURES = [
 ]
 
 const STATS = [
-  { value: '100+', label: 'Dinosaur Species', icon: TRexIcon },
-  { value: '50+', label: '3D Models', icon: BrachioIcon },
+  { value: '100+', label: 'Dinosaur Species', icon: GiDinosaurRex },
+  { value: '50+', label: '3D Models', icon: GiDinosaurBones },
   { value: '500+', label: 'Quiz Questions', icon: HelpCircle },
   { value: '10K+', label: 'Happy Learners', icon: Users },
 ]
@@ -184,7 +185,7 @@ export default function Home() {
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-white flex items-center gap-3">
-              <TRexIcon size={32} className="text-green-400" />
+              <GiDinosaurRex className="text-green-400 text-3xl" />
               Featured Dinosaurs
             </h2>
             <p className="text-gray-400 mt-2">Discover our most popular prehistoric creatures</p>
@@ -236,7 +237,7 @@ export default function Home() {
                     </div>
                   ) : (
                     <div className="h-48 sm:h-56 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center relative">
-                      <TRexIcon size={80} className="text-gray-600" />
+                      <GiBrokenBone className="text-gray-600 text-7xl" />
                       <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
                     </div>
                   )}

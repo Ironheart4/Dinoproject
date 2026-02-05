@@ -32,14 +32,14 @@ export default function App() {
     <ThemeProvider>
     <AuthProvider>
       <Routes>
-        {/* Splash page - full screen without header/footer */}
-        <Route path="/welcome" element={<Splash />} />
+        {/* Splash page - landing page without header/footer */}
+        <Route path="/" element={<Splash />} />
         
         {/* Main app with layout */}
         <Route path="/*" element={
           <MasterLayout>
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/encyclopedia" element={<Encyclopedia />} />
               <Route path="/dino/:id" element={<DinoDetail />} />
               <Route path="/login" element={<Login />} />
