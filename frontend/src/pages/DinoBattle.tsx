@@ -62,33 +62,44 @@ interface BattleStats {
  * @param dino - The dinosaur to calculate stats for
  * @returns BattleStats object with attack, defense, speed, intelligence, ferocity
  * 
- * FORMULA:
- * - Carnivores: High attack (30) + ferocity (35), low defense (15)
- * - Herbivores: Low attack (10), high defense (35), minimal ferocity (5)
+ * FORMULA (all deterministic based on actual DB values):
+ * - Carnivores: High attack (30) + ferocity (35), lower defense (15)
+ * - Herbivores: Lower attack (10), high defense (35), minimal ferocity (5)
  * - Omnivores: Balanced stats (20/25/15)
  * - Size bonuses: Larger = more attack/defense, slower speed
+ * - Intelligence: Based on diet type + size (carnivores typically more intelligent, smaller dinos also)
  */
 function calculateBattleStats(dino: Dinosaur): BattleStats {
   // Base stat modifiers by diet type
-  const dietModifiers: Record<string, { attack: number; defense: number; ferocity: number }> = {
-    carnivore: { attack: 30, defense: 15, ferocity: 35 },
-    herbivore: { attack: 10, defense: 35, ferocity: 5 },
-    omnivore: { attack: 20, defense: 25, ferocity: 15 },
+  const dietModifiers: Record<string, { attack: number; defense: number; ferocity: number; intelligence: number }> = {
+    carnivore: { attack: 30, defense: 15, ferocity: 35, intelligence: 55 },
+    carnivorous: { attack: 30, defense: 15, ferocity: 35, intelligence: 55 },
+    herbivore: { attack: 10, defense: 35, ferocity: 5, intelligence: 35 },
+    herbivorous: { attack: 10, defense: 35, ferocity: 5, intelligence: 35 },
+    omnivore: { attack: 20, defense: 25, ferocity: 15, intelligence: 50 },
+    omnivorous: { attack: 20, defense: 25, ferocity: 15, intelligence: 50 },
   }
   
   // Normalize diet string and get modifiers
-  const diet = (dino.diet || 'herbivore').toLowerCase()
+  const dietKey = (dino.diet || 'herbivore').toLowerCase().replace('ous', 'ore')
+  const diet = dietKey.includes('carni') ? 'carnivore' : dietKey.includes('omni') ? 'omnivore' : 'herbivore'
   const mod = dietModifiers[diet] || dietModifiers.herbivore
   
   // Size-based stats (normalized to 0-100 scale)
   const lengthScore = Math.min(100, (dino.length || 5) * 2.5)   // 40m max = 100
   const weightScore = Math.min(100, (dino.weight || 500) / 100) // 10000kg max = 100
   
-  // Calculate individual stats with modifiers
+  // Calculate individual stats with modifiers - ALL DETERMINISTIC
   const attack = Math.round(mod.attack + lengthScore * 0.3 + weightScore * 0.2)
   const defense = Math.round(mod.defense + weightScore * 0.4)
   const speed = Math.round(100 - weightScore * 0.5 + (diet === 'carnivore' ? 20 : 0))
-  const intelligence = Math.round(30 + Math.random() * 40) // Random 30-70 for variety
+  
+  // Intelligence: Based on diet + inverse size relationship (smaller predators tend to be "smarter")
+  // Uses dinosaur ID for slight variance while staying deterministic
+  const sizeIntelligencePenalty = Math.min(20, weightScore * 0.2)
+  const idVariance = ((dino.id || 1) % 10) * 2 // 0-18 based on ID, deterministic
+  const intelligence = Math.round(mod.intelligence - sizeIntelligencePenalty + idVariance)
+  
   const ferocity = Math.round(mod.ferocity + (diet === 'carnivore' ? lengthScore * 0.2 : 0))
   
   // Total power rating
@@ -540,8 +551,22 @@ export default function DinoBattle() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="text-center py-8"
                   >
-                    <div className="inline-block mb-6">
-                      <GiTrophy className="w-24 h-24 text-yellow-500 mx-auto animate-bounce" />
+                    {/* Winner Image or Trophy */}
+                    <div className="inline-block mb-6 relative">
+                      {battleResult.winner.image_url ? (
+                        <div className="relative">
+                          <img 
+                            src={battleResult.winner.image_url} 
+                            alt={battleResult.winner.name}
+                            className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-yellow-500 shadow-lg shadow-yellow-500/30"
+                          />
+                          <div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                            <GiTrophy className="w-7 h-7 text-white" />
+                          </div>
+                        </div>
+                      ) : (
+                        <GiTrophy className="w-24 h-24 text-yellow-500 mx-auto animate-bounce" />
+                      )}
                     </div>
                     <h2 className="text-3xl md:text-4xl font-black text-white mb-2">
                       {battleResult.winner.name} WINS!
@@ -554,32 +579,50 @@ export default function DinoBattle() {
 
                     {/* Final HP bars */}
                     <div className="max-w-md mx-auto space-y-4 mb-8">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-white">{fighter1?.name}</span>
-                          <span className="text-gray-400">{battleResult.finalHp.hp1} HP</span>
-                        </div>
-                        <div className="h-4 bg-gray-700 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full transition-all duration-500 ${
-                              battleResult.winner.id === fighter1?.id ? 'bg-green-500' : 'bg-red-500'
-                            }`}
-                            style={{ width: `${battleResult.finalHp.hp1}%` }}
-                          />
+                      <div className="flex items-center gap-3">
+                        {fighter1?.image_url ? (
+                          <img src={fighter1.image_url} alt={fighter1.name} className="w-10 h-10 rounded-full object-cover border-2 border-blue-500" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                            <GiDinosaurRex className="w-5 h-5 text-blue-400" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-white">{fighter1?.name}</span>
+                            <span className="text-gray-400">{battleResult.finalHp.hp1} HP</span>
+                          </div>
+                          <div className="h-4 bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-500 ${
+                                battleResult.winner.id === fighter1?.id ? 'bg-green-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${battleResult.finalHp.hp1}%` }}
+                            />
+                          </div>
                         </div>
                       </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-white">{fighter2?.name}</span>
-                          <span className="text-gray-400">{battleResult.finalHp.hp2} HP</span>
-                        </div>
-                        <div className="h-4 bg-gray-700 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full transition-all duration-500 ${
-                              battleResult.winner.id === fighter2?.id ? 'bg-green-500' : 'bg-red-500'
-                            }`}
-                            style={{ width: `${battleResult.finalHp.hp2}%` }}
-                          />
+                      <div className="flex items-center gap-3">
+                        {fighter2?.image_url ? (
+                          <img src={fighter2.image_url} alt={fighter2.name} className="w-10 h-10 rounded-full object-cover border-2 border-red-500" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                            <GiDinosaurRex className="w-5 h-5 text-red-400" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-white">{fighter2?.name}</span>
+                            <span className="text-gray-400">{battleResult.finalHp.hp2} HP</span>
+                          </div>
+                          <div className="h-4 bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-500 ${
+                                battleResult.winner.id === fighter2?.id ? 'bg-green-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${battleResult.finalHp.hp2}%` }}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>

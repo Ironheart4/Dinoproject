@@ -24,6 +24,12 @@ export default function Splash() {
   const [progress, setProgress] = useState(0)
   const [showContent, setShowContent] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  
+  // Detect mobile or slow connection - skip 3D on mobile for faster load
+  const isMobile = typeof window !== 'undefined' && (
+    window.innerWidth < 768 || 
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  )
 
   // Parallax mouse tracking
   useEffect(() => {
@@ -36,8 +42,26 @@ export default function Splash() {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
 
-  // 3D Scene setup
+  // 3D Scene setup - skip on mobile for faster load
   useEffect(() => {
+    // On mobile, skip 3D entirely and show content immediately
+    if (isMobile) {
+      setLoaded(true)
+      setTimeout(() => setShowContent(true), 300)
+      return
+    }
+    
+    // Fallback timeout - show content after 4 seconds even if 3D isn't loaded
+    const fallbackTimer = setTimeout(() => {
+      if (!loaded) {
+        setLoaded(true)
+        setProgress(100)
+      }
+      if (!showContent) {
+        setShowContent(true)
+      }
+    }, 4000)
+    
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -244,12 +268,13 @@ export default function Splash() {
     window.addEventListener('resize', handleResize)
 
     return () => {
+      clearTimeout(fallbackTimer)
       window.removeEventListener('resize', handleResize)
       cancelAnimationFrame(animationId)
       renderer.dispose()
       dracoLoader.dispose()
     }
-  }, [mousePos.x, mousePos.y])
+  }, [mousePos.x, mousePos.y, isMobile, loaded, showContent])
 
   const handleEnter = () => {
     navigate('/timeline')
@@ -261,8 +286,21 @@ export default function Splash() {
 
   return (
     <div ref={containerRef} className="fixed inset-0 overflow-hidden bg-[#050a08]">
-      {/* 3D Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+      {/* 3D Canvas - only render on desktop */}
+      {!isMobile && <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />}
+      
+      {/* Mobile-friendly gradient background */}
+      {isMobile && (
+        <div className="absolute inset-0" style={{
+          background: 'radial-gradient(ellipse at center, #1a3a2a 0%, #0d1f17 40%, #050a08 100%)'
+        }}>
+          {/* Animated gradient overlay for mobile */}
+          <div className="absolute inset-0 opacity-30" style={{
+            background: 'linear-gradient(45deg, transparent 30%, rgba(74, 222, 128, 0.1) 50%, transparent 70%)',
+            animation: 'shimmer 3s infinite'
+          }} />
+        </div>
+      )}
 
       {/* Parallax jungle silhouettes */}
       <div 
