@@ -3,14 +3,17 @@
 // - Update `navLinks` array to add/remove top-level navigation items
 // - Uses `useAuth()` to display user-specific links (Dashboard, Logout)
 // - Footer contains quick links and contact info; adjust for branding or legal text
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { 
   LayoutDashboard, Heart, Home, BookOpen, Target, Info, LogIn, 
   Mail, Twitter, Instagram, Youtube, MessageCircle, Calendar, Facebook,
   Menu, X
-} from 'lucide-react' 
+} from 'lucide-react'
+
+// Lazy load the heavy background component
+const DynamicBackground = lazy(() => import('./DynamicBackground'))
 
 const LOGO = 'https://i.postimg.cc/gcMbkWV0/Dino-Project-Logo.png'
 
@@ -19,7 +22,7 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navLinks = [
-    { to: '/', label: 'Home' },
+    { to: '/home', label: 'Home' },
     { to: '/encyclopedia', label: 'Encyclopedia' },
     { to: '/timeline', label: 'Timeline' },
     { to: '/quiz', label: 'Quiz' },
@@ -30,9 +33,14 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
   const closeMobileMenu = () => setMobileMenuOpen(false)
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900 text-gray-100 bg-pattern">
+    <div className="min-h-screen flex flex-col bg-gray-900 text-gray-100">
+      {/* Dynamic animated background */}
+      <Suspense fallback={null}>
+        <DynamicBackground />
+      </Suspense>
+      
       {/* Header */}
-      <header className="bg-gray-800/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-700/50">
+      <header className="bg-gray-800/80 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-700/50 relative">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo */}
           <Link to="/home" className="flex items-center" onClick={closeMobileMenu}>
@@ -124,12 +132,12 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
       </header>
 
       {/* Main Content */}
-      <div className="flex-1">
+      <main className="flex-1 relative z-10">
         <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">{children}</div>
-      </div>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white mt-auto border-t border-gray-700">
+      <footer className="bg-gray-800/90 backdrop-blur-sm text-white mt-auto border-t border-gray-700 relative z-10">
         <div className="max-w-6xl mx-auto px-3 sm:px-4 py-8 sm:py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-sm">
           {/* Brand */}
           <div className="sm:col-span-2 md:col-span-1">
