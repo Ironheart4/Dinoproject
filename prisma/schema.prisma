@@ -1,6 +1,33 @@
-// prisma/schema.prisma — Database schema for DinoProject
-// Purpose: Defines the database models used by the backend (users, dinosaurs, quizzes, etc.)
-// Note: Authentication users are managed in Supabase auth.users; `User.id` maps to that UUID
+// ============================================================================
+// prisma/schema.prisma — DinoProject Database Schema
+// ============================================================================
+// PURPOSE: Defines all database tables (models) for the application
+// 
+// HOW PRISMA WORKS:
+// 1. You define models here (like User, Dinosaur, Quiz)
+// 2. Run `npx prisma generate` to create TypeScript client
+// 3. Run `npx prisma db push` to sync schema to database
+// 4. Use `prisma.user.findMany()` etc. in your code
+//
+// IMPORTANT CONCEPTS:
+// - @id           = Primary key
+// - @unique       = Must be unique across all rows
+// - @default      = Default value if not provided
+// - @map          = Maps to different column name in DB (e.g., snake_case)
+// - @@map         = Maps model to different table name
+// - @relation     = Defines foreign key relationship
+//
+// DATABASE PROVIDER:
+// - Uses PostgreSQL (Supabase)
+// - Connection string in DATABASE_URL environment variable
+//
+// COMMON COMMANDS:
+//   npx prisma generate     → Generate Prisma client
+//   npx prisma db push      → Push schema to database
+//   npx prisma studio       → Open visual database editor
+//   npx prisma migrate dev  → Create migration (for production)
+// ============================================================================
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,89 +36,136 @@ datasource db {
   provider = "postgresql"
 }
 
-// Users (Profile data only - Auth handled by Supabase auth.users)
+// ============================================================================
+// USER MODEL
+// ============================================================================
+// Stores user profile data. Authentication is handled by Supabase auth.users
+// The `id` field links to Supabase's auth.users(id) UUID
+//
+// FIELDS:
+//   id        - UUID from Supabase auth (primary key)
+//   name      - Display name shown in UI
+//   role      - "user" or "admin" - controls permissions
+//   createdAt - When the account was created
+//
+// EXAMPLE QUERY:
+//   const user = await prisma.user.findUnique({ where: { id: 'uuid-here' } })
+// ============================================================================
 model User {
-  id        String   @id @db.Uuid // References auth.users(id)
+  id        String   @id @db.Uuid // Links to Supabase auth.users(id)
   name      String?  @db.VarChar(100)
-  role      String   @default("user") @db.VarChar(20) // user | admin
+  role      String   @default("user") @db.VarChar(20) // "user" | "admin"
   createdAt DateTime @default(now()) @map("created_at")
 
+  // Relationships (one user has many of these)
   scores       Score[]
   favorites    Favorite[]
   subscription Subscription?
   forumPosts   ForumPost[]
   forumReplies ForumReply[]
 
-  @@map("users")
+  @@map("users") // Table name in database
 }
 
-// Dinosaurs
+// ============================================================================
+// DINOSAUR MODEL
+// ============================================================================
+// Main content table - stores all dinosaur data
+//
+// KEY FIELDS:
+//   modelUrl    - URL to 3D GLB/GLTF model (required for 3D viewer)
+//   imageUrl    - Main thumbnail image
+//   imageUrl1-5 - Gallery images
+//   diet        - "Carnivorous", "Herbivorous", "Omnivorous"
+//   period      - "Cretaceous", "Jurassic", "Triassic"
+//   isPremium   - If true, full 3D access requires subscription
+//
+// BATTLE STATS (calculated from):
+//   lengthMeters → Attack bonus
+//   weightKg     → Defense/Attack bonus, Speed penalty
+//   diet         → Base stats for attack, defense, intelligence
+// ============================================================================
 model Dinosaur {
   id           Int      @id @default(autoincrement())
-  name         String?  @db.VarChar(100)
-  species      String   @unique @db.VarChar(100)
-  period       String?  @db.VarChar(50)
-  diet         String?  @db.VarChar(50)
-  habitat      String?  @db.VarChar(50) // land, air, water
-  lengthMeters Decimal? @map("length_meters") @db.Decimal(6, 2)
-  weightKg     Int?     @map("weight_kg")
-  description  String?
-  modelUrl     String   @map("model_url") @db.VarChar(500)
-  roarSound    String?  @map("roar_sound") @db.VarChar(500)
-  imageUrl     String?  @map("image_url") @db.VarChar(500)
-  imageUrl1    String?  @map("image_url1") @db.VarChar(500)
-  imageUrl2    String?  @map("image_url2") @db.VarChar(500)
-  imageUrl3    String?  @map("image_url3") @db.VarChar(500)
-  imageUrl4    String?  @map("image_url4") @db.VarChar(500)
-  imageUrl5    String?  @map("image_url5") @db.VarChar(500)
-  videoUrl     String?  @map("video_url") @db.VarChar(500)
-  taxonomy     String?
-  type         String?  @db.VarChar(100)
+  name         String?  @db.VarChar(100)    // Common name (e.g., "T-Rex")
+  species      String   @unique @db.VarChar(100) // Scientific name (must be unique)
+  period       String?  @db.VarChar(50)     // Geological period
+  diet         String?  @db.VarChar(50)     // Carnivorous/Herbivorous/Omnivorous
+  habitat      String?  @db.VarChar(50)     // land, air, water
+  lengthMeters Decimal? @map("length_meters") @db.Decimal(6, 2) // Body length in meters
+  weightKg     Int?     @map("weight_kg")   // Weight in kilograms
+  description  String?                       // Long description text
+  modelUrl     String   @map("model_url") @db.VarChar(500) // 3D model URL
+  roarSound    String?  @map("roar_sound") @db.VarChar(500) // Sound file URL
+  imageUrl     String?  @map("image_url") @db.VarChar(500)  // Main image
+  imageUrl1    String?  @map("image_url1") @db.VarChar(500) // Gallery image 1
+  imageUrl2    String?  @map("image_url2") @db.VarChar(500) // Gallery image 2
+  imageUrl3    String?  @map("image_url3") @db.VarChar(500) // Gallery image 3
+  imageUrl4    String?  @map("image_url4") @db.VarChar(500) // Gallery image 4
+  imageUrl5    String?  @map("image_url5") @db.VarChar(500) // Gallery image 5
+  videoUrl     String?  @map("video_url") @db.VarChar(500)  // YouTube/video URL
+  taxonomy     String?                       // Scientific classification
+  type         String?  @db.VarChar(100)    // Type (sauropod, theropod, etc.)
   livedIn      String?  @map("lived_in") @db.VarChar(200)
-  namedBy      String?  @map("named_by") @db.VarChar(200)
-  isPremium    Boolean  @default(false) @map("is_premium") // restrict full 3D access
+  namedBy      String?  @map("named_by") @db.VarChar(200) // Who named this species
+  isPremium    Boolean  @default(false) @map("is_premium") // If true, requires subscription for 3D
   createdAt    DateTime @default(now()) @map("created_at")
 
-  favorites Favorite[]
+  favorites Favorite[] // Users who favorited this dinosaur
 
   @@map("dinosaurs")
 }
 
-// Quizzes
+// ============================================================================
+// QUIZ MODEL
+// ============================================================================
+// Quizzes that users can take. Each quiz has multiple questions.
+// Admin creates quizzes via admin panel → QuizManager
+// ============================================================================
 model Quiz {
   id        Int        @id @default(autoincrement())
-  title     String     @db.VarChar(200)
+  title     String     @db.VarChar(200)  // Quiz title (e.g., "Dinosaur Diet Quiz")
   createdAt DateTime   @default(now()) @map("created_at")
 
-  questions Question[]
-  scores    Score[]
+  questions Question[] // Questions in this quiz
+  scores    Score[]    // User scores for this quiz
 
   @@map("quizzes")
 }
 
-// Questions
+// ============================================================================
+// QUESTION MODEL
+// ============================================================================
+// Individual quiz questions with 4 multiple choice options (A, B, C, D)
+// Linked to a specific quiz via quizId
+// ============================================================================
 model Question {
   id            Int    @id @default(autoincrement())
-  quizId        Int    @map("quiz_id")
-  questionText  String @map("question_text")
-  optionA       String @map("option_a")
-  optionB       String @map("option_b")
-  optionC       String @map("option_c")
-  optionD       String @map("option_d")
-  correctAnswer String @map("correct_answer") @db.Char(1)
+  quizId        Int    @map("quiz_id")        // Which quiz this belongs to
+  questionText  String @map("question_text")  // The question itself
+  optionA       String @map("option_a")       // Answer choice A
+  optionB       String @map("option_b")       // Answer choice B
+  optionC       String @map("option_c")       // Answer choice C
+  optionD       String @map("option_d")       // Answer choice D
+  correctAnswer String @map("correct_answer") @db.Char(1) // "A", "B", "C", or "D"
 
   quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
   @@map("questions")
 }
 
-// Scores (Quiz results)
+// ============================================================================
+// SCORE MODEL
+// ============================================================================
+// Records user's quiz results
+// Created when user submits a completed quiz
+// ============================================================================
 model Score {
   id          Int      @id @default(autoincrement())
-  userId      String   @map("user_id") @db.Uuid
-  quizId      Int      @map("quiz_id")
-  score       Int
-  completedAt DateTime @default(now()) @map("completed_at")
+  userId      String   @map("user_id") @db.Uuid  // Who took the quiz
+  quizId      Int      @map("quiz_id")           // Which quiz
+  score       Int                                 // Points earned
+  completedAt DateTime @default(now()) @map("completed_at") // When submitted
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
@@ -99,29 +173,39 @@ model Score {
   @@map("scores")
 }
 
-// Favorites (Free users limited to 5 by app logic)
+// ============================================================================
+// FAVORITE MODEL
+// ============================================================================
+// Users can favorite dinosaurs for quick access
+// Free users limited to 5 favorites (enforced in backend logic)
+// ============================================================================
 model Favorite {
   id        Int      @id @default(autoincrement())
-  userId    String   @map("user_id") @db.Uuid
-  dinoId    Int      @map("dino_id")
+  userId    String   @map("user_id") @db.Uuid  // Who favorited
+  dinoId    Int      @map("dino_id")           // Which dinosaur
   createdAt DateTime @default(now()) @map("created_at")
 
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   dinosaur Dinosaur @relation(fields: [dinoId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, dinoId])
+  @@unique([userId, dinoId]) // Can't favorite same dino twice
   @@map("favorites")
 }
 
-// Subscriptions (PayPal - determines premium access)
+// ============================================================================
+// SUBSCRIPTION MODEL
+// ============================================================================
+// Tracks premium subscriptions for users
+// Plans: "free" (default), "premium" (paid), "donor" (supporter)
+// ============================================================================
 model Subscription {
   id                   Int       @id @default(autoincrement())
-  userId               String    @unique @map("user_id") @db.Uuid
+  userId               String    @unique @map("user_id") @db.Uuid // One subscription per user
   plan                 String    @default("free") @db.VarChar(20) // free | premium | donor
   status               String    @default("active") @db.VarChar(20) // active | cancelled | expired
   startDate            DateTime  @default(now()) @map("start_date")
-  endDate              DateTime? @map("end_date")
-  paypalSubscriptionId String?   @map("paypal_subscription_id") @db.VarChar(200)
+  endDate              DateTime? @map("end_date")               // When subscription expires
+  paypalSubscriptionId String?   @map("paypal_subscription_id") @db.VarChar(200) // PayPal reference
   createdAt            DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -129,15 +213,20 @@ model Subscription {
   @@map("subscriptions")
 }
 
-// Forum Categories
+// ============================================================================
+// FORUM CATEGORY MODEL
+// ============================================================================
+// Forum categories organize posts into topics
+// Examples: "General Discussion", "Questions", "Show and Tell"
+// ============================================================================
 model ForumCategory {
   id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(100)
-  slug        String   @unique @db.VarChar(100)
-  description String?
-  icon        String?  @db.VarChar(50)
-  color       String?  @default("#4CAF50") @db.VarChar(20)
-  postCount   Int      @default(0) @map("post_count")
+  name        String   @db.VarChar(100)       // Display name
+  slug        String   @unique @db.VarChar(100) // URL-friendly name
+  description String?                          // Category description
+  icon        String?  @db.VarChar(50)        // Lucide icon name
+  color       String?  @default("#4CAF50") @db.VarChar(20) // Theme color
+  postCount   Int      @default(0) @map("post_count") // Cached post count
   createdAt   DateTime @default(now()) @map("created_at")
 
   posts ForumPost[]
@@ -145,20 +234,30 @@ model ForumCategory {
   @@map("forum_categories")
 }
 
-// Forum Posts
+// ============================================================================
+// FORUM POST MODEL
+// ============================================================================
+// Individual discussion threads within a category
+// Posts can be pinned (stay at top) or locked (no new replies)
+// View and reply counts are cached for performance
+// ============================================================================
 model ForumPost {
   id         Int       @id @default(autoincrement())
-  categoryId Int       @map("category_id")
-  userId     String    @map("user_id") @db.Uuid
-  title      String    @db.VarChar(200)
-  content    String
-  isPinned   Boolean   @default(false) @map("is_pinned")
-  isLocked   Boolean   @default(false) @map("is_locked")
-  viewCount  Int       @default(0) @map("view_count")
-  replyCount Int       @default(0) @map("reply_count")
+  categoryId Int       @map("category_id")              // Which category this belongs to
+  userId     String    @map("user_id") @db.Uuid         // Who created the post
+  title      String    @db.VarChar(200)                 // Post title (max 200 chars)
+  content    String                                      // Post body (Markdown supported)
+  isPinned   Boolean   @default(false) @map("is_pinned") // Admin can pin to top
+  isLocked   Boolean   @default(false) @map("is_locked") // Admin can lock discussion
+  viewCount  Int       @default(0) @map("view_count")   // How many times viewed
+  replyCount Int       @default(0) @map("reply_count")  // Number of replies (cached)
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
 
+  // RELATIONS:
+  // - category: The forum category this post belongs to
+  // - user: The author who created this post
+  // - replies: All replies to this post
   category ForumCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   replies  ForumReply[]
@@ -166,16 +265,24 @@ model ForumPost {
   @@map("forum_posts")
 }
 
-// Forum Replies
+// ============================================================================
+// FORUM REPLY MODEL
+// ============================================================================
+// Replies/comments on forum posts
+// Can be marked as "solution" for Q&A style posts
+// ============================================================================
 model ForumReply {
   id         Int      @id @default(autoincrement())
-  postId     Int      @map("post_id")
-  userId     String   @map("user_id") @db.Uuid
-  content    String
-  isSolution Boolean  @default(false) @map("is_solution")
+  postId     Int      @map("post_id")                    // Which post this is replying to
+  userId     String   @map("user_id") @db.Uuid           // Who wrote the reply
+  content    String                                       // Reply content (Markdown supported)
+  isSolution Boolean  @default(false) @map("is_solution") // Mark as accepted answer
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
 
+  // RELATIONS:
+  // - post: The post this is replying to
+  // - user: The author of this reply
   post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
   user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
