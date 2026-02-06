@@ -137,6 +137,30 @@ export default function Dashboard() {
       return
     }
 
+    // Build favorites list HTML
+    const favoritesListHtml = activity?.favorites?.length ? `
+        <h2>❤️ Your Favorite Dinosaurs</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+          <thead>
+            <tr style="background: #f3f4f6;">
+              <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e5e7eb;">#</th>
+              <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e5e7eb;">Dinosaur Name</th>
+              <th style="padding: 10px; text-align: left; border-bottom: 2px solid #e5e7eb;">Date Added</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${activity.favorites.map((fav, i) => `
+              <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 10px;">${i + 1}</td>
+                <td style="padding: 10px; font-weight: bold;">${fav.dinosaurName}</td>
+                <td style="padding: 10px; color: #6b7280;">${formatDate(fav.date)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <p style="color: #6b7280; margin-top: 10px;">Total: ${activity.favorites.length} favorites</p>
+    ` : ''
+
     const content = `
       <!DOCTYPE html>
       <html>
@@ -186,6 +210,8 @@ export default function Dashboard() {
             <div class="stat-label">🔥 Days Active</div>
           </div>
         </div>
+
+        ${favoritesListHtml}
 
         ${charts.topTypes.length > 0 ? `
         <h2>🦕 Favorite Dinosaur Types</h2>

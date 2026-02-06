@@ -21,13 +21,16 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
   const { user, logout } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  // Navigation links for header menu (desktop + mobile)
+  // Each link has: to (route path), label (display text)
   const navLinks = [
-    { to: '/home', label: 'Home' },
-    { to: '/encyclopedia', label: 'Encyclopedia' },
-    { to: '/timeline', label: 'Timeline' },
-    { to: '/quiz', label: 'Quiz' },
-    { to: '/forum', label: 'Forum' },
-    { to: '/about', label: 'About' },
+    { to: '/home', label: 'Home' },           // Main landing page
+    { to: '/encyclopedia', label: 'Encyclopedia' },  // Dinosaur database
+    { to: '/timeline', label: 'Timeline' },   // Historical timeline
+    { to: '/quiz', label: 'Quiz' },           // Knowledge quiz
+    { to: '/battle', label: 'Battle' },       // Dino Battle Arena
+    { to: '/forum', label: 'Forum' },         // Community forum
+    { to: '/about', label: 'About' },         // About page
   ]
 
   const closeMobileMenu = () => setMobileMenuOpen(false)

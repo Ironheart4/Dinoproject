@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
-import { BookOpen, Brain, Search, Loader2, ChevronLeft, ChevronRight, Heart, Sparkles, Play, Clock, Users, MessageSquare, Map, ArrowRight, Award, Eye, Globe, PenTool, HelpCircle, Star, Zap } from 'lucide-react'
+import { BookOpen, Brain, Search, Loader2, ChevronLeft, ChevronRight, Heart, Sparkles, Play, Clock, Users, MessageSquare, Map, ArrowRight, Award, Eye, Globe, PenTool, HelpCircle, Star, Zap, Swords } from 'lucide-react'
 import { GiDinosaurRex, GiBrokenBone, GiDinosaurBones } from 'react-icons/gi'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import ParticleBackground from '../components/ParticleBackground'
@@ -42,6 +42,7 @@ const FEATURES = [
   { icon: GiDinosaurBones, title: '3D Models', desc: 'Rotate, zoom, and explore 50+ detailed 3D dinosaur models in real-time', color: 'text-green-400', link: '/encyclopedia' },
   { icon: BookOpen, title: 'Encyclopedia', desc: 'Access facts, images, and stats for 100+ species — updated weekly', color: 'text-blue-400', link: '/encyclopedia' },
   { icon: Brain, title: 'Quizzes', desc: 'Test yourself with 500+ questions across Easy, Medium, and Hard levels', color: 'text-purple-400', link: '/quiz' },
+  { icon: Swords, title: 'Battle Arena', desc: 'Pick two dinosaurs and watch them clash — who will win?', color: 'text-red-400', link: '/battle' },
   { icon: Clock, title: 'Timeline', desc: 'Travel through 180 million years from Triassic to Cretaceous extinction', color: 'text-orange-400', link: '/timeline' },
   { icon: MessageSquare, title: 'Community', desc: 'Join 10,000+ members discussing discoveries and sharing insights daily', color: 'text-pink-400', link: '/forum' },
   { icon: Map, title: 'Fossil Map', desc: 'Pinpoint fossil sites across 6 continents with our interactive world map', color: 'text-cyan-400', link: '/timeline' },

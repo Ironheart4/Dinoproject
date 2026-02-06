@@ -24,11 +24,14 @@ import ForumCategory from './pages/ForumCategory'
 import ForumPost from './pages/ForumPost'
 import Privacy from './pages/Privacy'
 import Splash from './pages/Splash'
+import DinoBattle from './pages/DinoBattle'
 import CookieConsent from './components/CookieConsent'
 import DinoAssistant from './components/DinoAssistant'
+import ErrorBoundary from './components/ErrorBoundary'
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <ThemeProvider>
     <AuthProvider>
       <Routes>
@@ -53,6 +56,7 @@ export default function App() {
               <Route path="/forum/category/:slug" element={<ForumCategory />} />
               <Route path="/forum/post/:id" element={<ForumPost />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/battle" element={<DinoBattle />} />
             </Routes>
           </MasterLayout>
         } />
@@ -61,6 +65,7 @@ export default function App() {
       <DinoAssistant />
     </AuthProvider>
     </ThemeProvider>
+    </ErrorBoundary>
   )
 }
 

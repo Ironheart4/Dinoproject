@@ -7,9 +7,10 @@ import { useAuth } from '../lib/auth'
 import { 
   Brain, FileText, Image, Dna, BarChart3, Loader2, Rocket, 
   Trophy, PartyPopper, ThumbsUp, BookOpen, RefreshCw, Check, 
-  X, Save, Lightbulb, CircleCheck
+  X, Save, Lightbulb, CircleCheck, Share2
 } from 'lucide-react'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import SocialShare from '../components/SocialShare'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -356,6 +357,20 @@ export default function Quiz() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Share Results */}
+          <div className="mb-6">
+            <p className="text-gray-400 text-sm mb-2 flex items-center justify-center gap-1">
+              <Share2 size={14} /> Share your score:
+            </p>
+            <SocialShare
+              title="DinoProject Quiz Results"
+              text={`I scored ${score}/${questions.length} (${percentage}%) on the DinoProject dinosaur quiz! Can you beat my score?`}
+              hashtags={['DinoProject', 'DinosaurQuiz', 'DinoTrivia']}
+              variant="icons"
+              className="justify-center"
+            />
           </div>
 
           <div className="flex gap-4 justify-center">

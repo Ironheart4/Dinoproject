@@ -1,0 +1,48 @@
+{
+  "name": "DinoProject - 3D Dinosaur Encyclopedia",
+  "short_name": "DinoProject",
+  "description": "Explore prehistoric creatures with stunning 3D models, take educational quizzes, and discover the fascinating world of dinosaurs.",
+  "start_url": "/home",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#22c55e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/gcMbkWV0/Dino-Project-Logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.postimg.cc/gcMbkWV0/Dino-Project-Logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "entertainment"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Encyclopedia",
+      "url": "/encyclopedia",
+      "description": "Browse all dinosaurs"
+    },
+    {
+      "name": "Quiz",
+      "url": "/quiz",
+      "description": "Test your knowledge"
+    },
+    {
+      "name": "Dino Battle",
+      "url": "/battle",
+      "description": "Battle dinosaurs!"
+    },
+    {
+      "name": "Timeline",
+      "url": "/timeline",
+      "description": "Explore prehistoric eras"
+    }
+  ]
+}

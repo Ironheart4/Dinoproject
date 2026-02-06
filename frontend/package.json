@@ -12,6 +12,7 @@
     "@react-three/drei": "^9.84.0",
     "@react-three/fiber": "^8.13.0",
     "@supabase/supabase-js": "^2.89.0",
+    "framer-motion": "^12.33.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.562.0",
     "mapbox-gl": "^3.17.0",
