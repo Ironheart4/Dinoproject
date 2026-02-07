@@ -448,22 +448,23 @@ export default function Timeline() {
       {/* Horizontal Timeline */}
       <div className="bg-gray-800 rounded-xl p-3 sm:p-4 border border-gray-700">
         <h2 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">🦕 Geological Timeline</h2>
-        <div className="overflow-x-auto pb-4" style={{ scrollbarWidth: 'thin' }}>
-          <div className="flex gap-4 sm:gap-8 min-w-max">
-            {TIME_PERIODS.map((period) => (
-              <div key={period.name} className="flex-shrink-0">
-                {/* Period Header */}
-                <div 
-                  className="mb-3 px-4 py-2 rounded-lg text-center"
-                  style={{ backgroundColor: period.color + '30', borderLeft: `4px solid ${period.color}` }}
-                >
-                  <div className="font-bold text-white">{period.name}</div>
-                  <div className="text-xs text-gray-400">{period.years}</div>
-                </div>
-                
-                {/* Dinosaur Icons */}
-                <div className="flex gap-2 flex-wrap max-w-[250px] sm:max-w-[300px]">
-                  {groupedByPeriod[period.name]?.slice(0, 20).map((dino) => (
+        {/* Timeline grid - evenly spaced periods */}
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+          {TIME_PERIODS.map((period) => (
+            <div key={period.name} className="flex flex-col">
+              {/* Period Header */}
+              <div 
+                className="mb-3 px-3 sm:px-4 py-2 rounded-lg text-center"
+                style={{ backgroundColor: period.color + '30', borderLeft: `4px solid ${period.color}` }}
+              >
+                <div className="font-bold text-white text-sm sm:text-base">{period.name}</div>
+                <div className="text-xs text-gray-400">{period.years}</div>
+              </div>
+              
+              {/* Dinosaur Icons with scroll when overflow */}
+              <div className="flex gap-2 flex-wrap max-h-[200px] overflow-y-auto overflow-x-hidden pr-1" 
+                   style={{ scrollbarWidth: 'thin' }}>
+                {groupedByPeriod[period.name]?.map((dino) => (
                     <div
                       key={dino.id}
                       className={`relative group cursor-pointer transition-all duration-200 ${
@@ -525,11 +526,6 @@ export default function Timeline() {
                       </div>
                     </div>
                   ))}
-                  {(groupedByPeriod[period.name]?.length || 0) > 20 && (
-                    <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-xs text-gray-400 border-2 border-gray-600">
-                      +{(groupedByPeriod[period.name]?.length || 0) - 20}
-                    </div>
-                  )}
                   {(groupedByPeriod[period.name]?.length || 0) === 0 && (
                     <div className="text-gray-500 text-sm">No dinosaurs</div>
                   )}
@@ -538,7 +534,6 @@ export default function Timeline() {
             ))}
           </div>
         </div>
-      </div>
 
       {/* World Map */}
       <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
