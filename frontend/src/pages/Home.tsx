@@ -49,8 +49,8 @@ const FEATURES = [
 ]
 
 const STATS = [
-  { value: '50+', label: 'Dinosaur Species', icon: GiDinosaurRex },
-  { value: '50+', label: '3D Models', icon: GiDinosaurBones },
+  { value: '100+', label: 'Dinosaur Species', icon: GiDinosaurRex },
+  { value: '100+', label: '3D Models', icon: GiDinosaurBones },
   { value: '500+', label: 'Quiz Questions', icon: HelpCircle },
   { value: '10+', label: 'Features', icon: Sparkles },
 ]
@@ -568,7 +568,7 @@ export default function Home() {
             </div>
           </div>
           <h3 className="font-bold text-white text-xl mb-2">Learn</h3>
-          <p className="text-gray-400">Discover 50+ dinosaur species with detailed facts, images, and 3D models. Master prehistoric knowledge in minutes.</p>
+          <p className="text-gray-400">Discover 100+ dinosaur species with detailed facts, images, and 3D models. Master prehistoric knowledge in minutes.</p>
           <Link to="/encyclopedia" className="inline-flex items-center gap-2 mt-4 text-blue-400 hover:text-blue-300 font-medium group/link">
             Browse Encyclopedia <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
           </Link>
