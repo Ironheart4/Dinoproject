@@ -1,7 +1,9 @@
 // AboutUs.tsx — About page with project details, credits, and contributor links
 // Notes: Keep this page updated with contributors, project status, and links to the repo and support channels
 import React from 'react'
-import { User, Heart, BookOpen, Brain, Bot, Map, Clock, Image, Video, Cuboid as Cube3d, Github, Mail, Coffee, ExternalLink } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { User, Heart, BookOpen, Brain, Bot, Map, Clock, Image, Video, Cuboid as Cube3d, Github, Mail, Coffee, ExternalLink, Lock } from 'lucide-react'
+import { useAuth } from '../lib/auth'
 
 // PayPal Logo Component - Uses external image for clean rendering
 const PayPalIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
@@ -13,6 +15,8 @@ const PayPalIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
 )
 
 export default function AboutUs() {
+  const { user } = useAuth()
+  
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-primary-700 mb-3 sm:mb-4">About DinoProject</h2>
@@ -35,14 +39,23 @@ export default function AboutUs() {
         <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-4 sm:mb-6">
           This isn't a company or a startup. It's just me, learning by building something I genuinely care about.
         </p>
-        <a 
-          href="https://github.com/Ironheart4" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium text-sm sm:text-base"
-        >
-          <Github size={20} /> View My GitHub
-        </a>
+        {user ? (
+          <a 
+            href="https://github.com/Ironheart4" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium text-sm sm:text-base"
+          >
+            <Github size={20} /> View My GitHub
+          </a>
+        ) : (
+          <Link 
+            to="/login"
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition font-medium text-sm sm:text-base"
+          >
+            <Lock size={18} /> Log in to view GitHub
+          </Link>
+        )}
       </section>
 
       {/* Mission & Purpose */}
@@ -197,14 +210,23 @@ export default function AboutUs() {
           >
             <Mail size={18} /> <span className="break-all">dinoprojectoriginal@gmail.com</span>
           </a>
-          <a 
-            href="https://github.com/Ironheart4" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium inline-flex items-center justify-center gap-2 text-sm sm:text-base"
-          >
-            <Github size={18} /> GitHub
-          </a>
+          {user ? (
+            <a 
+              href="https://github.com/Ironheart4" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium inline-flex items-center justify-center gap-2 text-sm sm:text-base"
+            >
+              <Github size={18} /> GitHub
+            </a>
+          ) : (
+            <Link 
+              to="/login"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition font-medium inline-flex items-center justify-center gap-2 text-sm sm:text-base"
+            >
+              <Lock size={18} /> Log in for GitHub
+            </Link>
+          )}
         </div>
       </section>
     </div>
