@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
-import { Clock, Calendar, Loader2, Search, X, MapPin } from 'lucide-react' 
+import { Clock, Calendar, Loader2, Search, X, MapPin, Filter } from 'lucide-react' 
 
 // OpenLayers imports
 import Map from 'ol/Map'
@@ -46,6 +46,18 @@ const TIME_PERIODS: TimePeriod[] = [
   { name: 'Triassic', years: '252-201 MYA', color: '#E74C3C', bgClass: 'bg-red-500' },
   { name: 'Jurassic', years: '201-145 MYA', color: '#3498DB', bgClass: 'bg-blue-500' },
   { name: 'Cretaceous', years: '145-66 MYA', color: '#27AE60', bgClass: 'bg-green-500' },
+]
+
+// Dinosaur types for filtering
+const DINOSAUR_TYPES = [
+  { value: 'Theropod', label: '🦖 Theropod' },
+  { value: 'Sauropod', label: '🦕 Sauropod' },
+  { value: 'Ceratopsian', label: '🦏 Ceratopsian' },
+  { value: 'Armored', label: '🛡️ Armored' },
+  { value: 'Flying', label: '🦅 Flying' },
+  { value: 'Ornithopod', label: '🏃 Ornithopod' },
+  { value: 'Plesiosaur', label: '🌊 Plesiosaur' },
+  { value: 'Ichthyosaur', label: '🐠 Ichthyosaur' },
 ]
 
 // Region coordinates mapping [longitude, latitude]
@@ -108,6 +120,7 @@ export default function Timeline() {
   const [dinosaurs, setDinosaurs] = useState<Dinosaur[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null)
+  const [selectedType, setSelectedType] = useState<string | null>(null)
   const [hoveredDino, setHoveredDino] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResult, setSearchResult] = useState<Dinosaur | null>(null)
@@ -138,10 +151,11 @@ export default function Timeline() {
   // Filter dinosaurs
   const filteredDinos = useMemo(() => {
     return dinosaurs.filter(d => {
-      if (!selectedPeriod) return true
-      return d.period?.toLowerCase().includes(selectedPeriod.toLowerCase())
+      const periodMatch = !selectedPeriod || d.period?.toLowerCase().includes(selectedPeriod.toLowerCase())
+      const typeMatch = !selectedType || d.taxonomy?.toLowerCase().includes(selectedType.toLowerCase())
+      return periodMatch && typeMatch
     })
-  }, [dinosaurs, selectedPeriod])
+  }, [dinosaurs, selectedPeriod, selectedType])
 
   // Group by period for timeline
   const groupedByPeriod = useMemo(() => {
@@ -443,6 +457,34 @@ export default function Timeline() {
             </span>
           </button>
         ))}
+      </div>
+
+      {/* Type Filter */}
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap gap-2 sm:gap-2 items-center overflow-x-auto pb-2">
+          <span className="text-gray-400 text-xs sm:text-sm flex items-center gap-1 whitespace-nowrap"><Filter size={16} /> Type:</span>
+          <button
+            onClick={() => setSelectedType(null)}
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition whitespace-nowrap ${
+              !selectedType ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            All Types
+          </button>
+          {DINOSAUR_TYPES.map((type) => (
+            <button
+              key={type.value}
+              onClick={() => setSelectedType(selectedType === type.value ? null : type.value)}
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition whitespace-nowrap ${
+                selectedType === type.value 
+                  ? 'bg-blue-600 text-white ring-2 ring-blue-400' 
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              {type.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Horizontal Timeline */}

@@ -48,6 +48,7 @@ import ForumPost from './pages/ForumPost'
 import Privacy from './pages/Privacy'
 import Splash from './pages/Splash'
 import DinoBattle from './pages/DinoBattle'
+import Settings from './pages/Settings'
 
 // Layout and utility components
 import MasterLayout from './components/MasterLayout'      // Header + Footer wrapper
@@ -59,6 +60,7 @@ import ErrorBoundary from './components/ErrorBoundary'    // Catches errors, pre
 // Context providers - wrap app to provide global state
 import { AuthProvider } from './lib/auth'    // Login/logout state, user info
 import { ThemeProvider } from './lib/theme'  // Dark/light mode
+import { SettingsProvider } from './lib/settings'  // User settings & preferences
 
 export default function App() {
   return (
@@ -66,6 +68,8 @@ export default function App() {
     <ErrorBoundary>
     {/* ThemeProvider: Provides dark/light mode to all components */}
     <ThemeProvider>
+    {/* SettingsProvider: Provides user settings & preferences to all components */}
+    <SettingsProvider>
     {/* AuthProvider: Provides user, login/logout functions to all components */}
     <AuthProvider>
       <Routes>
@@ -92,11 +96,12 @@ export default function App() {
               <Route path="/support" element={<Support />} />
               <Route path="/support/success" element={<Support />} />
               <Route path="/timeline" element={<Timeline />} />
-              <Route path="/forum" element={<Forum />} />
-              <Route path="/forum/category/:slug" element={<ForumCategory />} />
-              <Route path="/forum/post/:id" element={<ForumPost />} />
+              <Route path="/forum" element={<PrivateRoute><Forum /></PrivateRoute>} />
+              <Route path="/forum/category/:slug" element={<PrivateRoute><ForumCategory /></PrivateRoute>} />
+              <Route path="/forum/post/:id" element={<PrivateRoute><ForumPost /></PrivateRoute>} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/battle" element={<DinoBattle />} />
+              <Route path="/settings" element={<Settings />} />
               
               {/* PROTECTED ROUTES - Requires login */}
               {/* PrivateRoute redirects to /login if user is not authenticated */}
@@ -116,6 +121,7 @@ export default function App() {
       <DinoAssistant />
       
     </AuthProvider>
+    </SettingsProvider>
     </ThemeProvider>
     </ErrorBoundary>
   )

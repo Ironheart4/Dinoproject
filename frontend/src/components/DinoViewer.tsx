@@ -68,12 +68,37 @@ export default function DinoViewer({
   const [loading, setLoading] = useState(true);                    // Loading state
   const [error, setError] = useState<string | null>(null);         // Error message
   const [loadProgress, setLoadProgress] = useState(0);             // Load progress %
+  const [isVisible, setIsVisible] = useState(false);               // Component visibility (for lazy loading)
 
   // ============================================================================
-  // MAIN EFFECT - Setup and load 3D scene
+  // INTERSECTION OBSERVER - Lazy load when component becomes visible
+  // ============================================================================
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.unobserve(entry.target)
+        }
+      },
+      { threshold: 0.1 }
+    )
+    
+    if (mountRef.current) {
+      observer.observe(mountRef.current)
+    }
+    
+    return () => observer.disconnect()
+  }, [])
+
+  // ============================================================================
+  // MAIN EFFECT - Setup and load 3D scene (only if visible)
   // This runs when url, background, autoRotate, or height changes
   // ============================================================================
   useEffect(() => {
+    // Skip loading if not visible yet (lazy loading optimization)
+    if (!isVisible) return
+
     const container = mountRef.current;
     if (!container || !url) {
       setLoading(false);
@@ -327,11 +352,22 @@ export default function DinoViewer({
         }
       });
     };
-  }, [url, background, autoRotate, height]);
+  }, [url, background, autoRotate, height, isVisible]);
 
   // ============================================================================
-  // RENDER: Placeholder when no URL provided
+  // RENDER: Placeholder when not yet visible (lazy loading) or no URL
   // ============================================================================
+  if (!isVisible) {
+    return (
+      <div ref={mountRef} className={`${className} bg-gray-800 rounded-lg flex items-center justify-center`} style={{ height }}>
+        <div className="text-center text-gray-400">
+          <Loader2 size={48} className="mx-auto mb-2 animate-spin" />
+          <p>Loading 3D model...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!url || url === "DEV_PENDING") {
     return (
       <div className={`${className} bg-gray-800 rounded-lg flex items-center justify-center`} style={{ height }}>

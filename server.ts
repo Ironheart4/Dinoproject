@@ -480,7 +480,7 @@ app.post("/api/dinosaurs", async (req, res) => {
     const {
       name, species, period, diet, habitat, lengthMeters, weightKg, description,
       modelUrl, roarSound, imageUrl, imageUrl1, imageUrl2, imageUrl3, imageUrl4, imageUrl5,
-      videoUrl, taxonomy, type, livedIn, namedBy
+      videoUrl, wikipedia, taxonomy, type, livedIn, namedBy
     } = req.body;
 
     if (!name || !species) {
@@ -506,6 +506,7 @@ app.post("/api/dinosaurs", async (req, res) => {
         imageUrl4: imageUrl4 ?? null,
         imageUrl5: imageUrl5 ?? null,
         videoUrl: videoUrl ?? null,
+        wikipedia: wikipedia ?? null,
         taxonomy: taxonomy ?? null,
         type: type ?? null,
         livedIn: livedIn ?? null,
@@ -526,7 +527,7 @@ app.put("/api/dinosaurs/:id", async (req, res) => {
     const {
       name, species, period, diet, habitat, lengthMeters, weightKg, description,
       modelUrl, roarSound, imageUrl, imageUrl1, imageUrl2, imageUrl3, imageUrl4, imageUrl5,
-      videoUrl, taxonomy, type, livedIn, namedBy
+      videoUrl, wikipedia, taxonomy, type, livedIn, namedBy
     } = req.body;
 
     if (!name || !species) {
@@ -553,6 +554,7 @@ app.put("/api/dinosaurs/:id", async (req, res) => {
         imageUrl4: imageUrl4 ?? null,
         imageUrl5: imageUrl5 ?? null,
         videoUrl: videoUrl ?? null,
+        wikipedia: wikipedia ?? null,
         taxonomy: taxonomy ?? null,
         type: type ?? null,
         livedIn: livedIn ?? null,
@@ -1842,6 +1844,134 @@ app.post("/api/ai/chat", authMiddleware, async (req: any, res) => {
     console.error("AI chat error:", error);
     const fallbackResponse = await getLocalDinoResponse(req.body.message || "");
     res.json({ response: fallbackResponse });
+  }
+});
+
+// ==================== SEARCH ENDPOINT ====================
+
+// Global search for dinosaurs and quizzes
+app.get("/api/search", async (req, res) => {
+  try {
+    const query = (req.query.q as string || "").trim().toLowerCase();
+    if (!query || query.length < 2) {
+      return res.json({ results: { dinosaurs: [], quizzes: [] } });
+    }
+
+    // Search dinosaurs by name, species, or type
+    const dinosaurs = await prisma.dinosaur.findMany({
+      where: {
+        OR: [
+          { name: { contains: query, mode: "insensitive" } },
+          { species: { contains: query, mode: "insensitive" } },
+          { type: { contains: query, mode: "insensitive" } },
+          { diet: { contains: query, mode: "insensitive" } },
+        ],
+      },
+      select: { id: true, name: true, species: true, period: true, imageUrl: true, diet: true },
+      take: 8,
+      orderBy: { name: "asc" },
+    });
+
+    // Search quizzes by title
+    const quizzes = await prisma.quiz.findMany({
+      where: {
+        title: { contains: query, mode: "insensitive" },
+      },
+      select: { id: true, title: true },
+      take: 5,
+      orderBy: { title: "asc" },
+    });
+
+    res.json({ 
+      results: { 
+        dinosaurs: dinosaurs.map(d => ({
+          id: d.id,
+          name: d.name,
+          species: d.species,
+          period: d.period,
+          imageUrl: d.imageUrl,
+          diet: d.diet,
+          type: "dinosaur",
+        })),
+        quizzes: quizzes.map(q => ({
+          id: q.id,
+          title: q.title,
+          type: "quiz",
+        })),
+      },
+    });
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({ error: "Failed to search" });
+  }
+});
+
+// ==================== QUIZ RECOMMENDATION ENDPOINT ====================
+
+// Get recommended quiz based on user's weak areas
+app.get("/api/quizzes/recommend", authMiddleware, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Get user's quiz scores
+    const userScores = await prisma.score.findMany({
+      where: { userId },
+      include: { quiz: { select: { id: true, title: true } } },
+      orderBy: { completedAt: "desc" },
+    });
+
+    // If user hasn't taken any quizzes, recommend a random one
+    if (userScores.length === 0) {
+      const allQuizzes = await prisma.quiz.findMany({
+        select: { id: true, title: true },
+      });
+      if (allQuizzes.length === 0) {
+        return res.status(404).json({ error: "No quizzes available" });
+      }
+      const randomQuiz = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+      return res.json({ 
+        recommendedQuiz: randomQuiz,
+        reason: "Try this quiz to get started!",
+      });
+    }
+
+    // Find the quiz with lowest score (weakest area)
+    let lowestScore = { score: 100, quizId: -1, quizTitle: "" };
+    userScores.forEach(s => {
+      if (s.score < lowestScore.score) {
+        lowestScore = { score: s.score, quizId: s.quiz.id, quizTitle: s.quiz.title };
+      }
+    });
+
+    // If user got perfect on weakest, recommend a new one
+    if (lowestScore.score === 100) {
+      const attemptedIds = userScores.map(s => s.quiz.id);
+      const newQuiz = await prisma.quiz.findFirst({
+        where: { id: { notIn: attemptedIds } },
+        select: { id: true, title: true },
+      });
+      if (newQuiz) {
+        return res.json({ 
+          recommendedQuiz: newQuiz,
+          reason: "You've mastered the others, try this new challenge!",
+        });
+      }
+    }
+
+    // Recommend retrying the weakest quiz
+    const retakeQuiz = await prisma.quiz.findUnique({
+      where: { id: lowestScore.quizId },
+      select: { id: true, title: true },
+    });
+
+    res.json({ 
+      recommendedQuiz: retakeQuiz,
+      reason: `Improve your score on "${lowestScore.quizTitle}" (current: ${lowestScore.score}%)`,
+      currentScore: lowestScore.score,
+    });
+  } catch (error) {
+    console.error("Quiz recommendation error:", error);
+    res.status(500).json({ error: "Failed to get quiz recommendation" });
   }
 });
 

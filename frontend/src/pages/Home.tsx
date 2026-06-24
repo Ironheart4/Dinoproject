@@ -124,14 +124,14 @@ export default function Home() {
                   className="group px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/25 flex items-center justify-center gap-2"
                 >
                   <Play size={20} className="group-hover:scale-110 transition-transform" />
-                  Start Exploring
+                  Explore 100+ Dinosaur Species
                 </Link>
                 <Link 
-                  to="/support" 
+                  to="/timeline" 
                   className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transition-all flex items-center justify-center gap-2"
                 >
-                  <Heart size={20} className="text-pink-400" />
-                  Support Us
+                  <Calendar size={20} className="text-blue-400" />
+                  Journey Through Time
                 </Link>
               </div>
 

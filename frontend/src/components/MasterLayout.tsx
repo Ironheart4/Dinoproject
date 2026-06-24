@@ -9,8 +9,9 @@ import { useAuth } from '../lib/auth'
 import { 
   LayoutDashboard, Heart, Home, BookOpen, Target, Info, LogIn, 
   Mail, Twitter, Instagram, Youtube, MessageCircle, Calendar, Facebook,
-  Menu, X
+  Menu, X, Settings as SettingsIcon
 } from 'lucide-react'
+import SearchBar from './SearchBar'
 
 // Lazy load the heavy background component
 const DynamicBackground = lazy(() => import('./DynamicBackground'))
@@ -58,10 +59,16 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
               </Link>
             ))}
 
+            {/* Global Search Bar */}
+            <SearchBar />
+
             {user ? (
               <>
                 <Link to="/dashboard" className="px-3 py-2 rounded-lg hover:bg-gray-700 hover:text-green-400 transition-all duration-200 flex items-center gap-1">
                   <LayoutDashboard size={16} /> Dashboard
+                </Link>
+                <Link to="/settings" className="px-3 py-2 rounded-lg hover:bg-gray-700 hover:text-blue-400 transition-all duration-200 flex items-center gap-1">
+                  <SettingsIcon size={16} /> Settings
                 </Link>
                 <Link to="/support" className="px-3 py-2 rounded-lg bg-gradient-to-r from-pink-600/20 to-red-500/20 hover:from-pink-600/40 hover:to-red-500/40 text-pink-400 hover:text-pink-300 transition-all duration-200 font-semibold flex items-center gap-1 border border-pink-600/30">
                   <Heart size={16} className="animate-pulse" /> Support
@@ -112,6 +119,9 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
                 <>
                   <Link to="/dashboard" onClick={closeMobileMenu} className="px-4 py-3 rounded-lg hover:bg-gray-700 hover:text-green-400 transition-all duration-200 flex items-center gap-2">
                     <LayoutDashboard size={18} /> Dashboard
+                  </Link>
+                  <Link to="/settings" onClick={closeMobileMenu} className="px-4 py-3 rounded-lg hover:bg-gray-700 hover:text-blue-400 transition-all duration-200 flex items-center gap-2">
+                    <SettingsIcon size={18} /> Settings
                   </Link>
                   <Link to="/support" onClick={closeMobileMenu} className="px-4 py-3 rounded-lg bg-gradient-to-r from-pink-600/20 to-red-500/20 text-pink-400 flex items-center gap-2 border border-pink-600/30">
                     <Heart size={18} /> Support Us
@@ -169,6 +179,7 @@ export default function MasterLayout({ children }: { children: React.ReactNode }
             <h4 className="font-semibold mb-3 sm:mb-4 text-white text-sm sm:text-base">Account</h4>
             <ul className="space-y-1.5 sm:space-y-2 text-gray-400 text-xs sm:text-sm">
               <li><Link to="/dashboard" className="hover:text-primary transition flex items-center gap-2"><LayoutDashboard size={14} /> Dashboard</Link></li>
+              <li><Link to="/settings" className="hover:text-primary transition flex items-center gap-2"><SettingsIcon size={14} /> Settings</Link></li>
               <li><Link to="/support" className="hover:text-primary transition flex items-center gap-2"><Heart size={14} /> Support Us</Link></li>
               <li><Link to="/login" className="hover:text-primary transition flex items-center gap-2"><LogIn size={14} /> Login</Link></li>
             </ul>

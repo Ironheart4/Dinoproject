@@ -12,7 +12,8 @@ import {
 } from 'recharts'
 import {
   Heart, Target, Trophy, TrendingUp, Flame, LayoutDashboard, ScrollText, User,
-  BookOpen, FileText, Star, Sparkles, Moon, Sun, CreditCard, Save, Loader2, BarChart3
+  BookOpen, FileText, Star, Sparkles, Moon, Sun, CreditCard, Save, Loader2, BarChart3,
+  ArrowRight, Clock, Zap
 } from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
@@ -65,6 +66,9 @@ export default function Dashboard() {
   const [activity, setActivity] = useState<Activity | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'profile'>('overview')
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([])
+  const [recommendedQuiz, setRecommendedQuiz] = useState<any>(null)
+  const [recommendationLoading, setRecommendationLoading] = useState(true)
 
   // Profile edit state
   const [editingProfile, setEditingProfile] = useState(false)
@@ -82,17 +86,30 @@ export default function Dashboard() {
       fetch(`${API}/api/dashboard/stats`, { headers }).then(r => r.json()),
       fetch(`${API}/api/dashboard/charts`, { headers }).then(r => r.json()),
       fetch(`${API}/api/dashboard/activity`, { headers }).then(r => r.json()),
+      fetch(`${API}/api/quizzes/recommend`, { headers }).then(r => r.json()).catch(() => null),
     ])
-      .then(([statsData, chartsData, activityData]) => {
+      .then(([statsData, chartsData, activityData, quizData]) => {
         setStats(statsData)
         setCharts(chartsData)
         setActivity(activityData)
         setEditName(statsData.user.name)
         setEditBio(statsData.user.bio || '')
+        setRecommendedQuiz(quizData)
       })
       .catch(err => console.error('Failed to fetch dashboard data:', err))
       .finally(() => setLoading(false))
   }, [token])
+
+  // Load recently viewed dinosaurs from localStorage
+  useEffect(() => {
+    try {
+      const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]')
+      setRecentlyViewed(viewed)
+    } catch (err) {
+      console.error('Failed to load recently viewed:', err)
+    }
+    setRecommendationLoading(false)
+  }, [])
 
   // Handle profile save
   const handleProfileSave = async () => {
@@ -417,6 +434,64 @@ export default function Dashboard() {
                     <p>Take some quizzes to track your progress!</p>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Recently Viewed Dinosaurs */}
+          {recentlyViewed.length > 0 && (
+            <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <Clock size={20} /> Recently Viewed
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {recentlyViewed.slice(0, 4).map((dino: any) => (
+                  <Link
+                    key={dino.id}
+                    to={`/dino/${dino.id}`}
+                    className="group relative bg-gray-700 rounded-lg overflow-hidden hover:shadow-lg hover:shadow-green-500/20 transition transform hover:scale-105"
+                  >
+                    {dino.imageUrl && (
+                      <img
+                        src={dino.imageUrl}
+                        alt={dino.name}
+                        className="w-full aspect-square object-cover group-hover:brightness-75 transition"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+                      <div className="font-semibold text-white text-sm">{dino.name}</div>
+                      <div className="text-xs text-gray-300">{dino.period}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Recommended Next Quiz */}
+          {recommendedQuiz?.recommendedQuiz && (
+            <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-xl p-5 border border-blue-700/30 hover:border-blue-600/50 transition">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                    <Zap size={20} className="text-yellow-400" /> Your Next Challenge
+                  </h3>
+                  <p className="text-gray-400 text-sm mb-2">{recommendedQuiz.reason}</p>
+                  <h4 className="text-xl font-bold text-blue-400 mb-3">
+                    {recommendedQuiz.recommendedQuiz.title}
+                  </h4>
+                  {recommendedQuiz.currentScore && (
+                    <p className="text-xs text-yellow-400 mb-3">
+                      Current Score: {recommendedQuiz.currentScore}%
+                    </p>
+                  )}
+                </div>
+                <Link
+                  to={`/quiz/${recommendedQuiz.recommendedQuiz.id}`}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition flex items-center gap-2 whitespace-nowrap font-medium"
+                >
+                  Take Quiz <ArrowRight size={16} />
+                </Link>
               </div>
             </div>
           )}

@@ -12,7 +12,7 @@ import { useAuth } from '../lib/auth'
 import { useDocumentTitle } from '../lib/useDocumentTitle' 
 import {
   Heart, Lock, Star, Calendar, Globe, Ruler, Scale, Home as HomeIcon,
-  PenTool, Microscope, BookOpen, Image, Video, Loader2, AlertTriangle
+  PenTool, Microscope, BookOpen, Image, Video, Loader2, AlertTriangle, BookMarked, ExternalLink
 } from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
@@ -74,6 +74,23 @@ export default function DinoDetail() {
       .then(data => setIsFavorited(data.isFavorited))
       .catch(() => {})
   }, [user, token, id])
+
+  // Track recently viewed dinosaurs
+  useEffect(() => {
+    if (!dino) return
+    try {
+      const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]')
+      // Remove if already exists, then add to front
+      const filtered = recentlyViewed.filter((d: any) => d.id !== dino.id)
+      const updated = [
+        { id: dino.id, name: dino.name, imageUrl: dino.imageUrl, period: dino.period },
+        ...filtered
+      ].slice(0, 12) // Keep last 12 viewed
+      localStorage.setItem('recentlyViewed', JSON.stringify(updated))
+    } catch (err) {
+      console.error('Failed to track recently viewed:', err)
+    }
+  }, [dino])
 
   const toggleFavorite = async () => {
     if (!token || !id) return
@@ -351,6 +368,29 @@ export default function DinoDetail() {
                   allowFullScreen
                 />
               </div>
+            </div>
+          )}
+
+          {/* Wikipedia Reference */}
+          {dino.wikipedia && (
+            <div className="bg-gray-800 rounded-lg p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <BookMarked size={20} /> Learn More
+              </h2>
+              <p className="text-gray-300 text-sm sm:text-base mb-4">
+                Discover more detailed information about {dino.name} on Wikipedia.
+              </p>
+              <a
+                href={dino.wikipedia}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Read about ${dino.name} on Wikipedia (opens in new tab)`}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <BookMarked size={18} />
+                <span>View Wikipedia Article</span>
+                <ExternalLink size={16} className="ml-1" />
+              </a>
             </div>
           )}
         </div>

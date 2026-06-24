@@ -104,6 +104,7 @@ model Dinosaur {
   imageUrl4    String?  @map("image_url4") @db.VarChar(500) // Gallery image 4
   imageUrl5    String?  @map("image_url5") @db.VarChar(500) // Gallery image 5
   videoUrl     String?  @map("video_url") @db.VarChar(500)  // YouTube/video URL
+  wikipedia    String?  @map("wikipedia") @db.VarChar(500)  // Wikipedia article URL
   taxonomy     String?                       // Scientific classification
   type         String?  @db.VarChar(100)    // Type (sauropod, theropod, etc.)
   livedIn      String?  @map("lived_in") @db.VarChar(200)
