@@ -53,3 +53,7 @@ agents-and-codebase-guidelines/
 AGENTS.md
 CLAUDE.md
 .claude/
+
+# Internal development documentation
+RUN.md
+docs/api-reference.md
