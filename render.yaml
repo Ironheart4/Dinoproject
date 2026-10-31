@@ -21,6 +21,20 @@ services:
         sync: false
       - key: SUPABASE_ANON_KEY
         sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: SUPABASE_PROFILE_BUCKET
+        value: profile-pictures
       - key: ALLOWED_ORIGINS
         value: https://dinoproject.vercel.app,https://dinoproject-admin.vercel.app
+      - key: FRONTEND_URL
+        value: https://dinoproject.vercel.app
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_SECRET
+        sync: false
+      - key: PAYPAL_MODE
+        value: sandbox
+      - key: HUGGINGFACE_API_KEY
+        sync: false
     healthCheckPath: /health

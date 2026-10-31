@@ -23,7 +23,7 @@ dinoproject-backend/          ← Root folder (also contains frontend)
 │       ├── pages/            ← Each page component
 │       ├── components/       ← Reusable UI components
 │       └── lib/              ← Utilities (api, auth, theme)
-└── admin/                    ← Admin dashboard React app
+└── admin/                    ← Optional checkout of the separate private admin repo
     └── src/
         ├── App.tsx           ← Admin routes
         └── pages/            ← Admin pages (DinosaurManager, etc.)

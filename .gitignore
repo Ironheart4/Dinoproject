@@ -41,3 +41,15 @@ admin/
 # Backup files
 *.backup
 *.bak
+
+# Local Claude Code overrides
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Local agentic programming kit
+agents-and-codebase-guidelines/
+
+# Local agent instructions and Claude configuration
+AGENTS.md
+CLAUDE.md
+.claude/

@@ -43,6 +43,10 @@ npm install
 # Install frontend dependencies
 cd frontend && npm install && cd ..
 
+# The admin dashboard is maintained in a separate private repository.
+# Clone it into this workspace as ./admin when needed.
+# git clone <PRIVATE_ADMIN_REPOSITORY_URL> admin
+
 # Copy environment variables
 cp .env.example .env
 # Edit .env with your Supabase credentials
@@ -50,12 +54,16 @@ cp .env.example .env
 # Run database migrations
 npx prisma db push
 
+# Run this after deploying the schema changes (profile fields and paypal_orders)
+# against the configured Supabase database.
+
 # Seed the database (optional)
 npm run seed
 
 # Start development servers
 npm run dev          # Backend on :5000
 cd frontend && npm run dev   # Frontend on :5173
+cd ../admin && npm install && npm run dev   # Admin on :5174
 ```
 
 ## 📁 Project Structure
@@ -70,8 +78,14 @@ dinoproject/
 ├── prisma/            # Database schema
 ├── scripts/           # Seed scripts
 ├── server.ts          # Express API server
-└── uploads/           # User uploads
+├── admin/             # Optional checkout of the private admin repository
+└── uploads/           # Legacy local directory; profile images use Supabase Storage
 ```
+
+Profile images require a public Supabase Storage bucket named by `SUPABASE_PROFILE_BUCKET`
+because the API stores public URLs. Set `SUPABASE_SERVICE_KEY` on the backend when the
+bucket does not allow server-side uploads with the anonymous key. Never expose that key
+to either frontend.
 
 ## 🔒 Security
 

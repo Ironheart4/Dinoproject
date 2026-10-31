@@ -54,6 +54,8 @@ datasource db {
 model User {
   id        String   @id @db.Uuid // Links to Supabase auth.users(id)
   name      String?  @db.VarChar(100)
+  bio       String?
+  profilePic String? @map("profile_pic") @db.VarChar(500)
   role      String   @default("user") @db.VarChar(20) // "user" | "admin"
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -63,6 +65,7 @@ model User {
   subscription Subscription?
   forumPosts   ForumPost[]
   forumReplies ForumReply[]
+  paypalOrders PayPalOrder[]
 
   @@map("users") // Table name in database
 }
@@ -207,11 +210,26 @@ model Subscription {
   startDate            DateTime  @default(now()) @map("start_date")
   endDate              DateTime? @map("end_date")               // When subscription expires
   paypalSubscriptionId String?   @map("paypal_subscription_id") @db.VarChar(200) // PayPal reference
+  paypalOrderId        String?   @unique @map("paypal_order_id") @db.VarChar(200)
   createdAt            DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
+}
+
+model PayPalOrder {
+  id        String   @id @db.VarChar(200)
+  userId    String   @map("user_id") @db.Uuid
+  plan      String   @db.VarChar(30)
+  amount    Decimal  @db.Decimal(10, 2)
+  status    String   @default("created") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("paypal_orders")
 }
 
 // ============================================================================

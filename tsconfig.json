@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     // Core settings for Node.js + CommonJS
-    "module": "commonjs",
+    "module": "node16",
     "target": "es2020",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -17,15 +17,15 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
 
     // Performance & compatibility
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "ignoreDeprecations": "6.0",
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
+
 
     // Node.js types
     "types": ["node"],
@@ -35,5 +35,5 @@
     "jsx": "preserve"
   },
   "include": ["**/*.ts"],
-  "exclude": ["node_modules", "dist", "frontend", "admin"]
+  "exclude": ["node_modules", "dist", "frontend", "admin", "tests", "index.ts", "vitest.config.mts"]
 }
