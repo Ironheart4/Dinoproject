@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,9 +8,6 @@
    DinoProject Global Styles
    Theme: Prehistoric Adventure meets Modern Tech
    ============================================ */
-
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap');
 
 /* CSS Variables - Prehistoric Theme */
 :root {

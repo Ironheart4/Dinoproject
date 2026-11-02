@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
-import { BookOpen, Brain, Search, Loader2, ChevronLeft, ChevronRight, Heart, Sparkles, Play, Clock, Users, MessageSquare, Map, ArrowRight, Award, Eye, Globe, PenTool, HelpCircle, Star, Zap, Swords } from 'lucide-react'
+import { BookOpen, Brain, Search, Loader2, ChevronLeft, ChevronRight, Heart, Sparkles, Play, Clock, Calendar, Users, MessageSquare, Map, ArrowRight, Award, Eye, Globe, PenTool, HelpCircle, Star, Zap, Swords } from 'lucide-react'
 import { GiDinosaurRex, GiBrokenBone, GiDinosaurBones } from 'react-icons/gi'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import ParticleBackground from '../components/ParticleBackground'
