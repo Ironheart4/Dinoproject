@@ -159,9 +159,20 @@ router.post("/api/paypal/capture-order", deps.authMiddleware, async (req: any, r
       },
     });
 
-    const captureData = await response.json() as { status?: string; id?: string };
+    const captureData = await response.json() as {
+      status?: string;
+      id?: string;
+      purchase_units?: Array<{
+        payments?: {
+          captures?: Array<{ amount?: { currency_code?: string; value?: string } }>;
+        };
+      }>;
+    };
+    const capturedAmount = captureData.purchase_units?.[0]?.payments?.captures?.[0]?.amount;
 
-    if (!response.ok || captureData.status !== "COMPLETED") {
+    if (!response.ok || captureData.status !== "COMPLETED" ||
+        capturedAmount?.currency_code !== "USD" ||
+        capturedAmount.value !== storedOrder.amount.toFixed(2)) {
       return res.status(400).json({ error: "Payment not completed" });
     }
 

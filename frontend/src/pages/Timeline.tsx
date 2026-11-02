@@ -1,6 +1,6 @@
 // Timeline.tsx — Timeline explorer with geographic mapping
 // Notes:
-// - Uses OpenLayers to render dinosaur locations inferred from `livedIn` text
+// - Uses OpenLayers to render approximate regions inferred from `livedIn` text
 // - Groups dinosaurs by time period and allows searching, hovering, and navigation to details
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -581,7 +581,7 @@ export default function Timeline() {
       <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
         <div className="p-4 border-b border-gray-700 flex items-center justify-between">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            🌍 Discovery Locations
+            🌍 Approximate Regions
           </h2>
           <div className="text-xs sm:text-sm text-gray-400">
             {mappableDinos.length} dinosaurs mapped
@@ -603,7 +603,7 @@ export default function Timeline() {
               <div className="space-y-1 text-xs">
                 {popupContent.lengthMeters && <div>Length: {popupContent.lengthMeters}m</div>}
                 {popupContent.weightKg && <div>Weight: {Number(popupContent.weightKg).toLocaleString()}kg</div>}
-                {popupContent.livedIn && <div>Location: {popupContent.livedIn}</div>}
+                {popupContent.livedIn && <div>Region: {popupContent.livedIn}</div>}
               </div>
               <div className="mt-2 pt-2 border-t border-gray-700 text-xs text-green-400 hover:text-green-300 flex items-center gap-1">
                 Click to view details →
@@ -649,7 +649,7 @@ export default function Timeline() {
             <div className="flex items-center gap-3">
               <MapPin className="text-green-400 flex-shrink-0" size={20} />
               <span className="text-green-400">
-                Found <strong>{searchResult.name}</strong> in {searchResult.livedIn || 'Unknown location'} - Look for the blinking marker above!
+                Approximate region for <strong>{searchResult.name}</strong>: {searchResult.livedIn || 'Unknown'} - Look for the blinking marker above!
               </span>
             </div>
             <button

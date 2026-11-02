@@ -21,7 +21,4 @@ jobs:
         working-directory: frontend
       - run: npm run build
         working-directory: frontend
-      - run: npm ci
-        working-directory: admin
-      - run: npm run build
-        working-directory: admin
+      # The admin app is a separate private repository and has its own CI.

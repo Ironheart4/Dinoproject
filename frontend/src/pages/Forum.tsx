@@ -29,7 +29,7 @@ interface RecentPost {
 
 export default function Forum() {
   useDocumentTitle('Community Forum');
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,9 +96,8 @@ export default function Forum() {
     setError("");
 
     try {
-      const token = localStorage.getItem("sb_token");
       await api.post("/api/forum/posts", newPost, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setNewPost({ categoryId: "", title: "", content: "" });
       setShowNewPost(false);

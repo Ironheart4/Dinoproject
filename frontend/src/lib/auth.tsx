@@ -100,6 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (session?.access_token && session?.user) {
       // User is logged in - store token
       setToken(session.access_token)
+      localStorage.setItem('token', session.access_token)
       
       // Fetch extended profile from our backend (roles, subscription status)
       // This gives us info not stored in Supabase auth.users
@@ -149,6 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else {
       // No session - user is logged out
       setToken(null)
+      localStorage.removeItem('token')
       setUser(null)
       setIsAdmin(false)
       setIsPremium(false)
@@ -242,6 +244,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function logout(): Promise<void> {
     try {
       await supabase.auth.signOut()
+      localStorage.removeItem('token')
       setToken(null)
       setUser(null)
       setIsAdmin(false)
