@@ -124,12 +124,20 @@ model Dinosaur {
 // QUIZ MODEL
 // ============================================================================
 // Quizzes that users can take. Each quiz has multiple questions.
+// NOTE: foreign keys in the live database have no ON DELETE CASCADE, so the
+// repositories delete child rows explicitly before deleting a quiz or dinosaur.
 // Admin creates quizzes via admin panel → QuizManager
 // ============================================================================
 model Quiz {
   id        Int        @id @default(autoincrement())
   title     String     @db.VarChar(200)  // Quiz title (e.g., "Dinosaur Diet Quiz")
   createdAt DateTime   @default(now()) @map("created_at")
+
+  // Quiz-level presentation fields (columns are camelCase in the database).
+  // The API copies these onto every question so the quiz page can read them per question.
+  questionType String? @map("questionType") // "text" | "image" | "identify"
+  imageUrl     String? @map("imageUrl")     // Image shown for "image" / "identify" quizzes
+  difficulty   String? @map("difficulty")   // "easy" | "medium" | "hard"
 
   questions Question[] // Questions in this quiz
   scores    Score[]    // User scores for this quiz

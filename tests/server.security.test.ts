@@ -1,38 +1,35 @@
-import request from "supertest";
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
+import { ROUTE_CONTRACT, contractKey, protectedRoutes } from "./contracts/route-contract";
 
-let app: typeof import("../app").app;
+/**
+ * Auth boundary HTTP checks live in `route-contract.test.ts`.
+ * This file keeps a lightweight sanity check that the Phase 1 contract
+ * still covers the original security-sensitive routes.
+ */
+describe("backend security contract coverage", () => {
+  it("includes the original auth-gated mutation routes", () => {
+    const keys = new Set(
+      protectedRoutes().map((entry) => contractKey(entry.method, entry.path)),
+    );
 
-beforeAll(async () => {
-  process.env.SUPABASE_URL = "https://example.supabase.co";
-  process.env.SUPABASE_ANON_KEY = "test-anon-key";
-  ({ app } = await import("../app"));
-});
-
-describe("backend security boundaries", () => {
-  it("serves the health endpoint", async () => {
-    const response = await request(app).get("/health");
-
-    expect(response.status).toBe(200);
-    expect(response.body.status).toBe("ok");
+    for (const key of [
+      "post /api/dinosaurs",
+      "put /api/dinosaurs/:id",
+      "delete /api/dinosaurs/:id",
+      "post /api/subscription",
+      "post /api/paypal/capture-order",
+      "post /api/ai/chat",
+      "get /api/quizzes/recommend",
+    ]) {
+      expect(keys.has(key), `missing from contract: ${key}`).toBe(true);
+    }
   });
 
-  it.each([
-    ["post", "/api/dinosaurs"],
-    ["put", "/api/dinosaurs/1"],
-    ["delete", "/api/dinosaurs/1"],
-    ["post", "/api/subscription"],
-    ["post", "/api/paypal/capture-order"],
-    ["post", "/api/ai/chat"],
-  ] as const)("requires authentication for %s %s", async (method, path) => {
-    const response = await request(app)[method](path);
-
-    expect(response.status).toBe(401);
-  });
-
-  it("matches the recommendation route before the quiz id route", async () => {
-    const response = await request(app).get("/api/quizzes/recommend");
-
-    expect(response.status).toBe(401);
+  it("keeps health as a public route in the contract", () => {
+    expect(
+      ROUTE_CONTRACT.some(
+        (entry) => entry.method === "get" && entry.path === "/health" && entry.auth === "public",
+      ),
+    ).toBe(true);
   });
 });

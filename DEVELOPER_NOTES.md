@@ -9,7 +9,11 @@
 
 ```
 dinoproject-backend/          ← Root folder (also contains frontend)
-├── server.ts                 ← Main backend server (Express + API routes)
+├── server.ts                 ← Process entry (listen, graceful shutdown)
+├── app.ts                    ← Express app (mounts one router per module)
+├── main.ts                   ← Composition root (wires providers by hand)
+├── modules/                  ← Features: controller → service → repository (+ schemas, routes)
+├── core/ config/ middleware/ infrastructure/   ← Errors, env, guards, outside systems
 ├── prisma/
 │   └── schema.prisma         ← Database schema (tables/models)
 ├── scripts/
@@ -45,7 +49,7 @@ dinoproject-backend/          ← Root folder (also contains frontend)
           ▼                                         ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    BACKEND SERVER (Express)                     │
-│  server.ts                                                      │
+│  server.ts → app.ts → modules/*                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │  Middleware: CORS → Helmet → Morgan → Rate Limit → Auth │   │
 │  └─────────────────────────────────────────────────────────┘   │
@@ -156,7 +160,7 @@ function PrivateRoute({ children }) {
 
 ### How Backend Verifies Tokens:
 ```typescript
-// server.ts - authMiddleware function
+// middleware/auth.ts - authMiddleware (uses AuthProvider + AuthRepository)
 async function authMiddleware(req, res, next) {
   // 1. Extract token from "Authorization: Bearer <token>"
   const token = req.headers.authorization?.split(" ")[1]
@@ -436,14 +440,14 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsI...
 
 ### Start Here:
 1. **Database:** Read `prisma/schema.prisma` to understand data structure
-2. **Backend:** Read `server.ts` focusing on one route group at a time
+2. **Backend:** Read `app.ts`, then one folder in `modules/` at a time (routes → controller → service → repository)
 3. **Frontend:** Start with `App.tsx` to see all routes, then explore pages
 
 ### Key Patterns to Learn:
 - **React Context:** See `auth.tsx` for global state management
 - **Three.js:** See `DinoViewer.tsx` for 3D graphics
 - **REST API:** See `api.ts` for fetch patterns
-- **Prisma ORM:** See server.ts for database queries
+- **Prisma ORM:** Database queries live only in `modules/*/*.repository.ts`
 
 ### Test Locally:
 ```bash

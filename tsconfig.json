@@ -35,5 +35,13 @@
     "jsx": "preserve"
   },
   "include": ["**/*.ts"],
-  "exclude": ["node_modules", "dist", "frontend", "admin", "tests", "index.ts", "vitest.config.mts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "frontend",
+    "admin",
+    "Dinoproject-admin",
+    "tests",
+    "vitest.config.mts"
+  ]
 }

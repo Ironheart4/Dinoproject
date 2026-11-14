@@ -13,11 +13,12 @@ COPY prisma.config.ts ./
 RUN npx prisma generate
 
 # Copy source files and build
-COPY app.ts server.ts ./
+COPY app.ts server.ts main.ts ./
 COPY config ./config
-COPY lib ./lib
+COPY core ./core
+COPY infrastructure ./infrastructure
 COPY middleware ./middleware
-COPY routes ./routes
+COPY modules ./modules
 COPY scripts ./scripts
 COPY tsconfig.json ./
 RUN npm run build

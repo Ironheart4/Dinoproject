@@ -77,7 +77,10 @@ dinoproject/
 │   │   └── lib/         # Utilities & hooks
 ├── prisma/            # Database schema
 ├── scripts/           # Seed scripts
-├── server.ts          # Express API server
+├── server.ts          # Process entry (listen, shutdown)
+├── app.ts / main.ts   # Express app and composition root
+├── modules/           # Feature modules (controller, service, repository, schemas, routes)
+├── core/ config/ infrastructure/ middleware/   # Shared building blocks
 ├── admin/             # Optional checkout of the private admin repository
 └── uploads/           # Legacy local directory; profile images use Supabase Storage
 ```

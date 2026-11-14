@@ -9,5 +9,7 @@ export const env = {
   profileBucket: process.env.SUPABASE_PROFILE_BUCKET || "profile-pictures",
   paypalClientId: process.env.PAYPAL_CLIENT_ID,
   paypalSecret: process.env.PAYPAL_SECRET,
+  frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
+  huggingFaceApiKey: process.env.HUGGINGFACE_API_KEY,
   paypalApi: process.env.PAYPAL_MODE === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com",
 };
