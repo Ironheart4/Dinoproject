@@ -27,6 +27,23 @@ export interface DinosaurWriteData {
   namedBy: string | null;
 }
 
+/** Lightweight shape for list / featured endpoints (no long text or extra media). */
+export type DinosaurListItem = Pick<
+  Dinosaur,
+  "id" | "name" | "species" | "period" | "diet" | "imageUrl1" | "modelUrl"
+>;
+
+/** Fields returned by list and featured — keeps payloads small for fast loads. */
+const LIST_SELECT = {
+  id: true,
+  name: true,
+  species: true,
+  period: true,
+  diet: true,
+  imageUrl1: true,
+  modelUrl: true,
+} as const;
+
 /** Prisma error codes: record not found, unique constraint violated. */
 const RECORD_NOT_FOUND = "P2025";
 const UNIQUE_VIOLATION = "P2002";
@@ -55,15 +72,22 @@ export class DinosaursRepository {
     return prisma;
   }
 
-  findAll(): Promise<Dinosaur[]> {
-    return this.requirePrisma().dinosaur.findMany({ orderBy: { name: "asc" } });
+  findAll(): Promise<DinosaurListItem[]> {
+    return this.requirePrisma().dinosaur.findMany({
+      select: LIST_SELECT,
+      orderBy: { name: "asc" },
+    });
   }
 
-  findFeatured(limit: number): Promise<Dinosaur[]> {
+  findFeatured(limit: number): Promise<DinosaurListItem[]> {
     return this.requirePrisma().dinosaur.findMany({
       where: {
-        OR: [{ imageUrl1: { not: undefined } }, { modelUrl: { not: undefined } }],
+        OR: [
+          { imageUrl1: { not: null } },
+          { modelUrl: { not: null } },
+        ],
       },
+      select: LIST_SELECT,
       take: limit,
       orderBy: { createdAt: "desc" },
     });

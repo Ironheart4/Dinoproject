@@ -1,7 +1,11 @@
 import type { Dinosaur } from "@prisma/client";
 import { BadRequestError, NotFoundError } from "../../core/errors";
 import type { DinosaurBody } from "./Dinosaurs.schemas";
-import type { DinosaurWriteData, DinosaursRepository } from "./Dinosaurs.repository";
+import type {
+  DinosaurListItem,
+  DinosaurWriteData,
+  DinosaursRepository,
+} from "./Dinosaurs.repository";
 
 const FEATURED_LIMIT = 6;
 /** The app-wide placeholder for "no asset yet"; the frontend already handles it. */
@@ -59,11 +63,11 @@ function parseOptionalInt(value: string | number | null | undefined, field: stri
 export class DinosaursService {
   constructor(private readonly repository: DinosaursRepository) {}
 
-  list(): Promise<Dinosaur[]> {
+  list(): Promise<DinosaurListItem[]> {
     return this.repository.findAll();
   }
 
-  featured(): Promise<Dinosaur[]> {
+  featured(): Promise<DinosaurListItem[]> {
     return this.repository.findFeatured(FEATURED_LIMIT);
   }
 
