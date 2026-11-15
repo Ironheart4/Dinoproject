@@ -161,9 +161,9 @@ export default function Splash() {
     let model: THREE.Group | null = null
     let targetY = -3 // Start below ground for emergence effect
 
-    // Fetch a dinosaur with a model (full list for now — will optimize next)
+    // Phase A: lightweight featured list (not full dinosaur payload)
     api
-      .get('/api/dinosaurs')
+      .get('/api/dinosaurs/featured')
       .then((res) => {
         if (cancelled) return
         const dinos = res.data.filter(
