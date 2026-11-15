@@ -84,7 +84,9 @@ export class DinosaursRepository {
       where: {
         OR: [
           { imageUrl1: { not: null } },
-          { modelUrl: { not: null } },
+          // `modelUrl` is required in the schema; records without a model use
+          // the `DEV_PENDING` sentinel instead of null.
+          { modelUrl: { not: "DEV_PENDING" } },
         ],
       },
       select: LIST_SELECT,
