@@ -276,7 +276,8 @@ export default function Timeline() {
       map.setTarget(undefined)
       mapInstanceRef.current = null
     }
-  }, [navigate])
+  // The map container is rendered only after loading completes.
+  }, [navigate, loading])
 
   // Update markers when data changes
   useEffect(() => {
