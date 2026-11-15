@@ -179,9 +179,17 @@ export default function Timeline() {
   // Mappable dinosaurs
   const mappableDinos = useMemo(() => {
     return filteredDinos
-      .map((d, i) => ({ ...d, coords: getCoordinates(d.livedIn, i) }))
+      // Use the id as a stable offset seed so a marker never shifts when filters change.
+      .map(d => ({ ...d, coords: getCoordinates(d.livedIn, d.id) }))
       .filter(d => d.coords !== null) as (Dinosaur & { coords: [number, number] })[]
   }, [filteredDinos])
+
+  // Timeline hover, search, and marker rendering must all use the exact same coordinate.
+  const coordinatesByDinoId = useMemo(() => {
+    const coordinates = new Map<number, [number, number]>()
+    mappableDinos.forEach(dino => coordinates.set(dino.id, dino.coords))
+    return coordinates
+  }, [mappableDinos])
 
   // Initialize OpenLayers Map
   useEffect(() => {
@@ -354,9 +362,12 @@ export default function Timeline() {
       setSearchResult(found)
       setBlinkingDino(found.id)
       
-      const coords = getCoordinates(found.livedIn, found.id)
+      const coords = coordinatesByDinoId.get(found.id)
       if (coords && mapInstanceRef.current) {
-        mapInstanceRef.current.getView().animate({
+        const map = mapInstanceRef.current
+        map.updateSize()
+        map.getView().cancelAnimations()
+        map.getView().animate({
           center: fromLonLat(coords),
           zoom: 5,
           duration: 1000,
@@ -392,10 +403,13 @@ export default function Timeline() {
     
     // Fly to dino location on the map when hovering timeline icons
     if (dino && mapInstanceRef.current) {
-      const coords = getCoordinates(dino.livedIn, dino.id)
+      const coords = coordinatesByDinoId.get(dino.id)
       if (coords) {
         const mapCoordinate = fromLonLat(coords)
-        mapInstanceRef.current.getView().animate({
+        const map = mapInstanceRef.current
+        map.updateSize()
+        map.getView().cancelAnimations()
+        map.getView().animate({
           center: mapCoordinate,
           zoom: 4,
           duration: 800,
