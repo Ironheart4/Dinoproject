@@ -30,7 +30,17 @@ export interface DinosaurWriteData {
 /** Lightweight shape for list / featured endpoints (no long text or extra media). */
 export type DinosaurListItem = Pick<
   Dinosaur,
-  "id" | "name" | "species" | "period" | "diet" | "imageUrl1" | "modelUrl"
+  | "id"
+  | "name"
+  | "species"
+  | "period"
+  | "diet"
+  | "taxonomy"
+  | "livedIn"
+  | "lengthMeters"
+  | "weightKg"
+  | "imageUrl1"
+  | "modelUrl"
 >;
 
 /** Fields returned by list and featured — keeps payloads small for fast loads. */
@@ -40,6 +50,10 @@ const LIST_SELECT = {
   species: true,
   period: true,
   diet: true,
+  taxonomy: true,
+  livedIn: true,
+  lengthMeters: true,
+  weightKg: true,
   imageUrl1: true,
   modelUrl: true,
 } as const;

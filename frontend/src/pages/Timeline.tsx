@@ -116,6 +116,7 @@ export default function Timeline() {
   const vectorSourceRef = useRef<VectorSource | null>(null)
   const popupRef = useRef<HTMLDivElement>(null)
   const overlayRef = useRef<Overlay | null>(null)
+  const dinosaursRef = useRef<Dinosaur[]>([])
   
   const [dinosaurs, setDinosaurs] = useState<Dinosaur[]>([])
   const [loading, setLoading] = useState(true)
@@ -127,6 +128,11 @@ export default function Timeline() {
   const [blinkingDino, setBlinkingDino] = useState<number | null>(null)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [popupContent, setPopupContent] = useState<Dinosaur | null>(null)
+
+  // OpenLayers event handlers are registered once, so keep their dinosaur lookup current.
+  useEffect(() => {
+    dinosaursRef.current = dinosaurs
+  }, [dinosaurs])
 
   // Fetch dinosaurs
   useEffect(() => {
@@ -244,7 +250,7 @@ export default function Timeline() {
         }
         
         const dinoId = feature.get('dinoId')
-        const dino = dinosaurs.find(d => d.id === dinoId)
+        const dino = dinosaursRef.current.find(d => d.id === dinoId)
         if (dino) {
           setPopupContent(dino)
           overlayRef.current.setPosition(evt.coordinate)
@@ -270,7 +276,7 @@ export default function Timeline() {
       map.setTarget(undefined)
       mapInstanceRef.current = null
     }
-  }, [navigate, dinosaurs])
+  }, [navigate])
 
   // Update markers when data changes
   useEffect(() => {
@@ -387,11 +393,19 @@ export default function Timeline() {
     if (dino && mapInstanceRef.current) {
       const coords = getCoordinates(dino.livedIn, dino.id)
       if (coords) {
+        const mapCoordinate = fromLonLat(coords)
         mapInstanceRef.current.getView().animate({
-          center: fromLonLat(coords),
+          center: mapCoordinate,
           zoom: 4,
           duration: 800,
         })
+
+        // Reuse the map marker popover for timeline icons as well.
+        if (overlayRef.current && popupRef.current) {
+          setPopupContent(dino)
+          overlayRef.current.setPosition(mapCoordinate)
+          popupRef.current.style.display = 'block'
+        }
       }
     }
   }
@@ -605,9 +619,13 @@ export default function Timeline() {
                 {popupContent.weightKg && <div>Weight: {Number(popupContent.weightKg).toLocaleString()}kg</div>}
                 {popupContent.livedIn && <div>Region: {popupContent.livedIn}</div>}
               </div>
-              <div className="mt-2 pt-2 border-t border-gray-700 text-xs text-green-400 hover:text-green-300 flex items-center gap-1">
-                Click to view details →
-              </div>
+              <button
+                type="button"
+                className="mt-2 pt-2 border-t border-gray-700 text-xs text-green-400 hover:text-green-300 flex items-center gap-1"
+                onClick={() => navigate(`/dino/${popupContent.id}`)}
+              >
+                View details →
+              </button>
             </>
           )}
         </div>
