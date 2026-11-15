@@ -117,6 +117,7 @@ export default function Timeline() {
   const popupRef = useRef<HTMLDivElement>(null)
   const overlayRef = useRef<Overlay | null>(null)
   const dinosaursRef = useRef<Dinosaur[]>([])
+  const navigateRef = useRef(navigate)
   
   const [dinosaurs, setDinosaurs] = useState<Dinosaur[]>([])
   const [loading, setLoading] = useState(true)
@@ -133,6 +134,10 @@ export default function Timeline() {
   useEffect(() => {
     dinosaursRef.current = dinosaurs
   }, [dinosaurs])
+
+  useEffect(() => {
+    navigateRef.current = navigate
+  }, [navigate])
 
   // Fetch dinosaurs
   useEffect(() => {
@@ -186,7 +191,7 @@ export default function Timeline() {
 
   // Timeline hover, search, and marker rendering must all use the exact same coordinate.
   const coordinatesByDinoId = useMemo(() => {
-    const coordinates = new Map<number, [number, number]>()
+    const coordinates = new globalThis.Map<number, [number, number]>()
     mappableDinos.forEach(dino => coordinates.set(dino.id, dino.coords))
     return coordinates
   }, [mappableDinos])
@@ -223,7 +228,9 @@ export default function Timeline() {
     if (popupRef.current) {
       const overlay = new Overlay({
         element: popupRef.current,
-        autoPan: true,
+        // A timeline hover already moves the map. Auto-panning the overlay at
+        // the same time causes competing animations and an off-centre marker.
+        autoPan: false,
         positioning: 'bottom-center',
         offset: [0, -10],
       })
@@ -232,20 +239,22 @@ export default function Timeline() {
     }
 
     // Handle map click
-    map.on('click', (evt) => {
+    // OpenLayers exposes several event subclasses through one listener API.
+    const handleMapClick = (evt: any) => {
       const feature = map.forEachFeatureAtPixel(evt.pixel, (f) => f)
       if (feature) {
         const dinoId = feature.get('dinoId')
         if (dinoId) {
-          navigate(`/dino/${dinoId}`)
+          navigateRef.current(`/dino/${dinoId}`)
         }
       }
-    })
+    }
+    map.on('click', handleMapClick)
 
     // Handle pointer move for hover - keep popup visible
     let hideTimeout: ReturnType<typeof setTimeout> | null = null
     
-    map.on('pointermove', (evt) => {
+    const handlePointerMove = (evt: any) => {
       const feature = map.forEachFeatureAtPixel(evt.pixel, (f) => f)
       const target = map.getTarget() as HTMLElement
       target.style.cursor = feature ? 'pointer' : ''
@@ -265,27 +274,32 @@ export default function Timeline() {
           popupRef.current.style.display = 'block'
         }
       }
-    })
+    }
+    map.on('pointermove', handlePointerMove)
     
     // Hide popup when mouse leaves the map container
     const mapContainer = mapRef.current
-    if (mapContainer) {
-      mapContainer.addEventListener('mouseleave', () => {
-        if (popupRef.current) {
-          popupRef.current.style.display = 'none'
-          setPopupContent(null)
-        }
-      })
+    const hidePopup = () => {
+      if (popupRef.current) {
+        popupRef.current.style.display = 'none'
+        setPopupContent(null)
+      }
     }
+    mapContainer?.addEventListener('mouseleave', hidePopup)
 
     mapInstanceRef.current = map
 
     return () => {
+      map.un('click', handleMapClick)
+      map.un('pointermove', handlePointerMove)
+      mapContainer?.removeEventListener('mouseleave', hidePopup)
       map.setTarget(undefined)
       mapInstanceRef.current = null
+      vectorSourceRef.current = null
+      overlayRef.current = null
     }
   // The map container is rendered only after loading completes.
-  }, [navigate, loading])
+  }, [loading])
 
   // Update markers when data changes
   useEffect(() => {
@@ -330,6 +344,31 @@ export default function Timeline() {
     })
   }, [mappableDinos, blinkingDino, hoveredDino])
 
+  /** Focus a marker first, then show its popup without allowing it to move the map. */
+  const focusDinosaurOnMap = (dino: Dinosaur, zoom: number, duration: number) => {
+    const coords = coordinatesByDinoId.get(dino.id)
+    const map = mapInstanceRef.current
+    if (!coords || !map) return
+
+    const mapCoordinate = fromLonLat(coords)
+    map.updateSize()
+    map.getView().cancelAnimations()
+    setPopupContent(dino)
+    map.getView().animate(
+      {
+        center: mapCoordinate,
+        zoom,
+        duration,
+      },
+      (completed: boolean) => {
+        if (completed && overlayRef.current && popupRef.current) {
+          overlayRef.current.setPosition(mapCoordinate)
+          popupRef.current.style.display = 'block'
+        }
+      },
+    )
+  }
+
   // Handle blinking effect
   useEffect(() => {
     if (blinkingDino === null) return
@@ -362,17 +401,7 @@ export default function Timeline() {
       setSearchResult(found)
       setBlinkingDino(found.id)
       
-      const coords = coordinatesByDinoId.get(found.id)
-      if (coords && mapInstanceRef.current) {
-        const map = mapInstanceRef.current
-        map.updateSize()
-        map.getView().cancelAnimations()
-        map.getView().animate({
-          center: fromLonLat(coords),
-          zoom: 5,
-          duration: 1000,
-        })
-      }
+      focusDinosaurOnMap(found, 5, 1000)
     } else {
       setSearchResult(null)
       alert('Dinosaur not found. Try another name.')
@@ -402,27 +431,7 @@ export default function Timeline() {
     setHoveredDino(dino ? dino.id : null)
     
     // Fly to dino location on the map when hovering timeline icons
-    if (dino && mapInstanceRef.current) {
-      const coords = coordinatesByDinoId.get(dino.id)
-      if (coords) {
-        const mapCoordinate = fromLonLat(coords)
-        const map = mapInstanceRef.current
-        map.updateSize()
-        map.getView().cancelAnimations()
-        map.getView().animate({
-          center: mapCoordinate,
-          zoom: 4,
-          duration: 800,
-        })
-
-        // Reuse the map marker popover for timeline icons as well.
-        if (overlayRef.current && popupRef.current) {
-          setPopupContent(dino)
-          overlayRef.current.setPosition(mapCoordinate)
-          popupRef.current.style.display = 'block'
-        }
-      }
-    }
+    if (dino) focusDinosaurOnMap(dino, 4, 800)
   }
 
   if (loading) {
