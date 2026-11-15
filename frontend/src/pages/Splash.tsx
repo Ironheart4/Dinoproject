@@ -20,29 +20,32 @@ export default function Splash() {
   const navigate = useNavigate()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const mousePosRef = useRef({ x: 0, y: 0 })
   const [loaded, setLoaded] = useState(false)
   const [progress, setProgress] = useState(0)
   const [showContent, setShowContent] = useState(false)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-  
-  // Detect mobile or slow connection - skip 3D on mobile for faster load
-  const isMobile = typeof window !== 'undefined' && (
-    window.innerWidth < 768 || 
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  )
 
-  // Parallax mouse tracking
+  // Detect mobile or slow connection - skip 3D on mobile for faster load
+  const isMobile =
+    typeof window !== 'undefined' &&
+    (window.innerWidth < 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ))
+
+  // Track mouse in a ref so the 3D scene is NOT recreated on every move
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 2
-      const y = (e.clientY / window.innerHeight - 0.5) * 2
-      setMousePos({ x, y })
+      mousePosRef.current = {
+        x: (e.clientX / window.innerWidth - 0.5) * 2,
+        y: (e.clientY / window.innerHeight - 0.5) * 2,
+      }
     }
     window.addEventListener('mousemove', handleMouseMove)
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
 
-  // 3D Scene setup - skip on mobile for faster load
+  // 3D Scene setup - runs once (or when isMobile changes). Never on mouse move.
   useEffect(() => {
     // On mobile, skip 3D entirely and show content immediately
     if (isMobile) {
@@ -50,23 +53,22 @@ export default function Splash() {
       setTimeout(() => setShowContent(true), 300)
       return
     }
-    
+
+    let cancelled = false
+
     // Fallback timeout - show content after 4 seconds even if 3D isn't loaded
     const fallbackTimer = setTimeout(() => {
-      if (!loaded) {
-        setLoaded(true)
-        setProgress(100)
-      }
-      if (!showContent) {
-        setShowContent(true)
-      }
+      if (cancelled) return
+      setLoaded(true)
+      setProgress(100)
+      setShowContent(true)
     }, 4000)
-    
+
     const canvas = canvasRef.current
     if (!canvas) return
 
     const scene = new THREE.Scene()
-    
+
     // Gradient background
     const canvas2d = document.createElement('canvas')
     canvas2d.width = 512
@@ -81,7 +83,12 @@ export default function Splash() {
     const bgTexture = new THREE.CanvasTexture(canvas2d)
     scene.background = bgTexture
 
-    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
+    const camera = new THREE.PerspectiveCamera(
+      50,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    )
     camera.position.set(0, 1.5, 6)
     camera.lookAt(0, 1, 0)
 
@@ -100,7 +107,7 @@ export default function Splash() {
     scene.add(ambient)
 
     // Main spotlight on dinosaur
-    const spotlight = new THREE.SpotLight(0x4CAF50, 3, 20, Math.PI / 6, 0.5)
+    const spotlight = new THREE.SpotLight(0x4caf50, 3, 20, Math.PI / 6, 0.5)
     spotlight.position.set(5, 10, 5)
     spotlight.castShadow = true
     spotlight.shadow.mapSize.width = 1024
@@ -114,7 +121,7 @@ export default function Splash() {
 
     // Ground plane (subtle)
     const groundGeo = new THREE.PlaneGeometry(50, 50)
-    const groundMat = new THREE.MeshStandardMaterial({ 
+    const groundMat = new THREE.MeshStandardMaterial({
       color: 0x0a1510,
       roughness: 0.9,
     })
@@ -144,7 +151,9 @@ export default function Splash() {
 
     // Load dinosaur model
     const dracoLoader = new DRACOLoader()
-    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/')
+    dracoLoader.setDecoderPath(
+      'https://www.gstatic.com/draco/versioned/decoders/1.5.6/'
+    )
     const loader = new GLTFLoader()
     loader.setDRACOLoader(dracoLoader)
 
@@ -152,27 +161,36 @@ export default function Splash() {
     let model: THREE.Group | null = null
     let targetY = -3 // Start below ground for emergence effect
 
-    // Fetch a dinosaur with a model
-    api.get('/api/dinosaurs')
-      .then(res => {
-        const dinos = res.data.filter((d: Dinosaur) => 
-          d.modelUrl && d.modelUrl !== 'DEV_PENDING' && d.modelUrl.startsWith('http')
+    // Fetch a dinosaur with a model (full list for now — will optimize next)
+    api
+      .get('/api/dinosaurs')
+      .then((res) => {
+        if (cancelled) return
+        const dinos = res.data.filter(
+          (d: Dinosaur) =>
+            d.modelUrl &&
+            d.modelUrl !== 'DEV_PENDING' &&
+            d.modelUrl.startsWith('http')
         )
         if (dinos.length === 0) {
           setLoaded(true)
           setShowContent(true)
           return
         }
-        
+
         // Pick T-Rex if available, otherwise random
-        const trex = dinos.find((d: Dinosaur) => d.name.toLowerCase().includes('tyrannosaurus'))
-        const selectedDino = trex || dinos[Math.floor(Math.random() * dinos.length)]
-        
+        const trex = dinos.find((d: Dinosaur) =>
+          d.name.toLowerCase().includes('tyrannosaurus')
+        )
+        const selectedDino =
+          trex || dinos[Math.floor(Math.random() * dinos.length)]
+
         loader.load(
-          selectedDino.modelUrl,
+          selectedDino.modelUrl!,
           (gltf) => {
+            if (cancelled) return
             model = gltf.scene
-            
+
             // Scale and position
             const box = new THREE.Box3().setFromObject(model)
             const size = new THREE.Vector3()
@@ -180,7 +198,7 @@ export default function Splash() {
             const maxDim = Math.max(size.x, size.y, size.z)
             const scale = 3 / maxDim
             model.scale.setScalar(scale)
-            
+
             // Recenter
             box.setFromObject(model)
             const center = new THREE.Vector3()
@@ -188,43 +206,51 @@ export default function Splash() {
             model.position.x = -center.x
             model.position.z = -center.z
             model.position.y = targetY // Start below
-            
+
             model.traverse((child) => {
               if ((child as THREE.Mesh).isMesh) {
                 child.castShadow = true
                 child.receiveShadow = true
               }
             })
-            
+
             scene.add(model)
-            
+
             // Animation
             if (gltf.animations?.length) {
               mixer = new THREE.AnimationMixer(model)
-              gltf.animations.forEach(clip => mixer!.clipAction(clip).play())
+              gltf.animations.forEach((clip) => mixer!.clipAction(clip).play())
             }
-            
+
             setLoaded(true)
-            
+
             // Emergence animation
             setTimeout(() => {
-              targetY = -box.min.y * scale // Ground level
+              if (!cancelled) targetY = -box.min.y * scale // Ground level
             }, 500)
-            
-            setTimeout(() => setShowContent(true), 1500)
+
+            setTimeout(() => {
+              if (!cancelled) setShowContent(true)
+            }, 1500)
           },
           (xhr) => {
-            setProgress(Math.round((xhr.loaded / xhr.total) * 100))
+            if (!cancelled && xhr.total > 0) {
+              setProgress(Math.round((xhr.loaded / xhr.total) * 100))
+            }
           },
           () => {
-            setLoaded(true)
-            setShowContent(true)
+            if (!cancelled) {
+              setLoaded(true)
+              setShowContent(true)
+            }
           }
         )
       })
       .catch(() => {
-        setLoaded(true)
-        setShowContent(true)
+        if (!cancelled) {
+          setLoaded(true)
+          setShowContent(true)
+        }
       })
 
     const clock = new THREE.Clock()
@@ -251,9 +277,10 @@ export default function Splash() {
       }
       particlesGeo.attributes.position.needsUpdate = true
 
-      // Camera subtle movement based on mouse
-      camera.position.x = 0 + mousePos.x * 0.3
-      camera.position.y = 1.5 + mousePos.y * 0.2
+      // Camera subtle movement from ref (does NOT recreate the scene)
+      const { x, y } = mousePosRef.current
+      camera.position.x = 0 + x * 0.3
+      camera.position.y = 1.5 + y * 0.2
       camera.lookAt(0, 1, 0)
 
       renderer.render(scene, camera)
@@ -268,13 +295,14 @@ export default function Splash() {
     window.addEventListener('resize', handleResize)
 
     return () => {
+      cancelled = true
       clearTimeout(fallbackTimer)
       window.removeEventListener('resize', handleResize)
       cancelAnimationFrame(animationId)
       renderer.dispose()
       dracoLoader.dispose()
     }
-  }, [mousePos.x, mousePos.y, isMobile, loaded, showContent])
+  }, [isMobile]) // Only re-run if mobile detection changes — never on mouse move
 
   const handleEnter = () => {
     navigate('/timeline')
@@ -287,35 +315,44 @@ export default function Splash() {
   return (
     <div ref={containerRef} className="fixed inset-0 overflow-hidden bg-[#050a08]">
       {/* 3D Canvas - only render on desktop */}
-      {!isMobile && <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />}
-      
+      {!isMobile && (
+        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+      )}
+
       {/* Mobile-friendly gradient background */}
       {isMobile && (
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(ellipse at center, #1a3a2a 0%, #0d1f17 40%, #050a08 100%)'
-        }}>
-          {/* Animated gradient overlay for mobile */}
-          <div className="absolute inset-0 opacity-30" style={{
-            background: 'linear-gradient(45deg, transparent 30%, rgba(74, 222, 128, 0.1) 50%, transparent 70%)',
-            animation: 'shimmer 3s infinite'
-          }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse at center, #1a3a2a 0%, #0d1f17 40%, #050a08 100%)',
+          }}
+        >
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              background:
+                'linear-gradient(45deg, transparent 30%, rgba(74, 222, 128, 0.1) 50%, transparent 70%)',
+              animation: 'shimmer 3s infinite',
+            }}
+          />
         </div>
       )}
 
-      {/* Parallax jungle silhouettes */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none transition-transform duration-300"
-        style={{ 
-          transform: `translateX(${mousePos.x * -20}px)`,
-          background: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1440 200\'%3E%3Cpath fill=\'%230a1510\' d=\'M0,200 L0,120 Q60,80 120,100 T240,90 T360,110 T480,85 T600,100 T720,75 T840,95 T960,80 T1080,100 T1200,85 T1320,95 T1440,90 L1440,200 Z\'/%3E%3C/svg%3E") repeat-x bottom',
+      {/* Jungle silhouettes (static for stability — no mouse-driven re-render) */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none"
+        style={{
+          background:
+            'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1440 200\'%3E%3Cpath fill=\'%230a1510\' d=\'M0,200 L0,120 Q60,80 120,100 T240,90 T360,110 T480,85 T600,100 T720,75 T840,95 T960,80 T1080,100 T1200,85 T1320,95 T1440,90 L1440,200 Z\'/%3E%3C/svg%3E") repeat-x bottom',
           backgroundSize: 'auto 100%',
         }}
       />
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none transition-transform duration-500"
-        style={{ 
-          transform: `translateX(${mousePos.x * -10}px)`,
-          background: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1440 150\'%3E%3Cpath fill=\'%23071210\' d=\'M0,150 L0,100 Q80,60 160,80 T320,70 T480,90 T640,65 T800,85 T960,70 T1120,80 T1280,60 T1440,75 L1440,150 Z\'/%3E%3C/svg%3E") repeat-x bottom',
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+        style={{
+          background:
+            'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1440 150\'%3E%3Cpath fill=\'%23071210\' d=\'M0,150 L0,100 Q80,60 160,80 T320,70 T480,90 T640,65 T800,85 T960,70 T1120,80 T1280,60 T1440,75 L1440,150 Z\'/%3E%3C/svg%3E") repeat-x bottom',
           backgroundSize: 'auto 100%',
         }}
       />
@@ -327,19 +364,23 @@ export default function Splash() {
             key={i}
             className="absolute w-1 h-1 bg-green-400/30 rounded-full animate-pulse"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 60}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`,
+              left: `${(i * 17) % 100}%`,
+              top: `${(i * 13) % 60}%`,
+              animationDelay: `${(i % 5) * 0.4}s`,
+              animationDuration: `${2 + (i % 3)}s`,
             }}
           />
         ))}
       </div>
 
       {/* Vignette overlay */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.6) 100%)'
-      }} />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.6) 100%)',
+        }}
+      />
 
       {/* Loading State */}
       {!loaded && (
@@ -347,7 +388,7 @@ export default function Splash() {
           <div className="text-center">
             <div className="relative w-24 h-24 mx-auto mb-6">
               <div className="absolute inset-0 border-4 border-green-500/30 rounded-full" />
-              <div 
+              <div
                 className="absolute inset-0 border-4 border-green-400 rounded-full border-t-transparent animate-spin"
                 style={{ animationDuration: '1s' }}
               />
@@ -361,7 +402,11 @@ export default function Splash() {
       )}
 
       {/* Main Content */}
-      <div className={`absolute inset-0 flex flex-col items-center justify-center px-6 z-10 transition-all duration-1000 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center px-6 z-10 transition-all duration-1000 ${
+          showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}
+      >
         {/* Logo/Icon */}
         <div className="mb-4 sm:mb-6">
           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-500/20 border-2 border-green-400/50 flex items-center justify-center backdrop-blur-sm animate-pulse">
@@ -379,8 +424,9 @@ export default function Splash() {
 
         {/* Subtitle */}
         <p className="text-base sm:text-lg md:text-xl text-gray-300 text-center max-w-2xl mb-6 sm:mb-8 leading-relaxed">
-          Discover 100+ species with 3D models, test your knowledge with 500+ quiz questions, 
-          explore fossils across 6 continents, and join 10,000+ prehistoric enthusiasts.
+          Discover 100+ species with 3D models, test your knowledge with 500+
+          quiz questions, explore fossils across 6 continents, and join 10,000+
+          prehistoric enthusiasts.
         </p>
 
         {/* Feature highlights */}
@@ -391,7 +437,7 @@ export default function Splash() {
             { icon: Map, label: 'Fossil Map' },
             { icon: Users, label: 'Community' },
           ].map((feature, i) => (
-            <div 
+            <div
               key={feature.label}
               className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full text-gray-300 text-xs sm:text-sm transition-all hover:bg-white/10 hover:border-green-500/50"
               style={{ animationDelay: `${i * 0.1}s` }}
@@ -407,11 +453,12 @@ export default function Splash() {
           onClick={handleEnter}
           className="group relative px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold text-lg sm:text-xl rounded-2xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 transition-all duration-300 flex items-center gap-3 overflow-hidden"
         >
-          {/* Shine effect */}
           <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-          
           <span className="relative">Start Exploring</span>
-          <ChevronRight size={24} className="relative group-hover:translate-x-1 transition-transform" />
+          <ChevronRight
+            size={24}
+            className="relative group-hover:translate-x-1 transition-transform"
+          />
         </button>
 
         {/* Skip to home */}
