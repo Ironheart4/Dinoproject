@@ -7,6 +7,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { isWebGLAvailable } from '../lib/webgl'
 
 interface Dinosaur {
   id: number
@@ -54,6 +55,12 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
     setLoading(true)
     setError(false)
 
+    if (!isWebGLAvailable()) {
+      setLoading(false)
+      setError(true)
+      return
+    }
+
     const width = container.clientWidth || 400
     const height = container.clientHeight || 400
 
@@ -66,11 +73,18 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
     camera.position.set(0, 1, 5)
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
-      alpha: true,
-      powerPreference: 'high-performance'
-    })
+    let renderer: THREE.WebGLRenderer
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance'
+      })
+    } catch {
+      setLoading(false)
+      setError(true)
+      return
+    }
     renderer.setSize(width, height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -191,6 +205,7 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
       window.removeEventListener('resize', handleResize)
       cancelAnimationFrame(animationId)
       controls.dispose()
+      renderer.forceContextLoss()
       renderer.dispose()
       dracoLoader.dispose()
       if (renderer.domElement && container.contains(renderer.domElement)) {
@@ -209,10 +224,18 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
 
   if (!currentDino) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="w-full h-full flex items-center justify-center p-6">
         <div className="text-center text-gray-400">
-          <div className="text-6xl mb-2">🦕</div>
-          <p className="text-sm">Loading dinosaurs...</p>
+          <div className="text-6xl mb-3">🦕</div>
+          <p className="text-sm mb-4">
+            {dinosaurs.length ? '3D models are coming soon.' : 'No dinosaurs are available right now.'}
+          </p>
+          <Link
+            to="/encyclopedia"
+            className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 transition-colors"
+          >
+            Browse Encyclopedia
+          </Link>
         </div>
       </div>
     )
@@ -235,11 +258,25 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
 
       {/* Error fallback */}
       {error && !loading && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-gray-300">
-            <div className="text-6xl mb-2">🦖</div>
-            <p className="text-sm">Model unavailable</p>
-          </div>
+        <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+          {currentDino.imageUrl1 && currentDino.imageUrl1 !== 'DEV_PENDING' ? (
+            <div className="relative h-full w-full">
+              <img
+                src={currentDino.imageUrl1}
+                alt={currentDino.name}
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/20 to-transparent" />
+              <p className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs text-gray-300">
+                3D view unavailable — showing image
+              </p>
+            </div>
+          ) : (
+            <div className="text-center text-gray-300">
+              <div className="text-6xl mb-2">🦖</div>
+              <p className="text-sm">3D view unavailable</p>
+            </div>
+          )}
         </div>
       )}
 

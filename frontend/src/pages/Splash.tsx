@@ -7,6 +7,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { api } from '../lib/api'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import { isWebGLAvailable } from '../lib/webgl'
 import { ChevronRight, Compass, Brain, Map, Users, Sparkles } from 'lucide-react'
 
 interface Dinosaur {
@@ -24,6 +25,7 @@ export default function Splash() {
   const [loaded, setLoaded] = useState(false)
   const [progress, setProgress] = useState(0)
   const [showContent, setShowContent] = useState(false)
+  const [webglAvailable] = useState(() => isWebGLAvailable())
 
   // Detect mobile or slow connection - skip 3D on mobile for faster load
   const isMobile =
@@ -47,10 +49,11 @@ export default function Splash() {
 
   // 3D Scene setup - runs once (or when isMobile changes). Never on mouse move.
   useEffect(() => {
-    // On mobile, skip 3D entirely and show content immediately
-    if (isMobile) {
+    // On mobile or without WebGL, skip 3D entirely and show content immediately
+    if (isMobile || !webglAvailable) {
       setLoaded(true)
-      setTimeout(() => setShowContent(true), 300)
+      setProgress(100)
+      setShowContent(true)
       return
     }
 
@@ -65,7 +68,13 @@ export default function Splash() {
     }, 4000)
 
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas) {
+      clearTimeout(fallbackTimer)
+      setLoaded(true)
+      setProgress(100)
+      setShowContent(true)
+      return
+    }
 
     const scene = new THREE.Scene()
 
@@ -80,11 +89,20 @@ export default function Splash() {
 
     // Keep the renderer transparent so the CSS gradient is consistent on desktop
     // and mobile. Some GPUs render the canvas texture above as a washed-out grey.
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true,
-    })
+    let renderer: THREE.WebGLRenderer
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+      })
+    } catch {
+      clearTimeout(fallbackTimer)
+      setLoaded(true)
+      setProgress(100)
+      setShowContent(true)
+      return
+    }
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setClearColor(0x000000, 0)
@@ -295,10 +313,11 @@ export default function Splash() {
       clearTimeout(fallbackTimer)
       window.removeEventListener('resize', handleResize)
       cancelAnimationFrame(animationId)
+      renderer.forceContextLoss()
       renderer.dispose()
       dracoLoader.dispose()
     }
-  }, [isMobile]) // Only re-run if mobile detection changes — never on mouse move
+  }, [isMobile, webglAvailable]) // Only re-run if mobile detection changes — never on mouse move
 
   const handleEnter = () => {
     navigate('/timeline')
@@ -328,8 +347,8 @@ export default function Splash() {
         />
       </div>
 
-      {/* 3D Canvas - only render on desktop */}
-      {!isMobile && (
+      {/* 3D Canvas - only render on desktop with WebGL support */}
+      {!isMobile && webglAvailable && (
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
       )}
 

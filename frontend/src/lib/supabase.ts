@@ -7,7 +7,17 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://mrhcjbprjtirrxwtudbl.supabase.co";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_gm4qqRPs5182s1pneYCr3w_pK5kmQYq";
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+let authQueue: Promise<unknown> = Promise.resolve();
+
+function inMemoryLock<R>(_name: string, _acquireTimeout: number, fn: () => Promise<R>): Promise<R> {
+  const run = authQueue.then(fn, fn);
+  authQueue = run.then(() => undefined, () => undefined);
+  return run;
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { lock: inMemoryLock },
+});
 
 // Helper to get current session token
 export async function getAccessToken(): Promise<string | null> {

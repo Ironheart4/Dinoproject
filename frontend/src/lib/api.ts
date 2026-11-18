@@ -50,9 +50,14 @@ export const api = {
    * GET request - fetch data from the server
    * @example const { data } = await api.get('/api/dinosaurs')
    */
-  async get(url: string) {
+  async get(url: string, config?: { params?: Record<string, string | number | boolean | null | undefined> }) {
     const token = localStorage.getItem('token')
-    const res = await fetch(`${BASE}${url}`, {
+    const params = new URLSearchParams()
+    Object.entries(config?.params || {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) params.set(key, String(value))
+    })
+    const query = params.toString()
+    const res = await fetch(`${BASE}${url}${query ? `${url.includes('?') ? '&' : '?'}${query}` : ''}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
     if (!res.ok) throw new Error(await res.text())

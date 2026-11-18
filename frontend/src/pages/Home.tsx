@@ -80,7 +80,7 @@ export default function Home() {
   return (
     <div className="space-y-12 lg:space-y-20">
       {/* Hero Section - Full Width with Particles and 3D Viewer */}
-      <section className="relative -mx-4 sm:-mx-8 lg:-mx-12 px-4 sm:px-8 lg:px-12 py-12 sm:py-16 lg:py-24 overflow-hidden">
+      <section className="relative -mx-3 sm:-mx-4 px-3 sm:px-4 py-12 sm:py-16 lg:py-24 overflow-hidden">
         {/* Gradient Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-green-900/30 to-gray-900" />
         

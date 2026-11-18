@@ -49,6 +49,7 @@ import Privacy from './pages/Privacy'
 import Splash from './pages/Splash'
 import DinoBattle from './pages/DinoBattle'
 import Settings from './pages/Settings'
+import DinoWorld from './pages/DinoWorld'
 
 // Layout and utility components
 import MasterLayout from './components/MasterLayout'      // Header + Footer wrapper
@@ -89,6 +90,7 @@ export default function App() {
               {/* PUBLIC ROUTES - Anyone can access */}
               <Route path="/home" element={<Home />} />
               <Route path="/encyclopedia" element={<Encyclopedia />} />
+              <Route path="/dino-world" element={<DinoWorld />} />
               <Route path="/dino/:id" element={<DinoDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/quiz" element={<Quiz />} />

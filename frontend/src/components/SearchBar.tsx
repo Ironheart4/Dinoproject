@@ -105,19 +105,19 @@ export default function SearchBar() {
   }
 
   return (
-    <div ref={containerRef} className="relative w-full md:w-64 lg:w-80">
+    <div ref={containerRef} className="relative w-full">
       {/* Search Input */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search dinosaurs, quizzes..."
+          placeholder="Search..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => query.length >= 2 && setIsOpen(true)}
-          className="w-full pl-10 pr-10 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-400 transition-colors"
+          className="w-full pl-8 pr-8 py-1.5 bg-gray-700 border border-gray-600 rounded-md text-xs text-white placeholder-gray-400 focus:outline-none focus:border-green-400 transition-colors"
         />
         {query && (
           <button
@@ -127,16 +127,16 @@ export default function SearchBar() {
               setIsOpen(false)
               inputRef.current?.focus()
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
           >
-            <X size={18} />
+            <X size={14} />
           </button>
         )}
       </div>
 
       {/* Results Dropdown */}
       {isOpen && results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+        <div className="absolute top-full right-0 mt-2 w-72 max-h-96 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
           {/* Dinosaurs Section */}
           {results.filter(r => r.type === 'dinosaur').length > 0 && (
             <div>
@@ -211,7 +211,7 @@ export default function SearchBar() {
 
       {/* Loading State */}
       {loading && isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-4 flex items-center justify-center gap-2 z-50">
+        <div className="absolute top-full right-0 mt-2 w-72 bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-4 flex items-center justify-center gap-2 z-50">
           <Loader2 size={18} className="animate-spin text-green-400" />
           <span className="text-gray-300 text-sm">Searching...</span>
         </div>
@@ -219,7 +219,7 @@ export default function SearchBar() {
 
       {/* No Results */}
       {isOpen && query.length >= 2 && results.length === 0 && !loading && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-4 text-center text-gray-400 text-sm z-50">
+        <div className="absolute top-full right-0 mt-2 w-72 bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-4 text-center text-gray-400 text-sm z-50">
           No dinosaurs or quizzes found
         </div>
       )}

@@ -5,8 +5,9 @@
 // - Lightweight particle effects (dust/fireflies)
 // - Three.js fog and distant dinosaur silhouettes
 // - Fully responsive and performance-optimized
-import { useEffect, useRef, useState, useCallback, memo } from 'react'
+import { useEffect, useRef, useState, memo } from 'react'
 import * as THREE from 'three'
+import { isWebGLAvailable } from '../lib/webgl'
 
 // Time of day phases for gradient animation
 type TimePhase = 'dawn' | 'day' | 'dusk' | 'night'
@@ -39,17 +40,12 @@ function DynamicBackground() {
   const particleCanvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [timePhase, setTimePhase] = useState<TimePhase>('day')
+  const [webglAvailable] = useState(() => isWebGLAvailable())
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [scrollY, setScrollY] = useState(0)
   const animationRef = useRef<number>()
   const particlesRef = useRef<Particle[]>([])
-  const threeRef = useRef<{
-    scene: THREE.Scene
-    camera: THREE.PerspectiveCamera
-    renderer: THREE.WebGLRenderer
-    fog: THREE.FogExp2
-    dinos: THREE.Mesh[]
-  } | null>(null)
+  const timePhaseRef = useRef<TimePhase>('day')
 
   // Cycle through time phases every 30 seconds (adjustable)
   useEffect(() => {
@@ -64,6 +60,10 @@ function DynamicBackground() {
     const interval = setInterval(cycleTime, 30000) // 30 seconds per phase
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    timePhaseRef.current = timePhase
+  }, [timePhase])
 
   // Track mouse position for parallax
   useEffect(() => {
@@ -178,23 +178,30 @@ function DynamicBackground() {
 
   // Initialize Three.js scene for fog and dinosaur silhouettes
   useEffect(() => {
+    if (!webglAvailable) return
+
     const canvas = canvasRef.current
     if (!canvas) return
-    
+
+    let renderer: THREE.WebGLRenderer
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: false, // Better performance
+        powerPreference: 'low-power'
+      })
+    } catch {
+      return
+    }
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)) // Cap pixel ratio for performance
+
     // Scene setup
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
     camera.position.z = 50
     camera.position.y = 5
-    
-    const renderer = new THREE.WebGLRenderer({ 
-      canvas, 
-      alpha: true, 
-      antialias: false, // Better performance
-      powerPreference: 'low-power'
-    })
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)) // Cap pixel ratio for performance
     
     // Fog
     const fog = new THREE.FogExp2(0x0a1628, 0.015)
@@ -245,12 +252,12 @@ function DynamicBackground() {
     ground.position.y = -8
     ground.position.z = -30
     scene.add(ground)
-    
-    threeRef.current = { scene, camera, renderer, fog, dinos }
-    
+
     // Animation
+    let animationId = 0
     let time = 0
     const animate = () => {
+      animationId = requestAnimationFrame(animate)
       time += 0.016
       
       // Animate dinosaurs
@@ -275,10 +282,9 @@ function DynamicBackground() {
         dusk: 0x2a1a2e,
         night: 0x050810
       }
-      fog.color.setHex(fogColors[timePhase])
+      fog.color.setHex(fogColors[timePhaseRef.current])
       
       renderer.render(scene, camera)
-      requestAnimationFrame(animate)
     }
     
     animate()
@@ -292,11 +298,20 @@ function DynamicBackground() {
     window.addEventListener('resize', handleResize)
     
     return () => {
+      cancelAnimationFrame(animationId)
       window.removeEventListener('resize', handleResize)
+      dinos.forEach(dino => {
+        dino.geometry.dispose()
+        ;(dino.material as THREE.Material).dispose()
+      })
+      dinoMaterial.dispose()
+      groundGeo.dispose()
+      groundMat.dispose()
+      renderer.forceContextLoss()
       renderer.dispose()
       scene.clear()
     }
-  }, [timePhase])
+  }, [webglAvailable])
 
   const colors = GRADIENT_COLORS[timePhase]
   
@@ -407,11 +422,13 @@ function DynamicBackground() {
       </div>
       
       {/* Three.js canvas for fog and dinosaur silhouettes */}
-      <canvas 
-        ref={canvasRef} 
-        className="absolute inset-0 w-full h-full opacity-60"
-        style={{ mixBlendMode: 'multiply' }}
-      />
+      {webglAvailable && (
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full opacity-60"
+          style={{ mixBlendMode: 'multiply' }}
+        />
+      )}
       
       {/* Particle canvas */}
       <canvas 

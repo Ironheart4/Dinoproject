@@ -41,6 +41,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Dna, Loader2, AlertTriangle } from "lucide-react";
+import { isWebGLAvailable } from "../lib/webgl";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -112,6 +113,12 @@ export default function DinoViewer({
       return;
     }
 
+    if (!isWebGLAvailable()) {
+      setLoading(false);
+      setError("3D viewer is unavailable in this browser");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setLoadProgress(0);
@@ -148,11 +155,18 @@ export default function DinoViewer({
     // ========================================================================
     // STEP 3: Create Renderer (converts 3D scene to 2D image)
     // ========================================================================
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: false,              // Disable for performance
-      alpha: false,                   // No transparency needed
-      powerPreference: 'high-performance' 
-    });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: false,              // Disable for performance
+        alpha: false,                   // No transparency needed
+        powerPreference: 'high-performance'
+      });
+    } catch {
+      setLoading(false);
+      setError("3D viewer is unavailable in this browser");
+      return;
+    }
     renderer.setSize(width, h);
     renderer.setPixelRatio(1);        // Use 1 for performance (vs devicePixelRatio)
     renderer.domElement.style.width = '100%';
@@ -331,6 +345,7 @@ export default function DinoViewer({
       resizeObserver.disconnect();
       cancelAnimationFrame(animationId);
       controls.dispose();
+      renderer.forceContextLoss();
       renderer.dispose();
       dracoLoader.dispose();
       rendererRef.current = null;
