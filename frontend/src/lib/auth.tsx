@@ -76,11 +76,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check for existing Supabase session when app starts
   // ============================================================================
   useEffect(() => {
+    let active = true
+
     // Get initial session (from localStorage/cookies)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      handleSession(session)
-      setLoading(false)
-    })
+    // React Strict Mode intentionally mounts effects twice in development. The
+    // first call can still hold Supabase's Navigator Lock when the second starts,
+    // so handle that transient failure instead of leaving an unhandled rejection.
+    const initializeSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (active) await handleSession(session)
+      } catch {
+        // A concurrent tab (or Strict Mode's first effect) may briefly own the
+        // auth lock. The auth-state listener remains subscribed and will supply
+        // the session once that lock is released.
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    void initializeSession()
 
     // Listen for auth changes (login, logout, token refresh)
     // This fires when user logs in/out in any tab
@@ -89,7 +103,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     // Cleanup subscription on unmount
-    return () => subscription.unsubscribe()
+    return () => {
+      active = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   // ============================================================================

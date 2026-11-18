@@ -69,20 +69,6 @@ export default function Splash() {
 
     const scene = new THREE.Scene()
 
-    // Gradient background
-    const canvas2d = document.createElement('canvas')
-    canvas2d.width = 512
-    canvas2d.height = 512
-    const ctx = canvas2d.getContext('2d')!
-    const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 400)
-    gradient.addColorStop(0, '#1a3a2a')
-    gradient.addColorStop(0.5, '#0d1f17')
-    gradient.addColorStop(1, '#050a08')
-    ctx.fillStyle = gradient
-    ctx.fillRect(0, 0, 512, 512)
-    const bgTexture = new THREE.CanvasTexture(canvas2d)
-    scene.background = bgTexture
-
     const camera = new THREE.PerspectiveCamera(
       50,
       window.innerWidth / window.innerHeight,
@@ -92,9 +78,16 @@ export default function Splash() {
     camera.position.set(0, 1.5, 6)
     camera.lookAt(0, 1, 0)
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+    // Keep the renderer transparent so the CSS gradient is consistent on desktop
+    // and mobile. Some GPUs render the canvas texture above as a washed-out grey.
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+    })
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setClearColor(0x000000, 0)
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -272,7 +265,10 @@ export default function Splash() {
       // Animate particles
       const posArray = particlesGeo.attributes.position.array as Float32Array
       for (let i = 0; i < posArray.length; i += 3) {
-        posArray[i + 1] += 0.01
+        // Use elapsed time rather than a fixed frame increment so movement is
+        // smooth and has the same speed on high- and low-refresh-rate displays.
+        posArray[i] += Math.sin(elapsed + i) * delta * 0.03
+        posArray[i + 1] += delta * 0.55
         if (posArray[i + 1] > 10) posArray[i + 1] = 0
       }
       particlesGeo.attributes.position.needsUpdate = true
@@ -314,29 +310,27 @@ export default function Splash() {
 
   return (
     <div ref={containerRef} className="fixed inset-0 overflow-hidden bg-[#050a08]">
+      {/* Shared background: the transparent desktop scene sits over this too. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, #1a3a2a 0%, #0d1f17 40%, #050a08 100%)',
+        }}
+      >
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            background:
+              'linear-gradient(45deg, transparent 30%, rgba(74, 222, 128, 0.1) 50%, transparent 70%)',
+            animation: 'shimmer 3s infinite',
+          }}
+        />
+      </div>
+
       {/* 3D Canvas - only render on desktop */}
       {!isMobile && (
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
-      )}
-
-      {/* Mobile-friendly gradient background */}
-      {isMobile && (
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse at center, #1a3a2a 0%, #0d1f17 40%, #050a08 100%)',
-          }}
-        >
-          <div
-            className="absolute inset-0 opacity-30"
-            style={{
-              background:
-                'linear-gradient(45deg, transparent 30%, rgba(74, 222, 128, 0.1) 50%, transparent 70%)',
-              animation: 'shimmer 3s infinite',
-            }}
-          />
-        </div>
       )}
 
       {/* Jungle silhouettes (static for stability — no mouse-driven re-render) */}
@@ -362,12 +356,11 @@ export default function Splash() {
         {[...Array(50)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-green-400/30 rounded-full animate-pulse"
+            className="absolute w-1 h-1 bg-green-400/50 rounded-full"
             style={{
               left: `${(i * 17) % 100}%`,
               top: `${(i * 13) % 60}%`,
-              animationDelay: `${(i % 5) * 0.4}s`,
-              animationDuration: `${2 + (i % 3)}s`,
+              animation: `splash-particle-float ${4 + (i % 4)}s ease-in-out ${(i % 7) * -0.8}s infinite`,
             }}
           />
         ))}
