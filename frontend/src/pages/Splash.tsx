@@ -7,7 +7,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { api } from '../lib/api'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
-import { isWebGLAvailable } from '../lib/webgl'
+import { isWebGLAvailable, reportWebGLFailure } from '../lib/webgl'
 import { ChevronRight, Compass, Brain, Map, Users, Sparkles } from 'lucide-react'
 
 interface Dinosaur {
@@ -97,6 +97,7 @@ export default function Splash() {
         alpha: true,
       })
     } catch {
+      reportWebGLFailure()
       clearTimeout(fallbackTimer)
       setLoaded(true)
       setProgress(100)
@@ -313,8 +314,8 @@ export default function Splash() {
       clearTimeout(fallbackTimer)
       window.removeEventListener('resize', handleResize)
       cancelAnimationFrame(animationId)
-      renderer.forceContextLoss()
       renderer.dispose()
+      renderer.forceContextLoss()
       dracoLoader.dispose()
     }
   }, [isMobile, webglAvailable]) // Only re-run if mobile detection changes — never on mouse move

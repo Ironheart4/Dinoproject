@@ -337,8 +337,8 @@ function DynamicBackground() {
       dinoMaterial.dispose()
       groundGeo.dispose()
       groundMat.dispose()
-      renderer.forceContextLoss()
       renderer.dispose()
+      renderer.forceContextLoss()
       scene.clear()
     }
   }, [webglAvailable])

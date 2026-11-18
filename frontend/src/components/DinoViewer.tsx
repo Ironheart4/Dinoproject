@@ -41,7 +41,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Dna, Loader2, AlertTriangle } from "lucide-react";
-import { isWebGLAvailable } from "../lib/webgl";
+import { isWebGLAvailable, reportWebGLFailure } from "../lib/webgl";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -163,6 +163,7 @@ export default function DinoViewer({
         powerPreference: 'high-performance'
       });
     } catch {
+      reportWebGLFailure();
       setLoading(false);
       setError("3D viewer is unavailable in this browser");
       return;
@@ -345,8 +346,8 @@ export default function DinoViewer({
       resizeObserver.disconnect();
       cancelAnimationFrame(animationId);
       controls.dispose();
-      renderer.forceContextLoss();
       renderer.dispose();
+      renderer.forceContextLoss();
       dracoLoader.dispose();
       rendererRef.current = null;
       

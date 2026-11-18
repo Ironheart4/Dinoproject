@@ -237,8 +237,8 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
       if (handleResize) window.removeEventListener('resize', handleResize)
       controls?.dispose()
       if (renderer) {
-        renderer.forceContextLoss()
         renderer.dispose()
+        renderer.forceContextLoss()
         if (renderer.domElement && container.contains(renderer.domElement)) {
           container.removeChild(renderer.domElement)
         }
