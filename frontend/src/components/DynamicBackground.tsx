@@ -7,7 +7,7 @@
 // - Fully responsive and performance-optimized
 import { useEffect, useRef, useState, memo } from 'react'
 import * as THREE from 'three'
-import { isWebGLAvailable } from '../lib/webgl'
+import { isWebGLAvailable, reportWebGLFailure } from '../lib/webgl'
 
 // Time of day phases for gradient animation
 type TimePhase = 'dawn' | 'day' | 'dusk' | 'night'
@@ -39,10 +39,11 @@ function DynamicBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const particleCanvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const farLayerRef = useRef<HTMLDivElement>(null)
+  const midLayerRef = useRef<HTMLDivElement>(null)
+  const nearLayerRef = useRef<HTMLDivElement>(null)
   const [timePhase, setTimePhase] = useState<TimePhase>('day')
   const [webglAvailable] = useState(() => isWebGLAvailable())
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-  const [scrollY, setScrollY] = useState(0)
   const animationRef = useRef<number>()
   const particlesRef = useRef<Particle[]>([])
   const timePhaseRef = useRef<TimePhase>('day')
@@ -67,22 +68,45 @@ function DynamicBackground() {
 
   // Track mouse position for parallax
   useEffect(() => {
+    const target = { x: 0, y: 0, scroll: 0 }
+    const current = { x: 0, y: 0, scroll: 0 }
+    let raf = 0
+
     const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 2
-      const y = (e.clientY / window.innerHeight - 0.5) * 2
-      setMousePos({ x, y })
+      target.x = (e.clientX / window.innerWidth - 0.5) * 2
+      target.y = (e.clientY / window.innerHeight - 0.5) * 2
     }
-    
+
     const handleScroll = () => {
-      setScrollY(window.scrollY)
+      target.scroll = window.scrollY
     }
-    
+
+    const animateParallax = () => {
+      current.x += (target.x - current.x) * 0.08
+      current.y += (target.y - current.y) * 0.08
+      current.scroll += (target.scroll - current.scroll) * 0.1
+
+      if (farLayerRef.current) {
+        farLayerRef.current.style.transform = `translate3d(${current.x * 5}px, ${current.y * 3 + current.scroll * 0.05}px, 0)`
+      }
+      if (midLayerRef.current) {
+        midLayerRef.current.style.transform = `translate3d(${current.x * 10}px, ${current.y * 5 + current.scroll * 0.1}px, 0)`
+      }
+      if (nearLayerRef.current) {
+        nearLayerRef.current.style.transform = `translate3d(${current.x * 15}px, ${current.y * 8 + current.scroll * 0.15}px, 0)`
+      }
+
+      raf = requestAnimationFrame(animateParallax)
+    }
+
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
     window.addEventListener('scroll', handleScroll, { passive: true })
-    
+    raf = requestAnimationFrame(animateParallax)
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('scroll', handleScroll)
+      cancelAnimationFrame(raf)
     }
   }, [])
 
@@ -110,23 +134,29 @@ function DynamicBackground() {
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         size: Math.random() * 2 + 1,
-        speedX: (Math.random() - 0.5) * 0.3,
-        speedY: Math.random() * 0.2 + 0.1,
+        speedX: (Math.random() - 0.5) * 22,
+        speedY: Math.random() * 16 + 8,
         opacity: Math.random() * 0.5 + 0.2,
         type: Math.random() > 0.7 ? 'firefly' : 'dust',
       })
     }
     particlesRef.current = particles
-    
+
     // Animation loop
-    let frame = 0
-    const animate = () => {
+    let lastTime = performance.now()
+    let elapsed = 0
+    const animate = (now: number) => {
+      const delta = Math.min((now - lastTime) / 1000, 0.05)
+      lastTime = now
+      elapsed += delta
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      
+
+      const phase = timePhaseRef.current
+
       particles.forEach((p, i) => {
         // Update position
-        p.x += p.speedX
-        p.y -= p.speedY // Float upward
+        p.x += p.speedX * delta
+        p.y -= p.speedY * delta // Float upward
         
         // Wrap around
         if (p.y < -10) {
@@ -139,18 +169,18 @@ function DynamicBackground() {
         // Draw particle
         ctx.beginPath()
         
-        if (p.type === 'firefly' && timePhase === 'night') {
+        if (p.type === 'firefly' && phase === 'night') {
           // Glowing firefly effect at night
-          const glow = Math.sin(frame * 0.05 + i) * 0.3 + 0.7
+          const glow = Math.sin(elapsed * 3 + i) * 0.3 + 0.7
           const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4)
           gradient.addColorStop(0, `rgba(180, 255, 100, ${p.opacity * glow})`)
           gradient.addColorStop(0.4, `rgba(120, 200, 80, ${p.opacity * glow * 0.5})`)
           gradient.addColorStop(1, 'rgba(80, 150, 50, 0)')
           ctx.fillStyle = gradient
           ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2)
-        } else if (p.type === 'firefly' && timePhase === 'dusk') {
+        } else if (p.type === 'firefly' && phase === 'dusk') {
           // Dimmer fireflies at dusk
-          const glow = Math.sin(frame * 0.03 + i) * 0.2 + 0.4
+          const glow = Math.sin(elapsed * 1.8 + i) * 0.2 + 0.4
           ctx.fillStyle = `rgba(200, 180, 100, ${p.opacity * glow})`
           ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2)
         } else {
@@ -162,11 +192,10 @@ function DynamicBackground() {
         ctx.fill()
       })
       
-      frame++
       animationRef.current = requestAnimationFrame(animate)
     }
     
-    animate()
+    animationRef.current = requestAnimationFrame(animate)
     
     return () => {
       window.removeEventListener('resize', resize)
@@ -174,7 +203,7 @@ function DynamicBackground() {
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [timePhase])
+  }, [])
 
   // Initialize Three.js scene for fog and dinosaur silhouettes
   useEffect(() => {
@@ -192,6 +221,7 @@ function DynamicBackground() {
         powerPreference: 'low-power'
       })
     } catch {
+      reportWebGLFailure()
       return
     }
     renderer.setSize(window.innerWidth, window.innerHeight)
@@ -314,13 +344,6 @@ function DynamicBackground() {
   }, [webglAvailable])
 
   const colors = GRADIENT_COLORS[timePhase]
-  
-  // Calculate parallax offsets
-  const parallaxOffset = {
-    far: { x: mousePos.x * 5, y: mousePos.y * 3 + scrollY * 0.05 },
-    mid: { x: mousePos.x * 10, y: mousePos.y * 5 + scrollY * 0.1 },
-    near: { x: mousePos.x * 15, y: mousePos.y * 8 + scrollY * 0.15 },
-  }
 
   return (
     <div 
@@ -355,10 +378,8 @@ function DynamicBackground() {
       
       {/* Far mountains layer (slowest parallax) */}
       <div 
-        className="absolute bottom-0 left-0 right-0 h-[40vh] transition-transform duration-150 ease-out"
-        style={{ 
-          transform: `translate(${parallaxOffset.far.x}px, ${parallaxOffset.far.y}px)`,
-        }}
+        ref={farLayerRef}
+        className="absolute bottom-0 left-0 right-0 h-[40vh] will-change-transform"
       >
         <svg 
           viewBox="0 0 1440 320" 
@@ -375,10 +396,8 @@ function DynamicBackground() {
       
       {/* Mid mountains layer */}
       <div 
-        className="absolute bottom-0 left-0 right-0 h-[35vh] transition-transform duration-100 ease-out"
-        style={{ 
-          transform: `translate(${parallaxOffset.mid.x}px, ${parallaxOffset.mid.y}px)`,
-        }}
+        ref={midLayerRef}
+        className="absolute bottom-0 left-0 right-0 h-[35vh] will-change-transform"
       >
         <svg 
           viewBox="0 0 1440 320" 
@@ -395,10 +414,8 @@ function DynamicBackground() {
       
       {/* Near foliage layer (fastest parallax) */}
       <div 
-        className="absolute bottom-0 left-0 right-0 h-[25vh] transition-transform duration-75 ease-out"
-        style={{ 
-          transform: `translate(${parallaxOffset.near.x}px, ${parallaxOffset.near.y}px)`,
-        }}
+        ref={nearLayerRef}
+        className="absolute bottom-0 left-0 right-0 h-[25vh] will-change-transform"
       >
         <svg 
           viewBox="0 0 1440 200" 

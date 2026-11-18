@@ -71,12 +71,12 @@ export default function ParticleBackground({
         x: Math.random() * canvas.offsetWidth,
         y: Math.random() * canvas.offsetHeight,
         size: Math.random() * (variant === 'subtle' ? 3 : 5) + 1,
-        speedX: (Math.random() - 0.5) * 0.4,
-        speedY: (Math.random() - 0.5) * 0.3 - 0.15,
+        speedX: (Math.random() - 0.5) * 26,
+        speedY: (Math.random() - 0.5) * 20 - 10,
         opacity: Math.random() * 0.5 + 0.2,
         color: colors[Math.floor(Math.random() * colors.length)],
         pulse: Math.random() * Math.PI * 2,
-        pulseSpeed: Math.random() * 0.02 + 0.01
+        pulseSpeed: Math.random() * 1.2 + 0.6
       })
     }
 
@@ -146,15 +146,16 @@ export default function ParticleBackground({
     }
 
     let animationId: number
-    let time = 0
+    let lastTime = performance.now()
 
-    const animate = () => {
-      time += 0.016 // ~60fps
+    const animate = (now: number) => {
+      const delta = Math.min((now - lastTime) / 1000, 0.05)
+      lastTime = now
       ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight)
 
       // Draw fog layers (background)
       fogLayers.forEach(fog => {
-        fog.x += fog.speed
+        fog.x += fog.speed * delta * 60
         if (fog.x > canvas.offsetWidth * 1.5) {
           fog.x = -canvas.offsetWidth * 0.5
         }
@@ -170,9 +171,9 @@ export default function ParticleBackground({
       // Draw particles
       particles.forEach((p) => {
         // Update position
-        p.x += p.speedX
-        p.y += p.speedY
-        p.pulse += p.pulseSpeed
+        p.x += p.speedX * delta
+        p.y += p.speedY * delta
+        p.pulse += p.pulseSpeed * delta
 
         // Wrap around edges
         if (p.x < -10) p.x = canvas.offsetWidth + 10
@@ -203,7 +204,7 @@ export default function ParticleBackground({
       animationId = requestAnimationFrame(animate)
     }
 
-    animate()
+    animationId = requestAnimationFrame(animate)
 
     const handleResize = () => {
       setCanvasSize()

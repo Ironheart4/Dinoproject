@@ -1,13 +1,13 @@
 // HeroDinoViewer.tsx — Interactive 3D viewer for hero section with dinosaur selector
 // Shows dinosaurs with their 3D models, allows user selection
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { isWebGLAvailable } from '../lib/webgl'
+import { isWebGLAvailable, reportWebGLFailure } from '../lib/webgl'
 
 interface Dinosaur {
   id: number
@@ -28,26 +28,37 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
   const [loading, setLoading] = useState(true)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [error, setError] = useState(false)
+  const [failedUrls, setFailedUrls] = useState<string[]>([])
+  const [webglUnavailable, setWebglUnavailable] = useState(() => !isWebGLAvailable())
 
   // Filter dinosaurs with valid model URLs
-  const dinosWithModels = dinosaurs.filter(d => 
-    d.modelUrl && d.modelUrl !== 'DEV_PENDING' && d.modelUrl.startsWith('http')
-  ).slice(0, 8) // Limit to 8 for the selector
+  const modelDinos = useMemo(
+    () => dinosaurs.filter(d =>
+      d.modelUrl && d.modelUrl !== 'DEV_PENDING' && d.modelUrl.startsWith('http')
+    ).slice(0, 8),
+    [dinosaurs]
+  )
+  const dinosWithModels = useMemo(
+    () => modelDinos.filter(d => !failedUrls.includes(d.modelUrl!)),
+    [modelDinos, failedUrls]
+  )
 
-  const currentDino = dinosWithModels[currentIndex] || null
+  const activeIndex = dinosWithModels.length ? currentIndex % dinosWithModels.length : 0
+  const currentDino = dinosWithModels[activeIndex] || null
 
   // Auto-cycle every 10 seconds (but user can override)
   useEffect(() => {
-    if (dinosWithModels.length <= 1) return
+    if (webglUnavailable || dinosWithModels.length <= 1) return
     const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % dinosWithModels.length)
     }, 10000)
     return () => clearInterval(interval)
-  }, [dinosWithModels.length])
+  }, [dinosWithModels.length, webglUnavailable])
 
   useEffect(() => {
     const container = mountRef.current
-    if (!container || !currentDino?.modelUrl) {
+    const modelUrl = currentDino?.modelUrl
+    if (!container || !modelUrl) {
       setLoading(false)
       return
     }
@@ -55,7 +66,8 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
     setLoading(true)
     setError(false)
 
-    if (!isWebGLAvailable()) {
+    if (webglUnavailable || !isWebGLAvailable()) {
+      setWebglUnavailable(true)
       setLoading(false)
       setError(true)
       return
@@ -64,74 +76,88 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
     const width = container.clientWidth || 400
     const height = container.clientHeight || 400
 
-    // Scene
-    const scene = new THREE.Scene()
-    scene.background = null // Transparent
+    let cancelled = false
+    let renderer: THREE.WebGLRenderer | null = null
+    let scene: THREE.Scene | null = null
+    let controls: OrbitControls | null = null
+    let mixer: THREE.AnimationMixer | null = null
+    let clock: THREE.Clock | null = null
+    let animationId = 0
+    let handleResize: (() => void) | null = null
 
-    // Camera - will be adjusted after model loads
-    const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 1000)
-    camera.position.set(0, 1, 5)
-
-    // Renderer
-    let renderer: THREE.WebGLRenderer
-    try {
-      renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: true,
-        powerPreference: 'high-performance'
-      })
-    } catch {
-      setLoading(false)
-      setError(true)
-      return
-    }
-    renderer.setSize(width, height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.outputColorSpace = THREE.SRGBColorSpace
-    renderer.setClearColor(0x000000, 0)
-    container.appendChild(renderer.domElement)
-
-    // Lighting
-    const ambient = new THREE.AmbientLight(0xffffff, 0.7)
-    scene.add(ambient)
-
-    const mainLight = new THREE.DirectionalLight(0xffffff, 1.2)
-    mainLight.position.set(5, 10, 7)
-    scene.add(mainLight)
-
-    const fillLight = new THREE.DirectionalLight(0x4CAF50, 0.4)
-    fillLight.position.set(-5, 5, -5)
-    scene.add(fillLight)
-
-    const rimLight = new THREE.DirectionalLight(0xFFB300, 0.3)
-    rimLight.position.set(0, -5, -10)
-    scene.add(rimLight)
-
-    // Controls
-    const controls = new OrbitControls(camera, renderer.domElement)
-    controls.enableZoom = false
-    controls.enablePan = false
-    controls.autoRotate = true
-    controls.autoRotateSpeed = 2
-    controls.enableDamping = true
-    controls.dampingFactor = 0.05
-
-    // DRACO Loader
     const dracoLoader = new DRACOLoader()
     dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/')
 
-    // GLTF Loader
     const loader = new GLTFLoader()
     loader.setDRACOLoader(dracoLoader)
 
-    let mixer: THREE.AnimationMixer | null = null
-    const clock = new THREE.Clock()
-    let animationId: number
+    const dropModel = () => {
+      setFailedUrls(prev => prev.includes(modelUrl) ? prev : [...prev, modelUrl])
+    }
 
     // Load model
-    loader.loadAsync(currentDino.modelUrl)
+    loader.loadAsync(modelUrl)
       .then((gltf) => {
+        if (cancelled) return
+
         const root = gltf.scene || gltf.scenes[0]
+        if (!root) {
+          setLoading(false)
+          setError(true)
+          dropModel()
+          return
+        }
+
+        try {
+          renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            powerPreference: 'high-performance'
+          })
+        } catch {
+          reportWebGLFailure()
+          setWebglUnavailable(true)
+          setLoading(false)
+          setError(true)
+          return
+        }
+
+        renderer.setSize(width, height)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        renderer.outputColorSpace = THREE.SRGBColorSpace
+        renderer.setClearColor(0x000000, 0)
+        container.appendChild(renderer.domElement)
+
+        scene = new THREE.Scene()
+        scene.background = null // Transparent
+
+        // Camera - adjusted after model is measured
+        const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 1000)
+        camera.position.set(0, 1, 5)
+
+        // Lighting
+        const ambient = new THREE.AmbientLight(0xffffff, 0.7)
+        scene.add(ambient)
+
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.2)
+        mainLight.position.set(5, 10, 7)
+        scene.add(mainLight)
+
+        const fillLight = new THREE.DirectionalLight(0x4CAF50, 0.4)
+        fillLight.position.set(-5, 5, -5)
+        scene.add(fillLight)
+
+        const rimLight = new THREE.DirectionalLight(0xFFB300, 0.3)
+        rimLight.position.set(0, -5, -10)
+        scene.add(rimLight)
+
+        controls = new OrbitControls(camera, renderer.domElement)
+        controls.enableZoom = false
+        controls.enablePan = false
+        controls.autoRotate = true
+        controls.autoRotateSpeed = 2
+        controls.enableDamping = true
+        controls.dampingFactor = 0.05
 
         // Calculate bounding box and center model
         const box = new THREE.Box3().setFromObject(root)
@@ -160,7 +186,7 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
         // Update camera and controls to look at model center
         const modelCenter = new THREE.Vector3(0, size.y / 2, 0)
         controls.target.copy(modelCenter)
-        
+
         // Position camera to see the whole model
         const distance = Math.max(size.x, size.z) * 1.5 + 2
         camera.position.set(0, size.y / 2, distance)
@@ -174,45 +200,53 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
         }
 
         setLoading(false)
+
+        // Animation loop
+        clock = new THREE.Clock()
+        const currentRenderer = renderer
+        const currentScene = scene
+        const animate = () => {
+          animationId = requestAnimationFrame(animate)
+          const dt = clock!.getDelta()
+          if (mixer) mixer.update(dt)
+          controls?.update()
+          currentRenderer.render(currentScene, camera)
+        }
+        animate()
+
+        // Resize handler
+        handleResize = () => {
+          const w = container.clientWidth
+          const h = container.clientHeight
+          camera.aspect = w / h
+          camera.updateProjectionMatrix()
+          currentRenderer.setSize(w, h)
+        }
+        window.addEventListener('resize', handleResize)
       })
-      .catch((err) => {
-        console.error('Hero model load error:', err)
+      .catch(() => {
+        if (cancelled) return
         setLoading(false)
         setError(true)
+        dropModel()
       })
 
-    // Animation loop
-    const animate = () => {
-      animationId = requestAnimationFrame(animate)
-      const dt = clock.getDelta()
-      if (mixer) mixer.update(dt)
-      controls.update()
-      renderer.render(scene, camera)
-    }
-    animate()
-
-    // Resize handler
-    const handleResize = () => {
-      const w = container.clientWidth
-      const h = container.clientHeight
-      camera.aspect = w / h
-      camera.updateProjectionMatrix()
-      renderer.setSize(w, h)
-    }
-    window.addEventListener('resize', handleResize)
-
     return () => {
-      window.removeEventListener('resize', handleResize)
-      cancelAnimationFrame(animationId)
-      controls.dispose()
-      renderer.forceContextLoss()
-      renderer.dispose()
-      dracoLoader.dispose()
-      if (renderer.domElement && container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement)
+      cancelled = true
+      if (animationId) cancelAnimationFrame(animationId)
+      if (handleResize) window.removeEventListener('resize', handleResize)
+      controls?.dispose()
+      if (renderer) {
+        renderer.forceContextLoss()
+        renderer.dispose()
+        if (renderer.domElement && container.contains(renderer.domElement)) {
+          container.removeChild(renderer.domElement)
+        }
       }
+      dracoLoader.dispose()
+      scene?.clear()
     }
-  }, [currentDino?.modelUrl])
+  }, [currentDino?.modelUrl, webglUnavailable])
 
   const handlePrev = () => {
     setCurrentIndex(prev => (prev - 1 + dinosWithModels.length) % dinosWithModels.length)
@@ -223,6 +257,34 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
   }
 
   if (!currentDino) {
+    const fallbackDino = modelDinos[0] || dinosaurs[0]
+
+    if (modelDinos.length > 0) {
+      return (
+        <div className="relative w-full h-full overflow-hidden">
+          {fallbackDino?.imageUrl1 && fallbackDino.imageUrl1 !== 'DEV_PENDING' ? (
+            <img
+              src={fallbackDino.imageUrl1}
+              alt={fallbackDino.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gray-800 text-6xl">🦖</div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
+            <p className="text-sm text-gray-300">3D models are temporarily unavailable.</p>
+            <Link
+              to="/encyclopedia"
+              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 transition-colors"
+            >
+              Browse Encyclopedia
+            </Link>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="w-full h-full flex items-center justify-center p-6">
         <div className="text-center text-gray-400">
@@ -339,7 +401,7 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
                 key={dino.id}
                 onClick={() => setCurrentIndex(idx)}
                 className={`flex-shrink-0 w-9 h-9 sm:w-12 sm:h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                  idx === currentIndex 
+                  idx === activeIndex
                     ? 'border-green-400 scale-110 shadow-lg shadow-green-400/30' 
                     : 'border-white/20 hover:border-white/50 opacity-70 hover:opacity-100'
                 }`}

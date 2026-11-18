@@ -108,7 +108,7 @@ export default function SearchBar() {
     <div ref={containerRef} className="relative w-full">
       {/* Search Input */}
       <div className="relative">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
         <input
           ref={inputRef}
           type="text"
@@ -117,7 +117,7 @@ export default function SearchBar() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => query.length >= 2 && setIsOpen(true)}
-          className="w-full pl-8 pr-8 py-1.5 bg-gray-700 border border-gray-600 rounded-md text-xs text-white placeholder-gray-400 focus:outline-none focus:border-green-400 transition-colors"
+          className="w-full pl-9 pr-8 py-2 bg-gray-700 border border-gray-600 rounded-md text-[13px] text-white placeholder-gray-400 focus:outline-none focus:border-green-400 transition-colors"
         />
         {query && (
           <button

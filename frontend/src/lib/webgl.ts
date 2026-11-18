@@ -1,6 +1,13 @@
 let cachedSupport: boolean | null = null
+let rendererFailure = false
+
+export function reportWebGLFailure(): void {
+  rendererFailure = true
+  cachedSupport = false
+}
 
 export function isWebGLAvailable(): boolean {
+  if (rendererFailure) return false
   if (cachedSupport !== null) return cachedSupport
   if (typeof window === 'undefined' || typeof document === 'undefined') {
     cachedSupport = false
