@@ -1,11 +1,10 @@
 // ForumCategory.tsx — List posts for a specific forum category (by slug)
 // Notes:
 // - Fetches posts by category and supports creating new posts (auth required)
-// - Uses `MasterLayout` for consistent header/footer and `api` helper for network calls
+// - Rendered inside the app-level `MasterLayout`; uses the `api` helper for network calls
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, MessageSquare, Eye, Pin, Lock, Clock } from "lucide-react";
-import MasterLayout from "../components/MasterLayout";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
@@ -95,28 +94,23 @@ export default function ForumCategory() {
 
   if (loading) {
     return (
-      <MasterLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-        </div>
-      </MasterLayout>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      </div>
     );
   }
 
   if (!category) {
     return (
-      <MasterLayout>
-        <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Category Not Found</h1>
-          <Link to="/forum" className="text-green-600 hover:underline">Back to Forum</Link>
-        </div>
-      </MasterLayout>
+      <div className="max-w-4xl mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Category Not Found</h1>
+        <Link to="/forum" className="text-green-600 hover:underline">Back to Forum</Link>
+      </div>
     );
   }
 
   return (
-    <MasterLayout>
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Breadcrumb */}
         <Link
           to="/forum"
@@ -246,7 +240,6 @@ export default function ForumCategory() {
             ))
           )}
         </div>
-      </div>
-    </MasterLayout>
+    </div>
   );
 }

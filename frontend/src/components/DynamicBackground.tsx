@@ -43,7 +43,7 @@ function DynamicBackground() {
   const midLayerRef = useRef<HTMLDivElement>(null)
   const nearLayerRef = useRef<HTMLDivElement>(null)
   const [timePhase, setTimePhase] = useState<TimePhase>('day')
-  const [webglAvailable] = useState(() => isWebGLAvailable())
+  const [webglAvailable, setWebglAvailable] = useState(() => isWebGLAvailable())
   const animationRef = useRef<number>()
   const particlesRef = useRef<Particle[]>([])
   const timePhaseRef = useRef<TimePhase>('day')
@@ -208,6 +208,10 @@ function DynamicBackground() {
   // Initialize Three.js scene for fog and dinosaur silhouettes
   useEffect(() => {
     if (!webglAvailable) return
+    if (!isWebGLAvailable()) {
+      setWebglAvailable(false)
+      return
+    }
 
     const canvas = canvasRef.current
     if (!canvas) return

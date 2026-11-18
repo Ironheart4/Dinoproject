@@ -14,6 +14,7 @@ import {
   ChevronDown, Dna
 } from 'lucide-react'
 import SearchBar from './SearchBar'
+import VisitedBreadcrumbs from './VisitedBreadcrumbs'
 
 const DynamicBackground = lazy(() => import('./DynamicBackground'))
 
@@ -284,7 +285,10 @@ export default function MasterLayout({ children }: { children: ReactNode }) {
 
       {/* Main Content */}
       <main className="flex-1 relative z-10 overflow-x-clip">
-        <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">{children}</div>
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+          <VisitedBreadcrumbs />
+          {children}
+        </div>
       </main>
 
       {/* Footer */}

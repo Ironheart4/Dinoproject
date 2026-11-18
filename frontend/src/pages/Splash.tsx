@@ -50,7 +50,7 @@ export default function Splash() {
   // 3D Scene setup - runs once (or when isMobile changes). Never on mouse move.
   useEffect(() => {
     // On mobile or without WebGL, skip 3D entirely and show content immediately
-    if (isMobile || !webglAvailable) {
+    if (isMobile || !webglAvailable || !isWebGLAvailable()) {
       setLoaded(true)
       setProgress(100)
       setShowContent(true)

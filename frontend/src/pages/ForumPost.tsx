@@ -5,7 +5,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Send, Trash2, Pin, Lock, Clock, User } from "lucide-react";
-import MasterLayout from "../components/MasterLayout";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
@@ -132,28 +131,23 @@ export default function ForumPost() {
 
   if (loading) {
     return (
-      <MasterLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-        </div>
-      </MasterLayout>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      </div>
     );
   }
 
   if (!post) {
     return (
-      <MasterLayout>
-        <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Post Not Found</h1>
-          <Link to="/forum" className="text-green-600 hover:underline">Back to Forum</Link>
-        </div>
-      </MasterLayout>
+      <div className="max-w-4xl mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Post Not Found</h1>
+        <Link to="/forum" className="text-green-600 hover:underline">Back to Forum</Link>
+      </div>
     );
   }
 
   return (
-    <MasterLayout>
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Breadcrumb */}
         <Link
           to={`/forum/category/${post.category.slug}`}
@@ -337,7 +331,6 @@ export default function ForumPost() {
             </p>
           </div>
         )}
-      </div>
-    </MasterLayout>
+    </div>
   );
 }

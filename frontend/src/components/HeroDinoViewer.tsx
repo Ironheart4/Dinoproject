@@ -108,6 +108,13 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
           return
         }
 
+        if (!isWebGLAvailable()) {
+          setWebglUnavailable(true)
+          setLoading(false)
+          setError(true)
+          return
+        }
+
         try {
           renderer = new THREE.WebGLRenderer({
             antialias: true,
