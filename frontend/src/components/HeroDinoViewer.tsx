@@ -1,5 +1,6 @@
 // HeroDinoViewer.tsx — Interactive 3D viewer for hero section with dinosaur selector
-// Shows dinosaurs with their 3D models, allows user selection
+// Shows a stable set of dinosaurs, using a 3D model when available and a clear
+// fallback when a model has not been added yet or cannot be rendered.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
@@ -9,6 +10,7 @@ import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { isWebGLAvailable, reportWebGLFailure } from '../lib/webgl'
 import { resolveDinosaurModelUrl } from '../lib/dinosaurModels'
+import { DinoFootprint } from './DinoIcons'
 
 interface Dinosaur {
   id: number
@@ -20,6 +22,10 @@ interface Dinosaur {
   imageUrl1: string | null
 }
 
+interface HeroOption extends Dinosaur {
+  hasModel: boolean
+}
+
 interface Props {
   dinosaurs: Dinosaur[]
 }
@@ -29,59 +35,94 @@ const HERO_MODEL_ORDER: Record<string, number> = {
   Aardonyx: 1,
 }
 
+const HERO_OPTION_LIMIT = 4
+const PINNED_HERO_MODEL = 'Aardonyx'
+const MODEL_LOAD_TIMEOUT_MS = 20000
+
 const UNAVAILABLE_MODEL_URLS = new Set([
   'https://raw.githubusercontent.com/Ironheart4/dino-models/main/models/Velociraptor.glb',
 ])
+
+function isUsableModelUrl(url: string | null): url is string {
+  return Boolean(url && url !== 'DEV_PENDING' && url.startsWith('http') && !UNAVAILABLE_MODEL_URLS.has(url))
+}
 
 export default function HeroDinoViewer({ dinosaurs }: Props) {
   const mountRef = useRef<HTMLDivElement>(null)
   const [loading, setLoading] = useState(true)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [error, setError] = useState(false)
   const [failedUrls, setFailedUrls] = useState<string[]>([])
   const [webglUnavailable, setWebglUnavailable] = useState(() => !isWebGLAvailable())
 
-  // Filter dinosaurs with valid model URLs
-  const modelDinos = useMemo(
-    () => dinosaurs
-      .filter(d => d.modelUrl && d.modelUrl !== 'DEV_PENDING' && d.modelUrl.startsWith('http') && !UNAVAILABLE_MODEL_URLS.has(d.modelUrl))
-      .map(d => ({ ...d, modelUrl: resolveDinosaurModelUrl(d) }))
-      .sort((a, b) => (HERO_MODEL_ORDER[a.name] ?? 9) - (HERO_MODEL_ORDER[b.name] ?? 9))
-      .slice(0, 8),
-    [dinosaurs]
-  )
-  const dinosWithModels = useMemo(
-    () => modelDinos.filter(d => !failedUrls.includes(d.modelUrl!)),
-    [modelDinos, failedUrls]
+  // Always keep the working hero model visible. Additional model-backed
+  // dinosaurs are shuffled, then missing-model dinosaurs fill the remaining
+  // selector slots so the hero never collapses back to a single option.
+  const heroOptions = useMemo<HeroOption[]>(() => {
+    const withModels: HeroOption[] = []
+    const withoutModels: HeroOption[] = []
+
+    for (const dino of dinosaurs) {
+      const modelUrl = resolveDinosaurModelUrl(dino)
+      const option = { ...dino, modelUrl, hasModel: isUsableModelUrl(modelUrl) }
+      if (option.hasModel) withModels.push(option)
+      else withoutModels.push(option)
+    }
+
+    withModels.sort((a, b) => (HERO_MODEL_ORDER[a.name] ?? 9) - (HERO_MODEL_ORDER[b.name] ?? 9))
+
+    const pinned = withModels.find(d => d.name === PINNED_HERO_MODEL) ?? withModels[0]
+    const rest = withModels.filter(d => d !== pinned)
+    for (let i = rest.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[rest[i], rest[j]] = [rest[j], rest[i]]
+    }
+
+    return [...(pinned ? [pinned] : []), ...rest, ...withoutModels].slice(0, HERO_OPTION_LIMIT)
+  }, [dinosaurs])
+
+  const activeIndex = heroOptions.length
+    ? ((currentIndex % heroOptions.length) + heroOptions.length) % heroOptions.length
+    : 0
+  const currentDino = heroOptions[activeIndex] || null
+  const activeModelUrl = currentDino?.hasModel ? currentDino.modelUrl : null
+  const activeModelFailed = Boolean(activeModelUrl && failedUrls.includes(activeModelUrl))
+  const canShowModel = Boolean(activeModelUrl && !activeModelFailed && !webglUnavailable)
+
+  const loadableIndexes = useMemo(
+    () => heroOptions.flatMap((dino, index) =>
+      dino.hasModel && dino.modelUrl && !failedUrls.includes(dino.modelUrl) ? [index] : []
+    ),
+    [heroOptions, failedUrls]
   )
 
-  const activeIndex = dinosWithModels.length ? currentIndex % dinosWithModels.length : 0
-  const currentDino = dinosWithModels[activeIndex] || null
-
-  // Auto-cycle every 10 seconds (but user can override)
+  // Auto-cycle only after the current model has settled, and only among
+  // models that can actually render. This avoids switching mid-load.
   useEffect(() => {
-    if (webglUnavailable || dinosWithModels.length <= 1) return
+    if (webglUnavailable || loading || loadableIndexes.length <= 1) return
     const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % dinosWithModels.length)
-    }, 10000)
+      setCurrentIndex(prev => {
+        const position = loadableIndexes.indexOf(prev)
+        return loadableIndexes[(position + 1) % loadableIndexes.length]
+      })
+    }, 15000)
     return () => clearInterval(interval)
-  }, [dinosWithModels.length, webglUnavailable])
+  }, [loadableIndexes, loading, webglUnavailable])
 
   useEffect(() => {
     const container = mountRef.current
-    const modelUrl = currentDino?.modelUrl
-    if (!container || !modelUrl) {
+    if (!container) return
+
+    if (!activeModelUrl || activeModelFailed) {
       setLoading(false)
       return
     }
 
+    const modelUrl = activeModelUrl
     setLoading(true)
-    setError(false)
 
     if (webglUnavailable || !isWebGLAvailable()) {
       setWebglUnavailable(true)
       setLoading(false)
-      setError(true)
       return
     }
 
@@ -96,6 +137,7 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
     let clock: THREE.Clock | null = null
     let animationId = 0
     let handleResize: (() => void) | null = null
+    let handleContextLost: ((event: Event) => void) | null = null
 
     const dracoLoader = new DRACOLoader()
     dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/')
@@ -107,15 +149,21 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
       setFailedUrls(prev => prev.includes(modelUrl) ? prev : [...prev, modelUrl])
     }
 
+    const loadTimeout = window.setTimeout(() => {
+      if (cancelled) return
+      setLoading(false)
+      dropModel()
+    }, MODEL_LOAD_TIMEOUT_MS)
+
     // Load model
     loader.loadAsync(modelUrl)
       .then((gltf) => {
         if (cancelled) return
+        window.clearTimeout(loadTimeout)
 
         const root = gltf.scene || gltf.scenes[0]
         if (!root) {
           setLoading(false)
-          setError(true)
           dropModel()
           return
         }
@@ -123,7 +171,6 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
         if (!isWebGLAvailable()) {
           setWebglUnavailable(true)
           setLoading(false)
-          setError(true)
           return
         }
 
@@ -137,7 +184,6 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
           reportWebGLFailure()
           setWebglUnavailable(true)
           setLoading(false)
-          setError(true)
           return
         }
 
@@ -146,6 +192,14 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
         renderer.outputColorSpace = THREE.SRGBColorSpace
         renderer.setClearColor(0x000000, 0)
         container.appendChild(renderer.domElement)
+
+        handleContextLost = (event: Event) => {
+          event.preventDefault()
+          if (cancelled) return
+          setLoading(false)
+          dropModel()
+        }
+        renderer.domElement.addEventListener('webglcontextlost', handleContextLost)
 
         scene = new THREE.Scene()
         scene.background = null // Transparent
@@ -224,8 +278,16 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
         clock = new THREE.Clock()
         const currentRenderer = renderer
         const currentScene = scene
+        let contextLossHandled = false
         const animate = () => {
           animationId = requestAnimationFrame(animate)
+          if (cancelled) return
+          if (!contextLossHandled && currentRenderer.getContext().isContextLost()) {
+            contextLossHandled = true
+            setLoading(false)
+            dropModel()
+            return
+          }
           const dt = clock!.getDelta()
           if (mixer) mixer.update(dt)
           controls?.update()
@@ -245,19 +307,23 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
       })
       .catch(() => {
         if (cancelled) return
+        window.clearTimeout(loadTimeout)
         setLoading(false)
-        setError(true)
         dropModel()
       })
 
     return () => {
       cancelled = true
+      window.clearTimeout(loadTimeout)
       if (animationId) cancelAnimationFrame(animationId)
       if (handleResize) window.removeEventListener('resize', handleResize)
+      if (renderer && handleContextLost) {
+        renderer.domElement.removeEventListener('webglcontextlost', handleContextLost)
+      }
       controls?.dispose()
       if (renderer) {
         renderer.dispose()
-        renderer.forceContextLoss()
+        if (!renderer.getContext().isContextLost()) renderer.forceContextLoss()
         if (renderer.domElement && container.contains(renderer.domElement)) {
           container.removeChild(renderer.domElement)
         }
@@ -265,49 +331,23 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
       dracoLoader.dispose()
       scene?.clear()
     }
-  }, [currentDino?.modelUrl, webglUnavailable])
+  }, [activeModelUrl, activeModelFailed, webglUnavailable])
 
   const handlePrev = () => {
-    setCurrentIndex(prev => (prev - 1 + dinosWithModels.length) % dinosWithModels.length)
+    if (!heroOptions.length) return
+    setCurrentIndex(prev => (prev - 1 + heroOptions.length) % heroOptions.length)
   }
 
   const handleNext = () => {
-    setCurrentIndex(prev => (prev + 1) % dinosWithModels.length)
+    if (!heroOptions.length) return
+    setCurrentIndex(prev => (prev + 1) % heroOptions.length)
   }
 
   if (!currentDino) {
-    const fallbackDino = modelDinos[0] || dinosaurs[0]
-
-    if (modelDinos.length > 0) {
-      return (
-        <div className="relative w-full h-full overflow-hidden">
-          {fallbackDino?.imageUrl1 && fallbackDino.imageUrl1 !== 'DEV_PENDING' ? (
-            <img
-              src={fallbackDino.imageUrl1}
-              alt={fallbackDino.name}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gray-800 text-6xl">🦖</div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
-            <p className="text-sm text-gray-300">3D models are temporarily unavailable.</p>
-            <Link
-              to="/encyclopedia"
-              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 transition-colors"
-            >
-              Browse Encyclopedia
-            </Link>
-          </div>
-        </div>
-      )
-    }
-
     return (
       <div className="w-full h-full flex items-center justify-center p-6">
         <div className="text-center text-gray-400">
-          <div className="text-6xl mb-3">🦕</div>
+          <DinoFootprint size={64} className="mx-auto mb-3 text-green-400/50" />
           <p className="text-sm mb-4">
             {dinosaurs.length ? '3D models are coming soon.' : 'No dinosaurs are available right now.'}
           </p>
@@ -322,13 +362,24 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
     )
   }
 
+  const fallbackImage = currentDino.imageUrl1 && currentDino.imageUrl1 !== 'DEV_PENDING'
+    ? currentDino.imageUrl1
+    : null
+  const unavailableMessage = webglUnavailable
+    ? '3D view is unavailable in this browser.'
+    : activeModelFailed
+      ? fallbackImage
+        ? '3D view unavailable — showing image.'
+        : '3D view unavailable for this dinosaur.'
+      : '3D model does not exist for this dinosaur yet.'
+
   return (
     <div className="relative w-full h-full flex flex-col">
       {/* 3D Viewer Area */}
       <div ref={mountRef} className="flex-1 min-h-0" />
 
       {/* Loading overlay */}
-      {loading && (
+      {loading && canShowModel && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="text-center">
             <Loader2 size={40} className="animate-spin text-green-400 mx-auto mb-2" />
@@ -337,32 +388,29 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
         </div>
       )}
 
-      {/* Error fallback */}
-      {error && !loading && (
+      {/* Image / missing-model fallback */}
+      {!canShowModel && !loading && (
         <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-          {currentDino.imageUrl1 && currentDino.imageUrl1 !== 'DEV_PENDING' ? (
-            <div className="relative h-full w-full">
-              <img
-                src={currentDino.imageUrl1}
-                alt={currentDino.name}
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/20 to-transparent" />
-              <p className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs text-gray-300">
-                3D view unavailable — showing image
-              </p>
-            </div>
+          {fallbackImage ? (
+            <img
+              src={fallbackImage}
+              alt={currentDino.name}
+              className="h-full w-full object-cover"
+            />
           ) : (
-            <div className="text-center text-gray-300">
-              <div className="text-6xl mb-2">🦖</div>
-              <p className="text-sm">3D view unavailable</p>
+            <div className="flex h-full w-full items-center justify-center bg-gray-800/80">
+              <DinoFootprint size={96} className="text-green-400/25" />
             </div>
           )}
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/45 to-gray-900/10" />
+          <p className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/60 px-3 py-1.5 text-center text-xs text-gray-200 sm:text-sm">
+            {unavailableMessage}
+          </p>
         </div>
       )}
 
       {/* Navigation Arrows */}
-      {dinosWithModels.length > 1 && (
+      {heroOptions.length > 1 && (
         <>
           <button
             onClick={handlePrev}
@@ -413,9 +461,9 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
         </Link>
 
         {/* Thumbnail Selector */}
-        {dinosWithModels.length > 1 && (
+        {heroOptions.length > 1 && (
           <div className="flex gap-1.5 sm:gap-2 justify-center overflow-x-auto py-1 sm:py-2 scrollbar-hide">
-            {dinosWithModels.map((dino, idx) => (
+            {heroOptions.map((dino, idx) => (
               <button
                 key={dino.id}
                 onClick={() => setCurrentIndex(idx)}
@@ -424,7 +472,9 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
                     ? 'border-green-400 scale-110 shadow-lg shadow-green-400/30' 
                     : 'border-white/20 hover:border-white/50 opacity-70 hover:opacity-100'
                 }`}
-                title={dino.name}
+                title={dino.hasModel ? dino.name : `${dino.name} — 3D model coming soon`}
+                aria-label={dino.name}
+                aria-current={idx === activeIndex}
               >
                 {dino.imageUrl1 && dino.imageUrl1 !== 'DEV_PENDING' ? (
                   <img 
@@ -433,8 +483,9 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-700 flex items-center justify-center text-sm sm:text-lg">
-                    🦖
+                  <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                    <DinoFootprint size={18} className="text-green-400/60 sm:hidden" />
+                    <DinoFootprint size={24} className="hidden text-green-400/60 sm:block" />
                   </div>
                 )}
               </button>
