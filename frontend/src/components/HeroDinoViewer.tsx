@@ -38,6 +38,7 @@ const HERO_MODEL_ORDER: Record<string, number> = {
 const HERO_OPTION_LIMIT = 4
 const PINNED_HERO_MODEL = 'Aardonyx'
 const MODEL_LOAD_TIMEOUT_MS = 20000
+const HIGH_POLY_THRESHOLD = 600_000
 
 const UNAVAILABLE_MODEL_URLS = new Set([
   'https://raw.githubusercontent.com/Ironheart4/dino-models/main/models/Velociraptor.glb',
@@ -45,6 +46,19 @@ const UNAVAILABLE_MODEL_URLS = new Set([
 
 function isUsableModelUrl(url: string | null): url is string {
   return Boolean(url && url !== 'DEV_PENDING' && url.startsWith('http') && !UNAVAILABLE_MODEL_URLS.has(url))
+}
+
+function countTriangles(root: THREE.Object3D): number {
+  let triangles = 0
+  root.traverse((object) => {
+    const mesh = object as THREE.Mesh
+    if (!mesh.isMesh || !mesh.geometry) return
+    const { geometry } = mesh
+    triangles += geometry.index
+      ? geometry.index.count / 3
+      : (geometry.attributes.position?.count ?? 0) / 3
+  })
+  return triangles
 }
 
 export default function HeroDinoViewer({ dinosaurs }: Props) {
@@ -174,11 +188,17 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
           return
         }
 
+        // Match the detail-page viewer's performance settings for high-poly
+        // models. Aardonyx has ~1M triangles, so full-DPR + MSAA is the main
+        // cause of choppy orbiting in the hero.
+        const highPoly = countTriangles(root) > HIGH_POLY_THRESHOLD
+
         try {
           renderer = new THREE.WebGLRenderer({
-            antialias: true,
+            antialias: !highPoly,
             alpha: true,
-            powerPreference: 'high-performance'
+            powerPreference: 'high-performance',
+            stencil: false
           })
         } catch {
           reportWebGLFailure()
@@ -188,10 +208,25 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
         }
 
         renderer.setSize(width, height)
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        renderer.setPixelRatio(highPoly ? 1 : Math.min(window.devicePixelRatio, 2))
         renderer.outputColorSpace = THREE.SRGBColorSpace
         renderer.setClearColor(0x000000, 0)
+        renderer.domElement.style.display = 'block'
         container.appendChild(renderer.domElement)
+
+        if (highPoly) {
+          root.traverse((object) => {
+            const mesh = object as THREE.Mesh
+            if (!mesh.isMesh) return
+            const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+            for (const material of materials) {
+              if (material instanceof THREE.Material && material.side === THREE.DoubleSide) {
+                material.side = THREE.FrontSide
+                material.needsUpdate = true
+              }
+            }
+          })
+        }
 
         handleContextLost = (event: Event) => {
           event.preventDefault()
@@ -228,7 +263,7 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
         controls.enableZoom = false
         controls.enablePan = false
         controls.autoRotate = true
-        controls.autoRotateSpeed = 2
+        controls.autoRotateSpeed = highPoly ? 1.5 : 2
         controls.enableDamping = true
         controls.dampingFactor = 0.05
 
