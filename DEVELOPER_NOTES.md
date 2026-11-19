@@ -375,6 +375,7 @@ ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174
 
 # AI (optional)
 HUGGINGFACE_API_KEY=hf_xxxx
+HUGGINGFACE_MODEL=meta-llama/Llama-3.1-8B-Instruct
 
 # PayPal (optional)
 PAYPAL_CLIENT_ID=xxxx

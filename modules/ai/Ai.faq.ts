@@ -62,7 +62,7 @@ export function faqResponse(message: string): string {
     return "🧠 Ready to test your dinosaur knowledge? Head over to our **Quiz** section! We have questions about dinosaur diets, time periods, sizes, and more. Can you get a perfect score?";
   }
   if (msg.includes("premium") || msg.includes("subscribe")) {
-    return "⭐ **DinoProject Premium** gives you access to HD 3D models, unlimited favorites, AI DinoBot, and exclusive content! You can also become a **Donor** to support our mission. Check out the Subscription page!";
+    return "⭐ **DinoProject Premium** gives you access to HD 3D models, unlimited favorites, and exclusive content! DinoBot itself is free for every logged-in member. You can also become a **Donor** to support our mission. Check out the Subscription page!";
   }
   if (msg.includes("hello") || msg.includes("hi") || msg.includes("hey")) {
     return "👋 Hello, fellow dinosaur enthusiast! I'm DinoBot, your prehistoric guide! Ask me anything about dinosaurs - their diets, sizes, time periods, or specific species. What would you like to learn about today?";

@@ -19,12 +19,6 @@ const GRADIENT_COLORS: Record<TimePhase, { top: string; mid: string; bottom: str
   night: { top: '#050810', mid: '#0a1020', bottom: '#141e30' },
 }
 
-// Dinosaur silhouette paths for Three.js scene
-const DINO_SILHOUETTES = {
-  trex: 'M0,0 L8,0 L10,-2 L12,-2 L14,0 L16,2 L18,2 L20,0 L22,0 L24,2 L24,6 L22,8 L20,8 L18,10 L16,10 L14,8 L10,8 L8,10 L6,10 L4,8 L2,8 L0,6 Z',
-  brachio: 'M0,8 L2,4 L4,2 L6,0 L8,0 L10,2 L10,4 L12,6 L14,6 L16,8 L18,8 L20,10 L18,10 L16,10 L14,10 L12,10 L10,10 L8,10 L6,10 L4,10 L2,10 L0,10 Z',
-}
-
 interface Particle {
   x: number
   y: number

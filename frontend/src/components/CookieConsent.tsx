@@ -3,7 +3,7 @@
 // - Stores user preference in localStorage under `cookie-consent`
 // - Minimal compliance UI; update content to match actual cookie usage
 import { useState, useEffect } from "react";
-import { Cookie, X } from "lucide-react";
+import { Cookie } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function CookieConsent() {

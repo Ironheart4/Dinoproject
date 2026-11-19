@@ -1,9 +1,7 @@
-import { hasActivePaidAccess } from "../../core/subscriptionAccess";
-import { ForbiddenError, ServiceUnavailableError } from "../../core/errors";
+import { ServiceUnavailableError } from "../../core/errors";
 import { logger } from "../../core/logger";
 import type { AiProvider } from "../../infrastructure/ai/AiProvider";
 import { normalizeQuestion } from "./Ai.faq";
-import type { AiRepository } from "./Ai.repository";
 
 export interface AiChatReply {
   response: string;
@@ -11,34 +9,16 @@ export interface AiChatReply {
   rateLimited?: true;
 }
 
-export interface ChatUser {
-  id: string;
-  role: string;
-}
-
-const PREMIUM_REQUIRED_MESSAGE =
-  "AI Assistant is available for Premium and Donor members only. Upgrade to access DinoBot!";
-
 /**
- * DinoBot logic: who may use it, caching, and graceful fallback. No Express types here.
- * Entitlement: admins, or an active premium/donor subscription that has not expired.
+ * DinoBot logic: caching and graceful fallback. No Express types here.
  */
 export class AiService {
   constructor(
-    private readonly repository: Pick<AiRepository, "findSubscription">,
     private readonly provider: AiProvider,
     private readonly fallback: (message: string) => Promise<string>,
-    private readonly now: () => Date = () => new Date(),
   ) {}
 
-  async chat(user: ChatUser, message: string): Promise<AiChatReply> {
-    if (user.role !== "admin") {
-      const subscription = await this.repository.findSubscription(user.id);
-      if (!hasActivePaidAccess(subscription, this.now())) {
-        throw new ForbiddenError("Premium required", { message: PREMIUM_REQUIRED_MESSAGE });
-      }
-    }
-
+  async chat(message: string): Promise<AiChatReply> {
     try {
       const result = await this.provider.generate(message, normalizeQuestion(message));
       switch (result.kind) {

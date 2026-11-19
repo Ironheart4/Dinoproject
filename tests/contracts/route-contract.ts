@@ -132,7 +132,7 @@ export const ROUTE_CONTRACT: RouteContractEntry[] = [
     method: "post",
     path: "/api/ai/chat",
     auth: "authenticated",
-    notes: "rate-limited (aiLimiter); Premium/Donor subscription or admin after auth",
+    notes: "rate-limited (aiLimiter); any authenticated user",
   },
 
   // Search

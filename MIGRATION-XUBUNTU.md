@@ -241,6 +241,7 @@ PAYPAL_CLIENT_ID="..."
 PAYPAL_SECRET="..."
 PAYPAL_MODE="sandbox"
 HUGGINGFACE_API_KEY="..."
+HUGGINGFACE_MODEL="meta-llama/Llama-3.1-8B-Instruct"
 ```
 
 Protect the file:

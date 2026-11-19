@@ -3,7 +3,7 @@
 // - Loads audio via the HTMLAudioElement and exposes play/pause, progress and volume
 // - Props: src (audio URL), label (for accessibility), className
 // - Handles crossOrigin and network errors gracefully and provides UI fallbacks
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { VolumeX, Volume1, Volume2, Dna, Loader2, XCircle } from "lucide-react";
 
 type Props = {

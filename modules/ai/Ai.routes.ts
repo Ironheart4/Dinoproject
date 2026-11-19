@@ -5,7 +5,6 @@ import type { AiProvider } from "../../infrastructure/ai/AiProvider";
 import { validateRequest } from "../../middleware/validateRequest";
 import { AiController } from "./Ai.controller";
 import { createLocalDinoResponder } from "./Ai.localResponder";
-import { AiRepository } from "./Ai.repository";
 import { chatBodySchema } from "./Ai.schemas";
 import { AiService } from "./Ai.service";
 
@@ -18,9 +17,8 @@ export interface AiRouterDeps {
 
 /** DinoBot route. The AI rate limiter runs before authentication (kept from the old route). */
 export function createAiRouter(deps: AiRouterDeps): Router {
-  const repository = new AiRepository(deps.getPrisma);
   const fallback = createLocalDinoResponder(deps.getPrisma).respond;
-  const service = new AiService(repository, deps.aiProvider, fallback);
+  const service = new AiService(deps.aiProvider, fallback);
   const controller = new AiController(service);
 
   const router = Router();

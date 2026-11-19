@@ -12,7 +12,7 @@ import { GiDinosaurRex, GiBrokenBone, GiDinosaurBones } from 'react-icons/gi'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import ParticleBackground from '../components/ParticleBackground'
 import HeroDinoViewer from '../components/HeroDinoViewer'
-import { DinoFootprint, BrachioIcon } from '../components/DinoIcons'
+import { DinoFootprint } from '../components/DinoIcons'
 
 interface Dinosaur {
   id: number

@@ -2,7 +2,7 @@
 // Notes:
 // - Fetches random questions from `/api/quiz/random` and manages quiz state, scoring, and saving scores for authenticated users
 // - Questions can be text, image, or identify types (supports image-based questions)
-import React, { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../lib/auth'
 import { 
   Brain, FileText, Image, Dna, BarChart3, Loader2, Rocket, 

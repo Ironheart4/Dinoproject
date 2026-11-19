@@ -21,7 +21,7 @@ import { Link } from 'react-router-dom'
 import { GiDinosaurRex, GiSwordClash, GiTrophy, GiHealthNormal, GiSpeedometer, GiBrain, GiLightningStorm } from 'react-icons/gi'
 import { FaArrowLeft, FaRandom, FaStar } from 'react-icons/fa'
 import { motion, AnimatePresence } from 'framer-motion'
-import { api, fetchDinos } from '../lib/api'
+import { fetchDinos } from '../lib/api'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import SocialShare from '../components/SocialShare'
 

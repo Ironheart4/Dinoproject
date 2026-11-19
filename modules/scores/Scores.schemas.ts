@@ -4,7 +4,7 @@ import { z } from "zod";
 export const scoresEmptyQuerySchema = z.object({});
 
 /**
- * Matches legacy parsePositiveInt + parseBoundedNumber + Number.isInteger(score).
+ * Matches the legacy positive-integer quiz id and bounded integer score rules.
  * Use with validateRequest fallbackMessage for the exact 400 string.
  */
 export const createScoreBodySchema = z.object({

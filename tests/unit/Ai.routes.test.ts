@@ -13,12 +13,12 @@ const deny: RequestHandler = (_req, res) => {
 };
 const passLimiter: RequestHandler = (_req, _res, next) => next();
 
-function buildApp(opts: { prisma?: unknown; auth?: RequestHandler; limiter?: RequestHandler; generate?: ReturnType<typeof vi.fn> }) {
+function buildApp(opts: { auth?: RequestHandler; limiter?: RequestHandler; generate?: ReturnType<typeof vi.fn> }) {
   const app = express();
   app.use(express.json());
   app.use(
     createAiRouter({
-      getPrisma: () => (opts.prisma ?? {}) as never,
+      getPrisma: () => undefined,
       authMiddleware: opts.auth ?? asUser("admin"),
       aiLimiter: opts.limiter ?? passLimiter,
       aiProvider: { generate: opts.generate ?? vi.fn().mockResolvedValue({ kind: "ok", response: "answer" }) },
@@ -53,28 +53,15 @@ describe("ai routes (HTTP behavior with a fake provider and database)", () => {
     expect(long.body).toEqual({ error: "Message must be 2,000 characters or fewer" });
   });
 
-  it("returns 403 with the legacy body for free users", async () => {
-    const prisma = { subscription: { findUnique: vi.fn().mockResolvedValue(null) } };
-    const res = await request(buildApp({ prisma, auth: asUser("user") })).post("/api/ai/chat").send({ message: "hi" });
-    expect(res.status).toBe(403);
-    expect(res.body.error).toBe("Premium required");
-    expect(res.body.message).toContain("Premium and Donor");
-  });
-
-  it("answers an admin's question", async () => {
-    const res = await request(buildApp({})).post("/api/ai/chat").send({ message: "hi" });
+  it("answers any logged-in user without a subscription", async () => {
+    const res = await request(buildApp({ auth: asUser("user") })).post("/api/ai/chat").send({ message: "hi" });
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ response: "answer" });
   });
 
-  it("answers an active premium member and returns 503 while the model loads", async () => {
-    const future = new Date(Date.now() + 86_400_000);
-    const prisma = { subscription: { findUnique: vi.fn().mockResolvedValue({ plan: "premium", status: "active", endDate: future }) } };
-    const ok = await request(buildApp({ prisma, auth: asUser("user") })).post("/api/ai/chat").send({ message: "hi" });
-    expect(ok.status).toBe(200);
-
+  it("returns 503 while the model loads", async () => {
     const generate = vi.fn().mockResolvedValue({ kind: "loading", response: "", estimatedTime: 20 });
-    const loading = await request(buildApp({ prisma, auth: asUser("user"), generate })).post("/api/ai/chat").send({ message: "hi" });
+    const loading = await request(buildApp({ auth: asUser("user"), generate })).post("/api/ai/chat").send({ message: "hi" });
     expect(loading.status).toBe(503);
     expect(loading.body).toMatchObject({ error: "Model loading", estimatedTime: 20 });
   });

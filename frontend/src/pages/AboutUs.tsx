@@ -1,8 +1,8 @@
 // AboutUs.tsx — About page with project details, credits, and contributor links
 // Notes: Keep this page updated with contributors, project status, and links to the repo and support channels
-import React from 'react'
 import { Link } from 'react-router-dom'
-import { User, Heart, BookOpen, Brain, Bot, Map, Clock, Image, Video, Cuboid as Cube3d, Github, Mail, Coffee, ExternalLink, Lock } from 'lucide-react'
+import { User, Heart, BookOpen, Brain, Map, Clock, Image, Video, Cuboid as Cube3d, Github, Mail, Coffee, ExternalLink, Lock } from 'lucide-react'
+import { DinoBotIcon } from '../components/DinoIcons'
 import { useAuth } from '../lib/auth'
 
 // PayPal Logo Component - Uses external image for clean rendering
@@ -75,7 +75,7 @@ export default function AboutUs() {
           <li>See where they lived on an interactive map</li>
           <li>Understand when they existed on a timeline</li>
           <li>Test your knowledge with quizzes</li>
-          <li>Ask questions to an AI assistant (experimental!)</li>
+          <li>Ask questions to a free AI assistant (experimental!)</li>
         </ul>
         <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
           It's driven by <strong>curiosity and accessibility</strong>, not profit. I want anyone — students, kids, adults, educators — to be able to explore and learn for free.
@@ -129,10 +129,10 @@ export default function AboutUs() {
           </div>
 
           <div className="bg-white rounded-lg shadow p-4 sm:p-5 flex items-start gap-3 sm:gap-4">
-            <Bot size={28} className="text-indigo-500 flex-shrink-0 mt-1 sm:w-8 sm:h-8" />
+            <DinoBotIcon size={28} className="text-indigo-500 flex-shrink-0 mt-1 sm:w-8 sm:h-8" />
             <div>
               <h4 className="font-semibold text-primary-700 mb-1 text-sm sm:text-base">AI Dino Assistant</h4>
-              <p className="text-xs sm:text-sm text-gray-600">An experimental AI chatbot that answers your dinosaur questions. Still learning!</p>
+              <p className="text-xs sm:text-sm text-gray-600">A free AI chatbot that answers your dinosaur questions. No premium plan required — just log in and ask!</p>
             </div>
           </div>
 

@@ -421,11 +421,6 @@ export default function Timeline() {
     }
   }
 
-  // Handle dino click
-  const handleDinoClick = (dino: Dinosaur) => {
-    navigate(`/dino/${dino.id}`)
-  }
-
   // Handle timeline hover - fly to location when hovering timeline icons
   const handleTimelineHover = (dino: Dinosaur | null) => {
     setHoveredDino(dino ? dino.id : null)

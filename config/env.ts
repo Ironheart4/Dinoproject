@@ -11,5 +11,6 @@ export const env = {
   paypalSecret: process.env.PAYPAL_SECRET,
   frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
   huggingFaceApiKey: process.env.HUGGINGFACE_API_KEY,
+  huggingFaceModel: process.env.HUGGINGFACE_MODEL || undefined,
   paypalApi: process.env.PAYPAL_MODE === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com",
 };

@@ -8,6 +8,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { isWebGLAvailable, reportWebGLFailure } from '../lib/webgl'
+import { resolveDinosaurModelUrl } from '../lib/dinosaurModels'
 
 interface Dinosaur {
   id: number
@@ -23,6 +24,15 @@ interface Props {
   dinosaurs: Dinosaur[]
 }
 
+const HERO_MODEL_ORDER: Record<string, number> = {
+  Tyrannosaurus: 0,
+  Aardonyx: 1,
+}
+
+const UNAVAILABLE_MODEL_URLS = new Set([
+  'https://raw.githubusercontent.com/Ironheart4/dino-models/main/models/Velociraptor.glb',
+])
+
 export default function HeroDinoViewer({ dinosaurs }: Props) {
   const mountRef = useRef<HTMLDivElement>(null)
   const [loading, setLoading] = useState(true)
@@ -33,9 +43,11 @@ export default function HeroDinoViewer({ dinosaurs }: Props) {
 
   // Filter dinosaurs with valid model URLs
   const modelDinos = useMemo(
-    () => dinosaurs.filter(d =>
-      d.modelUrl && d.modelUrl !== 'DEV_PENDING' && d.modelUrl.startsWith('http')
-    ).slice(0, 8),
+    () => dinosaurs
+      .filter(d => d.modelUrl && d.modelUrl !== 'DEV_PENDING' && d.modelUrl.startsWith('http') && !UNAVAILABLE_MODEL_URLS.has(d.modelUrl))
+      .map(d => ({ ...d, modelUrl: resolveDinosaurModelUrl(d) }))
+      .sort((a, b) => (HERO_MODEL_ORDER[a.name] ?? 9) - (HERO_MODEL_ORDER[b.name] ?? 9))
+      .slice(0, 8),
     [dinosaurs]
   )
   const dinosWithModels = useMemo(

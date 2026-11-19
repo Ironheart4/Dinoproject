@@ -393,7 +393,6 @@ export function JourneyProgress({ currentEra, dinosaursDiscovered, totalDinosaur
       {/* Era progress */}
       <div className="flex items-center gap-2 mb-4">
         {eras.map((era, index) => {
-          const config = RARITY_CONFIG[era === 'triassic' ? 'legendary' : era === 'jurassic' ? 'rare' : 'epic']
           const isComplete = index < currentIndex
           const isCurrent = index === currentIndex
           

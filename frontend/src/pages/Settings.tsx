@@ -5,12 +5,12 @@ import { useSettings } from '../lib/settings'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import {
   Settings as SettingsIcon, Palette, Layout, Type, Zap, Eye, RotateCcw,
-  Volume2, Image, Accessibility, Droplet, Grid3X3, List, Check, AlertCircle
+  Accessibility, Grid3X3, List, Check
 } from 'lucide-react'
 
 export default function Settings() {
   useDocumentTitle('Settings', ' — DinoProject')
-  const { settings, updateSetting, updateSettings, resetSettings } = useSettings()
+  const { settings, updateSetting, resetSettings } = useSettings()
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'info'; text: string } | null>(null)
 
   const showSaveMessage = (text: string, type: 'success' | 'info' = 'success') => {

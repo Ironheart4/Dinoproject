@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../lib/auth'
 import { Link, useSearchParams } from 'react-router-dom'
 import { 
-  Check, Heart, Star, Crown, Sparkles, ExternalLink, Gift, Shield, Zap, Users
+  Check, Heart, Star, Crown, Sparkles, ExternalLink, Gift, Shield, Users
 } from 'lucide-react'
 import { useDocumentTitle } from '../lib/useDocumentTitle' 
 
@@ -67,7 +67,6 @@ export default function Support() {
   const premiumFeatures: FeatureItem[] = [
     { icon: <Sparkles className="text-yellow-400" size={20} />, text: 'Full 3D Model Access', highlight: true },
     { icon: <Crown className="text-purple-400" size={20} />, text: 'Unlimited Favorites' },
-    { icon: <Zap className="text-blue-400" size={20} />, text: 'AI Dino Assistant' },
     { icon: <Gift className="text-pink-400" size={20} />, text: 'Download Resources' },
     { icon: <Shield className="text-green-400" size={20} />, text: 'Priority Support' },
     { icon: <Star className="text-orange-400" size={20} />, text: 'Early Access to New Features' },
@@ -75,6 +74,7 @@ export default function Support() {
 
   const freeFeatures = [
     'Browse all dinosaur images',
+    'Free AI Dino Assistant (login required)',
     'Unlimited quizzes',
     'Timeline explorer',
     'Video content',

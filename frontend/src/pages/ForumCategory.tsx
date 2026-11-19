@@ -3,7 +3,7 @@
 // - Fetches posts by category and supports creating new posts (auth required)
 // - Rendered inside the app-level `MasterLayout`; uses the `api` helper for network calls
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Plus, MessageSquare, Eye, Pin, Lock, Clock } from "lucide-react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -30,7 +30,6 @@ interface Category {
 
 export default function ForumCategory() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);

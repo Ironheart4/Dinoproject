@@ -7,11 +7,12 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { fetchDino } from '../lib/api'
 import DinoViewer from '../components/DinoViewer'
+import { resolveDinosaurModelUrl } from '../lib/dinosaurModels'
 import DinoSound from '../components/DinoSound'
 import { useAuth } from '../lib/auth'
 import { useDocumentTitle } from '../lib/useDocumentTitle' 
 import {
-  Heart, Lock, Star, Calendar, Globe, Ruler, Scale, Home as HomeIcon,
+  Heart, Lock, Calendar, Globe, Ruler, Scale, Home as HomeIcon,
   PenTool, Microscope, BookOpen, Image, Video, Loader2, AlertTriangle, BookMarked, ExternalLink
 } from 'lucide-react'
 
@@ -220,7 +221,7 @@ export default function DinoDetail() {
             <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">3D Model</h2>
             {canView3DModel ? (
               <div className="h-[350px] sm:h-[450px] md:h-[500px] lg:h-[600px] xl:h-[650px]">
-                <DinoViewer url={dino.modelUrl} height="100%" />
+                <DinoViewer url={resolveDinosaurModelUrl(dino)} height="100%" />
               </div>
             ) : (
               <div className="h-[350px] sm:h-[450px] md:h-[500px] lg:h-[600px] xl:h-[650px] flex flex-col items-center justify-center bg-gray-900 rounded-lg border-2 border-dashed border-gray-600 p-4">

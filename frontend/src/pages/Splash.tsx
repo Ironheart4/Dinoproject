@@ -8,6 +8,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { api } from '../lib/api'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { isWebGLAvailable, reportWebGLFailure } from '../lib/webgl'
+import { resolveDinosaurModelUrl } from '../lib/dinosaurModels'
 import { ChevronRight, Compass, Brain, Map, Users, Sparkles } from 'lucide-react'
 
 interface Dinosaur {
@@ -196,9 +197,10 @@ export default function Splash() {
         )
         const selectedDino =
           trex || dinos[Math.floor(Math.random() * dinos.length)]
+        const selectedModelUrl = resolveDinosaurModelUrl(selectedDino)
 
         loader.load(
-          selectedDino.modelUrl!,
+          selectedModelUrl!,
           (gltf) => {
             if (cancelled) return
             model = gltf.scene

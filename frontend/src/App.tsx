@@ -29,7 +29,6 @@
 //   3. Add <Route path="/your-path" element={<YourPage />} />
 //   4. If requires auth: wrap in <PrivateRoute>
 // ============================================================================
-import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 
 // Page components - each file in pages/ is a full page

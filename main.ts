@@ -36,11 +36,16 @@ export function createAppDependencies(options: CreateAppDependenciesOptions): Ap
 
   // The AI provider falls back to the local responder (matching dinosaur, then built-in FAQ).
   const localResponder = createLocalDinoResponder(getPrisma);
-  const aiProvider = new HuggingFaceAiProvider(env.huggingFaceApiKey, localResponder.respond);
+  const aiProvider = new HuggingFaceAiProvider(
+    env.huggingFaceApiKey,
+    localResponder.respond,
+    env.huggingFaceModel,
+  );
 
   logger.info("Application dependencies composed", {
     paypalConfigured: paymentProvider.isConfigured(),
     aiConfigured: Boolean(env.huggingFaceApiKey),
+    aiModel: env.huggingFaceModel || undefined,
     profileBucket: env.profileBucket,
   });
 

@@ -46,14 +46,14 @@ async function main() {
 
   // Seed a few more dinosaurs with partial data (for catalog testing)
   // modelUrl is required - using placeholder for now
-  const placeholderModel = "https://cdn.jsdelivr.net/gh/Ironheart4/dino-models@main/models/placeholder.glb";
+  const placeholderModel = "DEV_PENDING";
   
   const partialDinos = [
     { name: "Abelisaurus", species: "comahuensis", diet: "carnivorous", period: "Late Cretaceous 74-70 million years ago", livedIn: "Argentina", type: "large theropod", lengthMeters: 8, weightKg: 2150, modelUrl: placeholderModel },
     { name: "Achelousaurus", species: "horneri", diet: "herbivorous", period: "Late Cretaceous 83-70 million years ago", livedIn: "USA", type: "ceratopsian", lengthMeters: 6, weightKg: 3000, modelUrl: placeholderModel },
     { name: "Achillobator", species: "giganteus", diet: "carnivorous", period: "Late Cretaceous 99-84 million years ago", livedIn: "Mongolia", type: "large theropod", lengthMeters: 5.5, weightKg: 500, modelUrl: placeholderModel },
     { name: "Acrocanthosaurus", species: "atokensis", diet: "carnivorous", period: "Early Cretaceous 115-105 million years ago", livedIn: "USA", type: "large theropod", lengthMeters: 12, weightKg: 6500, modelUrl: placeholderModel },
-    { name: "Tyrannosaurus", species: "rex", diet: "carnivorous", period: "Late Cretaceous 68-66 million years ago", livedIn: "USA", type: "large theropod", lengthMeters: 12.3, weightKg: 8400, modelUrl: placeholderModel },
+    { name: "Tyrannosaurus", species: "rex", diet: "carnivorous", period: "Late Cretaceous 68-66 million years ago", livedIn: "USA", type: "large theropod", lengthMeters: 12.3, weightKg: 8400, modelUrl: "https://cdn.jsdelivr.net/gh/Ironheart4/dino-models@main/models/t-rex.glb" },
     { name: "Triceratops", species: "horridus", diet: "herbivorous", period: "Late Cretaceous 68-66 million years ago", livedIn: "USA", type: "ceratopsian", lengthMeters: 9, weightKg: 6000, modelUrl: placeholderModel },
     { name: "Velociraptor", species: "mongoliensis", diet: "carnivorous", period: "Late Cretaceous 75-71 million years ago", livedIn: "Mongolia", type: "small theropod", lengthMeters: 2, weightKg: 15, modelUrl: placeholderModel },
     { name: "Brachiosaurus", species: "altithorax", diet: "herbivorous", period: "Late Jurassic 155-140 million years ago", livedIn: "USA", type: "sauropod", lengthMeters: 26, weightKg: 40000, modelUrl: placeholderModel },

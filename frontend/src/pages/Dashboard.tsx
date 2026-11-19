@@ -11,18 +11,12 @@ import {
   LineChart, Line
 } from 'recharts'
 import {
-  Heart, Target, Trophy, TrendingUp, Flame, LayoutDashboard, ScrollText, User,
+  Heart, Target, Trophy, Flame, LayoutDashboard, ScrollText, User,
   BookOpen, FileText, Star, Sparkles, Moon, Sun, CreditCard, Save, Loader2, BarChart3,
   ArrowRight, Clock, Zap
 } from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
-
-// Default avatar SVG (blank person silhouette)
-const DEFAULT_AVATAR = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23374151"/><circle cx="50" cy="35" r="18" fill="%236b7280"/><ellipse cx="50" cy="80" rx="30" ry="22" fill="%236b7280"/></svg>')}`
-
-// Chart colors
-const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 
 interface DashboardStats {
   user: {
@@ -68,7 +62,6 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'profile'>('overview')
   const [recentlyViewed, setRecentlyViewed] = useState<any[]>([])
   const [recommendedQuiz, setRecommendedQuiz] = useState<any>(null)
-  const [recommendationLoading, setRecommendationLoading] = useState(true)
 
   // Profile edit state
   const [editingProfile, setEditingProfile] = useState(false)
@@ -108,7 +101,6 @@ export default function Dashboard() {
     } catch (err) {
       console.error('Failed to load recently viewed:', err)
     }
-    setRecommendationLoading(false)
   }, [])
 
   // Handle profile save
@@ -540,10 +532,10 @@ export default function Dashboard() {
                     <Sparkles className="text-yellow-400" /> Unlock Premium Features
                   </h3>
                   <p className="text-gray-300">
-                    Get access to the AI Dino Assistant, exclusive content, and more!
+                    Get access to HD 3D models, exclusive content, and more!
                   </p>
                   <ul className="mt-2 text-sm text-gray-400 space-y-1">
-                    <li>✓ AI-powered dinosaur assistant</li>
+                    <li>✓ Full HD 3D model access</li>
                     <li>✓ Unlimited quiz attempts</li>
                     <li>✓ Exclusive content & early access</li>
                     <li>✓ Ad-free experience</li>

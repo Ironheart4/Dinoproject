@@ -14,6 +14,6 @@ export class AiController {
     const user = req.user;
     if (!user?.id) throw new UnauthorizedError("Authentication required");
     const { message } = req.body as ChatBody;
-    res.json(await this.service.chat({ id: user.id, role: user.role }, message));
+    res.json(await this.service.chat(message));
   });
 }

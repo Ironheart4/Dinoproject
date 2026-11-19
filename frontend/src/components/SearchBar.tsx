@@ -145,7 +145,7 @@ export default function SearchBar() {
               </div>
               {results
                 .filter(r => r.type === 'dinosaur')
-                .map((result, idx) => (
+                .map((result) => (
                   <button
                     key={`dino-${result.id}`}
                     onClick={() => handleSelect(result)}
@@ -184,7 +184,7 @@ export default function SearchBar() {
               </div>
               {results
                 .filter(r => r.type === 'quiz')
-                .map((result, idx) => (
+                .map((result) => (
                   <button
                     key={`quiz-${result.id}`}
                     onClick={() => handleSelect(result)}

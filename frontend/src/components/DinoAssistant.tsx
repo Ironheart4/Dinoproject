@@ -1,10 +1,11 @@
 // DinoAssistant.tsx — Floating AI chat widget (DinoBot)
 // Notes & integration:
-// - Uses `/api/ai/chat` and `/api/subscription` on the backend to send messages and check premium status
+// - Uses `/api/ai/chat` on the backend to send messages
 // - In development this file points to `http://localhost:5000`; update to `import.meta.env.VITE_API_URL` in production
-// - Feature is gated by premium/subscription; unauthenticated users are prompted to log in
+// - Available to any logged-in user; unauthenticated users are prompted to log in
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Bot, User, Loader2, Minimize2, Crown, RefreshCw } from "lucide-react";
+import { X, Send, User, Loader2, Minimize2, RefreshCw } from "lucide-react";
+import { DinoBotIcon } from "./DinoIcons";
 import { useAuth } from "../lib/auth";
 import { Link } from "react-router-dom";
 
@@ -14,10 +15,9 @@ interface Message {
 }
 
 export default function DinoAssistant() {
-  const { user, token, isAdmin, isPremium: authIsPremium } = useAuth();
+  const { user, token } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -27,33 +27,8 @@ export default function DinoAssistant() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [modelLoading, setModelLoading] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Check if user has premium/donor subscription OR is admin
-  useEffect(() => {
-    // Admins always get premium access
-    if (isAdmin || authIsPremium) {
-      setIsPremium(true);
-      return;
-    }
-    
-    const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    if (user && token) {
-      fetch(`${API}/api/subscription`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          const isPremiumUser = data.plan === 'premium' || data.plan === 'donor';
-          setIsPremium(isPremiumUser && data.status === 'active');
-        })
-        .catch(() => setIsPremium(false));
-    } else {
-      setIsPremium(false);
-    }
-  }, [user, token, isAdmin, authIsPremium]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -73,18 +48,7 @@ export default function DinoAssistant() {
       setMessages((prev) => [
         ...prev,
         { role: "user", content: input.trim() },
-        { role: "assistant", content: "🔒 Please log in to use DinoBot! Create an account and get Premium access to chat with me about dinosaurs." },
-      ]);
-      setInput("");
-      return;
-    }
-
-    // Check if user is premium
-    if (!isPremium) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", content: input.trim() },
-        { role: "assistant", content: "⭐ DinoBot is a Premium feature! Upgrade to Premium or become a Donor to unlock unlimited AI-powered dinosaur conversations. Visit the Subscription page to learn more!" },
+        { role: "assistant", content: "🔒 Please log in to use DinoBot! Create a free account to chat with me about dinosaurs." },
       ]);
       setInput("");
       return;
@@ -118,20 +82,17 @@ export default function DinoAssistant() {
           ...prev,
           { role: "assistant", content: `🦕 ${data.message} (about ${Math.ceil(data.estimatedTime)}s)` },
         ]);
-        setRetryCount((c) => c + 1);
         return;
       }
 
-      // Handle premium required error
-      if (response.status === 403) {
+      if (response.status === 401 || response.status === 403) {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: `⭐ ${data.message}` },
+          { role: "assistant", content: `🔒 ${data.message || "Please log in again to use DinoBot."}` },
         ]);
         return;
       }
 
-      setRetryCount(0);
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: data.response || "Sorry, I couldn't process that. Try again!" },
@@ -169,7 +130,7 @@ export default function DinoAssistant() {
         className="fixed bottom-6 right-6 z-50 p-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 group"
         title="Ask DinoBot"
       >
-        <Bot className="w-6 h-6" />
+        <DinoBotIcon size={24} />
         <span className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full animate-pulse" />
       </button>
     );
@@ -182,7 +143,7 @@ export default function DinoAssistant() {
         onClick={() => setIsMinimized(false)}
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-gray-800 border border-gray-700 rounded-full shadow-lg cursor-pointer hover:bg-gray-700 transition"
       >
-        <Bot className="w-5 h-5 text-green-400" />
+        <DinoBotIcon size={20} className="text-green-400" />
         <span className="text-sm text-white">DinoBot</span>
         <button
           onClick={(e) => {
@@ -202,10 +163,10 @@ export default function DinoAssistant() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600">
         <div className="flex items-center gap-2">
-          <Bot className="w-6 h-6 text-white" />
+          <DinoBotIcon size={24} className="text-white" />
           <div>
             <h3 className="font-semibold text-white">DinoBot</h3>
-            <p className="text-xs text-green-100">Your Dino Assistant</p>
+            <p className="text-xs text-green-100">Your free Dino Assistant</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -233,7 +194,7 @@ export default function DinoAssistant() {
           >
             {msg.role === "assistant" && (
               <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
-                <Bot className="w-4 h-4 text-white" />
+                <DinoBotIcon size={16} className="text-white" />
               </div>
             )}
             <div
@@ -255,7 +216,7 @@ export default function DinoAssistant() {
         {loading && (
           <div className="flex gap-2 justify-start">
             <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-white" />
+              <DinoBotIcon size={16} className="text-white" />
             </div>
             <div className="bg-gray-700 px-4 py-3 rounded-2xl rounded-bl-md">
               <Loader2 className="w-5 h-5 text-green-400 animate-spin" />
@@ -277,18 +238,6 @@ export default function DinoAssistant() {
         </div>
       )}
 
-      {/* Premium upgrade prompt for non-premium users */}
-      {!isPremium && user && (
-        <div className="px-4 pb-2">
-          <Link
-            to="/support"
-            className="flex items-center justify-center gap-2 py-2 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-lg text-sm font-semibold hover:opacity-90 transition"
-          >
-            <Crown className="w-4 h-4" /> Support Us for AI Chat Access
-          </Link>
-        </div>
-      )}
-
       {/* Login prompt for non-logged-in users */}
       {!user && (
         <div className="px-4 pb-2">
@@ -301,8 +250,8 @@ export default function DinoAssistant() {
         </div>
       )}
 
-      {/* Quick suggestions - only for premium users */}
-      {isPremium && messages.length <= 2 && (
+      {/* Quick suggestions for logged-in users */}
+      {user && messages.length <= 2 && (
         <div className="px-4 pb-2 flex flex-wrap gap-2">
           {["What's the biggest dinosaur?", "Tell me about T-Rex", "When did dinosaurs go extinct?"].map((q) => (
             <button
@@ -328,7 +277,7 @@ export default function DinoAssistant() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={isPremium ? "Ask about dinosaurs..." : "Premium feature - upgrade to chat"}
+            placeholder="Ask about dinosaurs..."
             className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
             disabled={loading}
           />
